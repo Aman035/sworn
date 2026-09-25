@@ -8,3 +8,4 @@ Phase definitions live in `SWORN_PLAN.md`; per-phase notes in `docs/phases/PHASE
 
 | Phase | Status | Date (UTC) | Commit | Gate | Evidence |
 | ----- | ------ | ---------- | ------ | ---- | -------- |
+| 0 | DONE | 2026-09-25T10:45:36Z | `525b955` | `make phase-0` — 8 checks ok | [gate log](docs/phases/gate-logs/phase-0.log), [notes](docs/phases/PHASE-0.md) |

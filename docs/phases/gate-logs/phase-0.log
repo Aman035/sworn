@@ -1,0 +1,77 @@
+==> repo layout
+  ok  layout matches SWORN_PLAN.md §1
+==> submodules pinned
+  ok  v4 dependencies present
+==> forge build
+Compiling 1 files with Solc 0.8.26
+Solc 0.8.26 finished in 803.31ms
+Compiler run successful!
+  ok  contracts compile (solc 0.8.26, via-IR)
+==> forge test
+No files changed, compilation skipped
+
+Ran 1 test for test/unit/Bootstrap.t.sol:BootstrapTest
+[PASS] test_toolchainIsWired() (gas: 3754)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.95ms (1.41ms CPU time)
+
+Ran 1 test suite in 136.49ms (3.95ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
+  ok  solidity tests pass
+==> pnpm typecheck
+Scope: 5 of 6 workspace projects
+app typecheck$ tsc --noEmit -p tsconfig.json
+attestor typecheck$ tsc --noEmit -p tsconfig.json
+index typecheck$ tsc --noEmit -p tsconfig.json
+probe typecheck$ tsc --noEmit -p tsconfig.json
+probe typecheck: Done
+attestor typecheck: Done
+sdk typecheck$ tsc --noEmit -p tsconfig.json
+index typecheck: Done
+app typecheck: Done
+sdk typecheck: Done
+  ok  typescript strict typecheck passes
+==> pnpm test
+Scope: 5 of 6 workspace projects
+app test$ vitest run --passWithNoTests
+attestor test$ vitest run --passWithNoTests
+index test$ vitest run --passWithNoTests
+probe test$ vitest run --passWithNoTests
+index test:  RUN  v2.1.8 /Users/amangupta/Desktop/Personal_Projects/sworn/index
+app test:  RUN  v2.1.8 /Users/amangupta/Desktop/Personal_Projects/sworn/app
+attestor test:  RUN  v2.1.8 /Users/amangupta/Desktop/Personal_Projects/sworn/attestor
+probe test:  RUN  v2.1.8 /Users/amangupta/Desktop/Personal_Projects/sworn/probe
+app test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+app test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+attestor test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+attestor test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+app test: No test files found, exiting with code 0
+attestor test: No test files found, exiting with code 0
+index test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+index test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+probe test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+probe test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+index test: No test files found, exiting with code 0
+probe test: No test files found, exiting with code 0
+attestor test: Done
+probe test: Done
+index test: Done
+app test: Done
+sdk test$ vitest run --passWithNoTests
+sdk test:  RUN  v2.1.8 /Users/amangupta/Desktop/Personal_Projects/sworn/sdk
+sdk test:  ✓ test/chains.test.ts (2 tests) 1ms
+sdk test:  Test Files  1 passed (1)
+sdk test:       Tests  2 passed (2)
+sdk test:    Start at  19:45:35
+sdk test:    Duration  196ms (transform 57ms, setup 0ms, collect 47ms, tests 1ms, environment 0ms, prepare 42ms)
+sdk test: Done
+  ok  workspace tests pass
+==> python tests
+......                                                                   [100%]
+6 passed in 0.02s
+All checks passed!
+  ok  python tests and lint pass
+==> ci workflows
+validated 3 workflow(s): attestor.yml, ci.yml, fork.yml
+ warn actionlint not installed; used the built-in YAML validator instead
+==> gate runner self-test
+selftest: failing gate exited 1 and left PHASES.md untouched
+  ok  mark-phase.sh refuses to mark a failing phase

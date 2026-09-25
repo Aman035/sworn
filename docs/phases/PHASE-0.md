@@ -1,6 +1,6 @@
 # Phase 0 — Bootstrap, conventions, gating
 
-> Status: IN PROGRESS · Gate: `make phase-0`
+> Status: DONE · Gate: `make phase-0`
 
 ## Objective
 
@@ -27,8 +27,27 @@ anything; it exists so that Phases 1–11 cannot quietly skip a check.
 ## Gate output
 
 ```
-<filled from docs/phases/gate-logs/phase-0.log once the gate passes>
+==> repo layout
+  ok  layout matches SWORN_PLAN.md §1
+==> submodules pinned
+  ok  v4 dependencies present
+==> forge build
+  ok  contracts compile (solc 0.8.26, via-IR)
+==> forge test
+  ok  solidity tests pass
+==> pnpm typecheck
+  ok  typescript strict typecheck passes
+==> pnpm test
+  ok  workspace tests pass
+==> python tests
+  ok  python tests and lint pass
+==> ci workflows
+ warn actionlint not installed; used the built-in YAML validator instead
+==> gate runner self-test
+  ok  mark-phase.sh refuses to mark a failing phase
 ```
+
+Full log: `docs/phases/gate-logs/phase-0.log`. Ledger row: `PHASES.md`.
 
 ## Decisions and deviations from the plan
 
