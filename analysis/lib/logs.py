@@ -90,6 +90,10 @@ class LogFetcher:
         self.chunk = max(MIN_CHUNK, min(start_chunk, MAX_CHUNK))
         self.stats = FetchStats()
         self._clean_run = 0
+        # Widths at or above this were refused once already. Without it the fetcher
+        # grows, gets refused, halves, grows again — paying one wasted request per
+        # `GROWTH_AFTER` chunks forever, which over 26M blocks is thousands of calls.
+        self._ceiling = MAX_CHUNK
 
     # Seam for tests: a real sleep would make the rate-limit path untestable.
     def _sleep(self, seconds: float) -> None:
@@ -129,6 +133,7 @@ class LogFetcher:
                     continue
                 if not looks_like_range_limit(exc) or self.chunk <= MIN_CHUNK:
                     raise
+                self._ceiling = min(self._ceiling, self.chunk)
                 self.chunk = max(MIN_CHUNK, self.chunk // 2)
                 self.stats.backoffs += 1
                 self._clean_run = 0
@@ -145,8 +150,12 @@ class LogFetcher:
 
             lo = hi + 1
             self._clean_run += 1
-            if self._clean_run >= GROWTH_AFTER and self.chunk < MAX_CHUNK:
-                self.chunk = min(MAX_CHUNK, self.chunk * 2)
+            if self._clean_run >= GROWTH_AFTER:
+                # Growth is a doubling or nothing. Creeping up to `ceiling - 1` would be
+                # refused again almost immediately, which is the thrash this avoids.
+                target = min(MAX_CHUNK, self.chunk * 2)
+                if target < self._ceiling:
+                    self.chunk = target
                 self._clean_run = 0
 
 

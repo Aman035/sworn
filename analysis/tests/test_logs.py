@@ -199,3 +199,25 @@ def test_rate_limit_gives_up_after_the_retry_budget() -> None:
     fetcher._sleep = lambda _s: None  # type: ignore[method-assign]
     with pytest.raises(httpx.HTTPStatusError):
         list(fetcher.fetch_range(0, 999))
+
+
+def test_fetcher_does_not_retry_a_width_already_refused() -> None:
+    """Growth must remember the ceiling.
+
+    Without this the fetcher pays one refused request every GROWTH_AFTER chunks for the
+    whole run — thousands of wasted calls across a 26M-block census.
+    """
+    rpc = LimitedRpc(max_span=10_000)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=10_000)  # type: ignore[arg-type]
+    list(fetcher.fetch_range(0, 2_000_000))
+
+    # One probe above the limit is expected; a cycle would produce dozens.
+    assert fetcher.stats.backoffs <= 2, f"thrashing: {fetcher.stats.backoffs} backoffs"
+    assert fetcher.stats.max_chunk_used <= 10_000
+
+
+def test_ceiling_still_allows_growth_from_a_low_start() -> None:
+    rpc = LimitedRpc(max_span=10_000)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=100)  # type: ignore[arg-type]
+    list(fetcher.fetch_range(0, 500_000))
+    assert fetcher.chunk > 100
