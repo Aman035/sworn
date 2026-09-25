@@ -195,17 +195,22 @@ def replay(chain: str, sample: pd.DataFrame, by_pair: dict[Any, pd.DataFrame]) -
                 "tx_hash": r.tx_hash,
                 "block_number": int(r.block_number),
                 "out_currency": r.currency1,
-                "realized": realized,
-                "best_candidate": cand,
+                # Decimal strings, not ints: see `confirm_against_traces`.
+                "realized": str(realized),
+                "best_candidate": str(cand),
                 "best_pool": pool_id,
                 "candidates": counts.get(pos, 0),
                 "gas_overhead": probe_gas(counts.get(pos, 0)),
-                "protection": max(0, cand - realized) if realized > 0 and cand > 0 else 0,
+                "protection": str(max(0, cand - realized) if realized > 0 and cand > 0 else 0),
+                # Float is fine for a ratio; it is never used as an amount.
+                "protection_bps": (
+                    (cand - realized) / realized * 10_000
+                    if realized > 0 and cand > realized
+                    else 0.0
+                ),
             }
         )
-    out = pd.DataFrame(rows)
-    out["protection_bps"] = (out.protection / out.realized.where(out.realized > 0)) * 10_000
-    return out
+    return pd.DataFrame(rows)
 
 
 def summarize(
@@ -223,7 +228,7 @@ def summarize(
         priced_usd.append(p.usd)
         priced_net.append(p.usd - gas_usd)
 
-    protected = rep[rep.protection > 0]
+    protected = rep[rep.protection_bps > 0]
     bps = [b for b in protected.protection_bps.tolist() if pd.notna(b)]
     overheads = sorted(rep[rep.candidates > 0].gas_overhead.tolist())
 
@@ -272,7 +277,7 @@ def main(argv: list[str] | None = None) -> int:
 
     by_hook = []
     for hook, g in rep.groupby("hook"):
-        p = g[g.protection > 0]
+        p = g[g.protection_bps > 0]
         if p.empty:
             continue
         by_hook.append(

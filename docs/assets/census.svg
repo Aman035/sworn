@@ -4,26 +4,26 @@
   <text x="28" y="62" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12.5" font-weight="400" fill="#5a6675" text-anchor="start">Pools indexed from PoolManager Initialize logs, per chain.</text>
   <text x="28" y="116" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#e8ecf1" text-anchor="start">base</text>
   <rect x="130" y="104" width="420.0" height="16" rx="3" fill="#171d26" stroke="#232c38"/>
-  <rect x="130" y="104" width="1.0" height="16" rx="3" fill="#e8b84b"/>
+  <rect x="130" y="104" width="413.6" height="16" rx="3" fill="#e8b84b"/>
   <text x="562" y="117" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8ecf1" text-anchor="end">15,309,659</text>
-  <text x="672" y="117" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">0.0% hooked</text>
+  <text x="672" y="117" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">98.5% hooked</text>
   <text x="28" y="150" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#e8ecf1" text-anchor="start">bnb</text>
   <rect x="130" y="138" width="7.0" height="16" rx="3" fill="#171d26" stroke="#232c38"/>
-  <rect x="130" y="138" width="1.0" height="16" rx="3" fill="#e8b84b"/>
+  <rect x="130" y="138" width="1.2" height="16" rx="3" fill="#e8b84b"/>
   <text x="562" y="151" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8ecf1" text-anchor="end">256,187</text>
-  <text x="672" y="151" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">0.0% hooked</text>
+  <text x="672" y="151" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">17.6% hooked</text>
   <text x="28" y="184" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#e8ecf1" text-anchor="start">mainnet</text>
   <rect x="130" y="172" width="3.9" height="16" rx="3" fill="#171d26" stroke="#232c38"/>
   <rect x="130" y="172" width="1.0" height="16" rx="3" fill="#e8b84b"/>
   <text x="562" y="185" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8ecf1" text-anchor="end">143,218</text>
-  <text x="672" y="185" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">0.0% hooked</text>
+  <text x="672" y="185" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">24.1% hooked</text>
   <text x="28" y="218" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#e8ecf1" text-anchor="start">arbitrum</text>
   <rect x="130" y="206" width="3.0" height="16" rx="3" fill="#171d26" stroke="#232c38"/>
   <rect x="130" y="206" width="1.0" height="16" rx="3" fill="#e8b84b"/>
   <text x="562" y="219" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8ecf1" text-anchor="end">19,143</text>
-  <text x="672" y="219" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">0.0% hooked</text>
+  <text x="672" y="219" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="end">24.8% hooked</text>
   <line x1="28" y1="248" x2="672" y2="248" stroke="#232c38"/>
   <text x="28" y="274" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#5a6675" text-anchor="start">total</text>
-  <text x="562" y="274" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#e8ecf1" text-anchor="end">0</text>
+  <text x="562" y="274" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#e8ecf1" text-anchor="end">15,728,207</text>
   <text x="672" y="274" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#e8b84b" text-anchor="end">0 hooked</text>
 </svg>

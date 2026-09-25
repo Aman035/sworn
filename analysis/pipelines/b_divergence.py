@@ -136,9 +136,12 @@ def confirm_against_traces(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
         confirmed.append(True), reason.append("")
 
     out = sample.copy()
-    out["req_amount"] = req
+    # Amounts routinely exceed 2^63 — a single fill in the sample is 1.9e25 raw units —
+    # so they travel as decimal strings. Parquet has no int128, and an int64 column would
+    # not fail loudly here, it would fail at write time after the expensive part is done.
+    out["req_amount"] = [str(v) for v in req]
     out["hook_data"] = hdata
-    out["realized"] = realized
+    out["realized"] = [str(v) for v in realized]
     out["confirmed"] = confirmed
     out["drop_reason"] = reason
 

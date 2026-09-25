@@ -58,13 +58,13 @@ gets no fill.
 ![Pools indexed per chain, and the hooked share](docs/assets/census.svg)
 
 Every v4 pool on four chains, indexed from `Initialize` logs — no subgraph, no third-party
-index. On Base alone that is 15,309,659
-pools across 69,242 distinct hooks, of
-which 10,430 sit behind a proxy and can
+index. On Base alone that is {{result:census.json:chains[chain=base].pools_total|int}}
+pools across {{result:census.json:chains[chain=base].hooks_total|int}} distinct hooks, of
+which {{result:census.json:chains[chain=base].upgradeable|int}} sit behind a proxy and can
 change behaviour after anyone has reviewed them.
 
 Hook attribution covers all fills, and publishes its own blind spot:
-**50.2% of fills are unlabeled**. A table that
+**{{result:attribution.json:unlabeled_share|pct}} of fills are unlabeled**. A table that
 hides its coverage is not evidence.
 
 ## The finding: `Swap` events cannot measure hook take
@@ -93,9 +93,9 @@ token0 from exact-output on token1. They are identical.
 So every measured fill here is confirmed against its own transaction trace.
 `amountSpecified`, `hookData` and the realized output all come from the traced
 `PoolManager.swap` call — calldata and return value. Of
-100 sampled fills,
-85 survived confirmation and
-13 were exact-output
+{{result:divergence.json:trace_confirmation.sampled|int}} sampled fills,
+{{result:divergence.json:trace_confirmation.confirmed|int}} survived confirmation and
+{{result:divergence.json:trace_confirmation.dropped.exact-output|int}} were exact-output
 swaps the event had disguised. Both defects are filed upstream in [FEEDBACK.md](FEEDBACK.md).
 
 ## Why detection is not enough
@@ -121,7 +121,7 @@ Every row is either imprecise or retrospective. That is the argument for the rou
 your transaction right now.**
 
 In the sample measured so far there are
-0 divergent hooks at every threshold in
+{{result:divergence.json:totals.divergent_hooks|int}} divergent hooks at every threshold in
 the sensitivity sweep. That is a real result and a small one — see
 [Limitations](#limitations).
 

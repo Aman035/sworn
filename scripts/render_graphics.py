@@ -345,7 +345,14 @@ def census_chart() -> str:
     """Population funnel, from census.json."""
     doc = _load("census.json")
     chains = doc.get("chains", [])
-    totals = doc.get("totals", {})
+    if not chains:
+        raise SystemExit("census.json has no chains")
+    # census.json reports per chain only; the totals row is derived here rather than read,
+    # so it cannot disagree with the bars above it.
+    totals = {
+        "pools_total": sum(int(c["pools_total"]) for c in chains),
+        "hooked_pools": sum(int(c["hooked_pools"]) for c in chains),
+    }
 
     p: list[str] = []
     p.append(
@@ -361,11 +368,11 @@ def census_chart() -> str:
         )
     )
 
-    biggest = max((c.get("pools_total", 0) for c in chains), default=1) or 1
+    biggest = max(int(c["pools_total"]) for c in chains) or 1
     y = 104
-    for c in sorted(chains, key=lambda c: -c.get("pools_total", 0)):
-        total = int(c.get("pools_total", 0))
-        hooked = int(c.get("pools_hooked", 0))
+    for c in sorted(chains, key=lambda c: -int(c["pools_total"])):
+        total = int(c["pools_total"])
+        hooked = int(c["hooked_pools"])
         w = max(3.0, total / biggest * 420)
         hw = max(1.0, hooked / biggest * 420)
         p.append(
