@@ -1,0 +1,44 @@
+name: attestor
+
+# Disabled until Phase 7: the job only runs when the repository variable
+# ATTESTOR_ENABLED is set to 'true'. The schedule stays here so that enabling it
+# is a one-line change rather than a new workflow.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '5 * * * *'
+
+concurrency:
+  group: attestor
+  cancel-in-progress: false
+
+jobs:
+  attest:
+    name: score hooks and write HookBook
+    if: vars.ATTESTOR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pnpm install --frozen-lockfile
+      - run: pip install -e analysis
+      - name: run attestor
+        env:
+          BASE_RPC_ARCHIVE: ${{ secrets.BASE_RPC_ARCHIVE }}
+          BNB_RPC_ARCHIVE: ${{ secrets.BNB_RPC_ARCHIVE }}
+          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
+          ATTESTOR_PK: ${{ secrets.ATTESTOR_PK }}
+        run: pnpm --filter sworn-attestor start

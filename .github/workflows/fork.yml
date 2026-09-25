@@ -1,0 +1,45 @@
+name: fork-tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Nightly. Fork tests hit archive RPCs, so they are kept off the PR path.
+    - cron: '17 3 * * *'
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: fork-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  fork:
+    name: fork tests (base, bnb)
+    # On PRs, only run when someone asks for it with the `run-fork-tests` label.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'run-fork-tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: check secrets are configured
+        env:
+          BASE_RPC_ARCHIVE: ${{ secrets.BASE_RPC_ARCHIVE }}
+          BNB_RPC_ARCHIVE: ${{ secrets.BNB_RPC_ARCHIVE }}
+        run: |
+          if [ -z "$BASE_RPC_ARCHIVE" ] || [ -z "$BNB_RPC_ARCHIVE" ]; then
+            echo "::error::BASE_RPC_ARCHIVE and BNB_RPC_ARCHIVE repository secrets are required"
+            exit 1
+          fi
+      - name: forge test (fork)
+        env:
+          BASE_RPC_ARCHIVE: ${{ secrets.BASE_RPC_ARCHIVE }}
+          BNB_RPC_ARCHIVE: ${{ secrets.BNB_RPC_ARCHIVE }}
+        run: forge test --match-path 'test/fork/*' -vvv
+        working-directory: contracts
