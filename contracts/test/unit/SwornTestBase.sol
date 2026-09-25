@@ -4,6 +4,7 @@ pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
 import {ISignatureTransfer} from "permit2/src/interfaces/ISignatureTransfer.sol";
 import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
+import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "v4-core/src/libraries/Hooks.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
@@ -29,7 +30,19 @@ abstract contract SwornTestBase is Test, Deployers {
     uint160 internal constant OBSERVE_FLAGS = uint160(Hooks.BEFORE_SWAP_FLAG);
 
     uint256 internal constant DEFAULT_PROBE_GAS = 2_000_000;
-    uint256 internal constant SWAP_AMOUNT = 1e18;
+
+    /// @dev Swap size, chosen to be small relative to the pool. v4-core's default test
+    ///      liquidity (1e18 over ticks +/-120) holds only ~6e15 per side, so a 1e18 swap
+    ///      drains the pool to its price limit and every result becomes an artefact of
+    ///      the fixture rather than of the hook.
+    uint256 internal constant SWAP_AMOUNT = 1e15;
+
+    /// @dev Liquidity added to every test pool, over a wide range so that a swap of
+    ///      SWAP_AMOUNT moves the price negligibly and route comparisons reflect hook
+    ///      behaviour rather than depth.
+    int256 internal constant DEEP_LIQUIDITY = 1e21;
+    int24 internal constant WIDE_LOWER = -60_000;
+    int24 internal constant WIDE_UPPER = 60_000;
 
     PoolKey internal hooklessKey;
 
@@ -40,7 +53,7 @@ abstract contract SwornTestBase is Test, Deployers {
         sworn = new SwornRouter(manager, ISignatureTransfer(address(0)));
 
         // The hookless pool every test uses as the honest baseline.
-        (hooklessKey,) = initPoolAndAddLiquidity(currency0, currency1, IHooks(address(0)), 3000, SQRT_PRICE_1_1);
+        hooklessKey = initDeepPool(IHooks(address(0)));
 
         // Fund the router's caller and approve it.
         _approveSworn();
@@ -62,10 +75,14 @@ abstract contract SwornTestBase is Test, Deployers {
     }
 
     /// @notice Deploy a fixture at an address carrying `flags`, and init a pool on it.
-    /// @param artifact e.g. "ToxicHooks.sol:GaspriceSniffHook"
+    /// @param name the fixture contract's name, e.g. "GaspriceSniffHook"
+    /// @dev Artifacts are referenced by output path, not by `File.sol:Name`. The name
+    ///      form does not resolve for these fixtures under this Foundry version, and a
+    ///      silent `vm.getCode` miss reads like a test-logic failure rather than a
+    ///      lookup failure, so the path form is used deliberately.
     /// @param args abi-encoded constructor arguments
     function deployHookAndPool(
-        string memory artifact,
+        string memory name,
         bytes memory args,
         uint160 flags,
         uint256 salt
@@ -76,8 +93,22 @@ abstract contract SwornTestBase is Test, Deployers {
         // forge-lint: disable-next-line(unsafe-typecast)
         uint160 saltBits = uint160(salt) << 16;
         hookAddress = address(flags | saltBits);
-        deployCodeTo(artifact, args, hookAddress);
-        (key,) = initPoolAndAddLiquidity(currency0, currency1, IHooks(hookAddress), 3000, SQRT_PRICE_1_1);
+        deployCodeTo(string.concat("out/ToxicHooks.sol/", name, ".json"), args, hookAddress);
+        key = initDeepPool(IHooks(hookAddress));
+    }
+
+    /// @notice Initialise a pool at 1:1 and give it liquidity deep enough to price fairly.
+    function initDeepPool(
+        IHooks hooks
+    ) internal returns (PoolKey memory key) {
+        (key,) = initPool(currency0, currency1, hooks, 3000, SQRT_PRICE_1_1);
+        modifyLiquidityRouter.modifyLiquidity(
+            key,
+            IPoolManager.ModifyLiquidityParams({
+                tickLower: WIDE_LOWER, tickUpper: WIDE_UPPER, liquidityDelta: DEEP_LIQUIDITY, salt: 0
+            }),
+            ""
+        );
     }
 
     // -----------------------------------------------------------------------------------
