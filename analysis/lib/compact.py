@@ -9,18 +9,26 @@ progress marker behind so the pull can still resume.
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-from .census_rows import row
-from .events import DecodeError, decode_initialize
+from .census_rows import row, swap_row
+from .events import DecodeError, decode_initialize, decode_swap
 from .logs import _open_text, record_progress
 
 SHARD_PREFIX = "pools-part-"
+SWAP_SHARD_PREFIX = "fills-part-"
+
+# (decoder, row builder, shard prefix) per log kind, so the compactor is shared between
+# the census and the fill pull rather than duplicated with a different bug in each.
+KINDS: dict[str, tuple[Callable[[dict[str, Any]], Any], Callable[[Any], dict[str, Any]], str]] = {
+    "initialize": (decode_initialize, row, SHARD_PREFIX),
+    "swap": (decode_swap, swap_row, SWAP_SHARD_PREFIX),
+}
 
 
 @dataclass
@@ -32,19 +40,17 @@ class CompactResult:
     freed_bytes: int
 
 
-def shard_paths(directory: Path) -> list[Path]:
+def shard_paths(directory: Path, prefix: str = SHARD_PREFIX) -> list[Path]:
     """Complete shards only — `.parquet.tmp` files are in-progress writes."""
-    return sorted(
-        p for p in directory.glob(f"{SHARD_PREFIX}*.parquet") if not p.name.endswith(".tmp")
-    )
+    return sorted(p for p in directory.glob(f"{prefix}*.parquet") if not p.name.endswith(".tmp"))
 
 
-def next_shard(directory: Path) -> Path:
-    existing = shard_paths(directory)
+def next_shard(directory: Path, prefix: str = SHARD_PREFIX) -> Path:
+    existing = shard_paths(directory, prefix)
     index = 0
     if existing:
-        index = max(int(p.stem.removeprefix(SHARD_PREFIX)) for p in existing) + 1
-    return directory / f"{SHARD_PREFIX}{index:04d}.parquet"
+        index = max(int(p.stem.removeprefix(prefix)) for p in existing) + 1
+    return directory / f"{prefix}{index:04d}.parquet"
 
 
 def _records(raw: Path) -> Iterator[dict[str, Any]]:
@@ -66,7 +72,9 @@ def _records(raw: Path) -> Iterator[dict[str, Any]]:
 BATCH_ROWS = 500_000
 
 
-def compact(raw: Path, *, delete_raw: bool = True, batch_rows: int = BATCH_ROWS) -> CompactResult:
+def compact(
+    raw: Path, *, delete_raw: bool = True, batch_rows: int = BATCH_ROWS, kind: str = "initialize"
+) -> CompactResult:
     """Decode `raw` into parquet shards, record progress, and remove the raw file.
 
     Rows are flushed on chunk boundaries, so peak memory is roughly `batch_rows` plus one
@@ -75,6 +83,7 @@ def compact(raw: Path, *, delete_raw: bool = True, batch_rows: int = BATCH_ROWS)
     if not raw.is_file():
         return CompactResult(None, 0, 0, None, 0)
 
+    decoder, build_row, prefix = KINDS[kind]
     directory = raw.parent
     size = raw.stat().st_size
 
@@ -94,7 +103,7 @@ def compact(raw: Path, *, delete_raw: bool = True, batch_rows: int = BATCH_ROWS)
         nonlocal rows, total
         if not rows:
             return
-        path = next_shard(directory)
+        path = next_shard(directory, prefix)
         tmp = path.with_suffix(".parquet.tmp")
         pd.DataFrame(rows).to_parquet(tmp, index=False)
         tmp.replace(path)
@@ -108,7 +117,7 @@ def compact(raw: Path, *, delete_raw: bool = True, batch_rows: int = BATCH_ROWS)
             last_block = to if last_block is None else max(last_block, to)
         for log in record.get("logs", []):
             try:
-                rows.append(row(decode_initialize(log)))
+                rows.append(build_row(decoder(log)))
             except DecodeError:
                 undecodable += 1
         if len(rows) >= batch_rows:
@@ -130,10 +139,13 @@ def compact(raw: Path, *, delete_raw: bool = True, batch_rows: int = BATCH_ROWS)
     return CompactResult(shard, total, undecodable, last_block, freed)
 
 
-def load_shards(directory: Path) -> pd.DataFrame:
-    """Concatenate every shard into one frame, deduplicated on pool id."""
-    shards = shard_paths(directory)
+def load_shards(directory: Path, prefix: str = SHARD_PREFIX) -> pd.DataFrame:
+    """Concatenate every shard into one frame, deduplicated on its natural key."""
+    shards = shard_paths(directory, prefix)
     if not shards:
         return pd.DataFrame()
     frame = pd.concat([pd.read_parquet(s) for s in shards], ignore_index=True)
-    return frame.drop_duplicates(subset=["pool_id"], keep="first").reset_index(drop=True)
+    # A pool is initialized once; a fill is identified by (tx, log index). An overlapping
+    # resume can replay a chunk, so both are deduplicated on what the chain guarantees.
+    key = ["pool_id"] if prefix == SHARD_PREFIX else ["tx_hash", "log_index"]
+    return frame.drop_duplicates(subset=key, keep="first").reset_index(drop=True)
