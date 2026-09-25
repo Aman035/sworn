@@ -130,31 +130,85 @@ Attribution, which needs no re-quoting and therefore covers all 12.8M fills:
 **50.2% of fills are unlabeled**, published as a field. An attribution table that hides
 its own coverage is not evidence.
 
-## The limitation these numbers carry
+## The -101 bps that turned out to be the finding
 
-**Every hooked re-quote was made with empty `hookData`**, and `divergence.json` records
-`hook_data_unknown_share: 1.0` for every hook. Recovering what a router actually passed
-needs a per-router calldata decoder, which does not exist yet.
+An earlier run of this pipeline reported a median take of about **-101 bps** on several
+hooks: users apparently receiving 1% _more_ than they were quoted. The obvious explanation
+was that the re-quote applied a fee the real swap did not. That was tested and fails —
+hooks on pools with fee **0** showed the same -101 bps as hooks on fee-3000 pools. A
+systematic offset across unrelated fee tiers is not a fee-tier bug.
 
-This is not a footnote. Several hooks show a median take of about **-101 bps** — users
-apparently receiving 1% _more_ than quoted. The obvious explanation, that the quote applies
-a fee the real swap did not, was tested and fails: hooks with pool fee **0** show the same
--101 bps as hooks with fee 3000. A systematic offset across unrelated fee tiers is the
-signature of the hook seeing a different call, not of generosity.
+The cause was in what "realized" meant. It was being read from the `Swap` event, and
+**`PoolManager` emits that event before it calls `afterSwap`**:
 
-So: the hookless calibration validates the **state and the engine** — it agrees to 0.00 bps
-on fills with no hook involved. It says nothing about the `hookData` assumption, and
-conflating the two would repeat the earlier mistake where a check that could only fail in
-one direction was read as a pass.
+```solidity
+(amountToSwap, beforeSwapDelta, lpFeeOverride) = key.hooks.beforeSwap(key, params, hookData);
+swapDelta = _swap(pool, id, ...);        // emits Swap(amount0, amount1)  <-- indexers read this
+(swapDelta, hookDelta) = key.hooks.afterSwap(key, params, swapDelta, hookData, beforeSwapDelta);
+_accountPoolBalanceDelta(key, swapDelta, msg.sender);   // what the caller is actually charged
+```
 
-**What these numbers support:** the machinery works end to end, the sample contains no
-divergent hooks at any threshold, and the attribution is solid.
+On fill `0x03d2434d…`, the event and the call disagree:
 
-**What they do not support:** a claim about how often hooks charge. That needs the
-`hookData` decoder, and until it exists the divergence figures are preliminary.
+|                       |                        amount1 |
+| --------------------- | -----------------------------: |
+| `Swap` event          |      3,941,355,102,139,778,949 |
+| `swap()` return value |      3,901,941,551,118,381,160 |
+| difference            | 39,413,551,021,397,789 = 1.00% |
+
+The hook takes **1% in `afterSwap`**, and the event does not show it. Measured from the
+event, that hook looks like it is paying users 1%. It is charging them 1%.
+
+The correction generalizes: **anyone measuring hook behaviour from `Swap` events
+systematically under-reports exactly the hooks that take the most**, because taking in
+`afterSwap` is invisible to the event. That is the obvious way to build such a measurement,
+and it is the way this repo built it first.
+
+Chasing that also exposed a second event defect. The sign pattern of `Swap` cannot
+distinguish exact-input-token0 from exact-output-token1 — they are identical. **13% of the
+fills this pipeline had selected as "exact-input" were exact-output swaps**, re-quoted as a
+swap that never happened.
+
+### What the pipeline does now
+
+Every sampled fill is confirmed against its own transaction trace before it is measured.
+`amountSpecified`, `hookData` and the realized output all come from the traced
+`PoolManager.swap` call — its calldata and its return value. The event is used only to
+locate candidates. Matching an indexed fill to a traced call needs no ordering assumption:
+the first five words of the swap calldata are the ABI encoding of the pool key, so
+`keccak256` of them is the same `PoolId` the event carries.
+
+Recovery costs about **0.01 s per transaction** and succeeded on 135/135 calls in the
+sample. `divergence.json` now carries a `trace_confirmation` block recording what was
+dropped and why.
+
+### The effect on the numbers
+
+| Quantity                   | From the `Swap` event | From the traced call |
+| -------------------------- | --------------------: | -------------------: |
+| Median take across fills   |            -101.0 bps |         **+0.0 bps** |
+| Fills measured             |                   100 |                   78 |
+| Exact-output contamination |                   13% |                   0% |
+| `hook_data_unknown_share`  |                   1.0 |                  0.0 |
+
+A median of **+0.0 bps** is the strong result here: on the median fill the re-quote
+predicts the delivered output exactly, including hooks that take 1% in `afterSwap`. The
+hook charges, the quoter sees the charge, and the swapper gets what the quote said. That is
+what Sworn calls honest — and it is only visible once the measurement stops trusting the
+event.
+
+## What these numbers support, and what they do not
+
+**Supported:** the machinery works end to end; the re-quote agrees with reality to 0.0 bps
+at the median on hooked fills and 0.00 bps on hookless ones; the sample contains no
+divergent hooks at any threshold in the sensitivity sweep; the attribution is solid.
+
+**Not supported:** a claim about how often hooks charge across the population. The sample
+is volume-weighted (the busiest 25 hooks, 4 fills each), not uniform, so it answers "what
+do the busiest hooks do" and not "what does a hook do". The ±37-40 bps at p5/p95 is
+block-position noise from quoting at block N-1, not hook behaviour.
 
 ## Next step
 
-A per-router `hookData` decoder, starting with Universal Router, which alone accounts for
-37.5% of fills. Then re-run against a uniformly drawn sample rather than a
-volume-weighted one, so the population matches the question 0x's number answers.
+A uniformly drawn sample large enough for a real charged-rate distribution, rather than a
+volume-weighted one, so the population matches the question the headline asks.
