@@ -1,0 +1,2783 @@
+{
+  "meta": {
+    "generated_at": "2026-09-25T14:54:38Z",
+    "script_commit": "5db13e1-dirty",
+    "config_version": 1,
+    "pipeline": "a_census_report",
+    "snapshots": [
+      {
+        "name": "hooklist",
+        "sha256": "35a505bc32b62e818cfbed29a8428af0a2449b7481684f6fc680536f73dc8c6c",
+        "block_from": 0,
+        "block_to": 0,
+        "rows": 4961
+      },
+      {
+        "name": "census-base",
+        "sha256": "a5379268608d769898a5e9a90b37270978167c233a24381dc307a7b1adfc3205",
+        "block_from": 25350988,
+        "block_to": 51778292,
+        "rows": 15309659,
+        "chain": "base"
+      }
+    ]
+  },
+  "chains": [
+    {
+      "chain": "base",
+      "hooks_total": 69242,
+      "pools_total": 15309659,
+      "hooked_pools": 15076019,
+      "block_from": 25350988,
+      "block_to": 51778292,
+      "with_returns_delta": 40497,
+      "dynamic_fee_pools": 3349510,
+      "upgradeable": 4,
+      "verified": 30,
+      "allowlisted": 1106,
+      "by_flag_combination": [
+        {
+          "flags_bitmap": 64,
+          "hooks": 14811,
+          "names": [
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 204,
+          "hooks": 14290,
+          "names": [
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10376,
+          "hooks": 13385,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10432,
+          "hooks": 10354,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 196,
+          "hooks": 6478,
+          "names": [
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 325,
+          "hooks": 2154,
+          "names": [
+            "AFTER_REMOVE_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 14560,
+          "hooks": 1602,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE"
+          ]
+        },
+        {
+          "flags_bitmap": 68,
+          "hooks": 1547,
+          "names": [
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2184,
+          "hooks": 361,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 128,
+          "hooks": 328,
+          "names": [
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 136,
+          "hooks": 265,
+          "names": [
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 192,
+          "hooks": 177,
+          "names": [
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 8396,
+          "hooks": 174,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 4096,
+          "hooks": 164,
+          "names": [
+            "AFTER_INITIALIZE"
+          ]
+        },
+        {
+          "flags_bitmap": 12488,
+          "hooks": 127,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10444,
+          "hooks": 120,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 8192,
+          "hooks": 110,
+          "names": [
+            "BEFORE_INITIALIZE"
+          ]
+        },
+        {
+          "flags_bitmap": 4224,
+          "hooks": 107,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 4288,
+          "hooks": 94,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 10988,
+          "hooks": 93,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10956,
+          "hooks": 92,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2764,
+          "hooks": 89,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 12492,
+          "hooks": 81,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 8260,
+          "hooks": 79,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 4160,
+          "hooks": 76,
+          "names": [
+            "AFTER_INITIALIZE",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 200,
+          "hooks": 73,
+          "names": [
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2176,
+          "hooks": 68,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 10820,
+          "hooks": 68,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 4300,
+          "hooks": 65,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 8328,
+          "hooks": 59,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1088,
+          "hooks": 58,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 9671,
+          "hooks": 53,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10436,
+          "hooks": 49,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 8384,
+          "hooks": 47,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 10408,
+          "hooks": 47,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2752,
+          "hooks": 47,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 8320,
+          "hooks": 45,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 10308,
+          "hooks": 43,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 8256,
+          "hooks": 41,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 9679,
+          "hooks": 38,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2688,
+          "hooks": 37,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 4164,
+          "hooks": 36,
+          "names": [
+            "AFTER_INITIALIZE",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1344,
+          "hooks": 36,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 12480,
+          "hooks": 36,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 2240,
+          "hooks": 36,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 10368,
+          "hooks": 33,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 16383,
+          "hooks": 29,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 8388,
+          "hooks": 29,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 3266,
+          "hooks": 28,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 4032,
+          "hooks": 26,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 12252,
+          "hooks": 26,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16368,
+          "hooks": 26,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE"
+          ]
+        },
+        {
+          "flags_bitmap": 6144,
+          "hooks": 25,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY"
+          ]
+        },
+        {
+          "flags_bitmap": 4292,
+          "hooks": 22,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10944,
+          "hooks": 21,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 2248,
+          "hooks": 21,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1216,
+          "hooks": 20,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 9284,
+          "hooks": 20,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10920,
+          "hooks": 19,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 15052,
+          "hooks": 16,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2760,
+          "hooks": 15,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 6280,
+          "hooks": 14,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10952,
+          "hooks": 14,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 9280,
+          "hooks": 14,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 2048,
+          "hooks": 14,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY"
+          ]
+        },
+        {
+          "flags_bitmap": 16380,
+          "hooks": 14,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2696,
+          "hooks": 13,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10888,
+          "hooks": 13,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 6208,
+          "hooks": 12,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 10880,
+          "hooks": 11,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 16373,
+          "hooks": 11,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16376,
+          "hooks": 11,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 384,
+          "hooks": 11,
+          "names": [
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 2560,
+          "hooks": 10,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY"
+          ]
+        },
+        {
+          "flags_bitmap": 1280,
+          "hooks": 10,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY"
+          ]
+        },
+        {
+          "flags_bitmap": 4232,
+          "hooks": 10,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2116,
+          "hooks": 9,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16379,
+          "hooks": 9,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 12356,
+          "hooks": 9,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1152,
+          "hooks": 9,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 6336,
+          "hooks": 9,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 11460,
+          "hooks": 9,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 324,
+          "hooks": 9,
+          "names": [
+            "AFTER_REMOVE_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 15048,
+          "hooks": 8,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 6884,
+          "hooks": 8,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 14976,
+          "hooks": 8,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 11470,
+          "hooks": 8,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 14532,
+          "hooks": 8,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 6860,
+          "hooks": 8,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16382,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10948,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16370,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1228,
+          "hooks": 7,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2252,
+          "hooks": 7,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 10440,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16371,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1026,
+          "hooks": 7,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 5568,
+          "hooks": 7,
+          "names": [
+            "AFTER_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 11468,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16381,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 12484,
+          "hooks": 7,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 5248,
+          "hooks": 6,
+          "names": [
+            "AFTER_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 15084,
+          "hooks": 6,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 6368,
+          "hooks": 6,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE"
+          ]
+        },
+        {
+          "flags_bitmap": 10816,
+          "hooks": 6,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 9352,
+          "hooks": 6,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 16375,
+          "hooks": 6,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 4296,
+          "hooks": 6,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1092,
+          "hooks": 6,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 12012,
+          "hooks": 6,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 1479,
+          "hooks": 6,
+          "names": [
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA",
+            "AFTER_ADD_LIQUIDITY_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2756,
+          "hooks": 6,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 48,
+          "hooks": 5,
+          "names": [
+            "BEFORE_DONATE",
+            "AFTER_DONATE"
+          ]
+        },
+        {
+          "flags_bitmap": 5184,
+          "hooks": 5,
+          "names": [
+            "AFTER_INITIALIZE",
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 12416,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 8140,
+          "hooks": 5,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 12424,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 8392,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 12352,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 2796,
+          "hooks": 5,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 11712,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 10240,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY"
+          ]
+        },
+        {
+          "flags_bitmap": 16377,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "BEFORE_SWAP_RETURNS_DELTA",
+            "AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 2628,
+          "hooks": 5,
+          "names": [
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_SWAP",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        },
+        {
+          "flags_bitmap": 6272,
+          "hooks": 5,
+          "names": [
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "BEFORE_SWAP"
+          ]
+        },
+        {
+          "flags_bitmap": 16372,
+          "hooks": 5,
+          "names": [
+            "BEFORE_INITIALIZE",
+            "AFTER_INITIALIZE",
+            "BEFORE_ADD_LIQUIDITY",
+            "AFTER_ADD_LIQUIDITY",
+            "BEFORE_REMOVE_LIQUIDITY",
+            "AFTER_REMOVE_LIQUIDITY",
+            "BEFORE_SWAP",
+            "AFTER_SWAP",
+            "BEFORE_DONATE",
+            "AFTER_DONATE",
+            "AFTER_SWAP_RETURNS_DELTA"
+          ]
+        }
+      ],
+      "metadata_hooks_covered": 200
+    }
+  ],
+  "top_hooks": [
+    {
+      "chain": "base",
+      "address": "0xc8d077444625eb300a427a6dfb2b1dbf9b159040",
+      "pool_count": 8170323,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 36530247,
+      "bytecode_sha256": "b8e5b6f95ef065cf7bcea867aff9b394a55562d3bfccf41b516bdb048b0b22ba"
+    },
+    {
+      "chain": "base",
+      "address": "0x9ea932730a7787000042e34390b8e435dd839040",
+      "pool_count": 1895318,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 32646833,
+      "bytecode_sha256": "a1ca5cc48de36f470640f646f0be9b28ffed7b515c7769de163ee0c014213383"
+    },
+    {
+      "chain": "base",
+      "address": "0xbb7784a4d481184283ed89619a3e3ed143e1adc0",
+      "pool_count": 973200,
+      "flags_bitmap": 11712,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 42022239
+    },
+    {
+      "chain": "base",
+      "address": "0x0469a4bd3724dc86c9542f4694c976da13c450c0",
+      "pool_count": 882974,
+      "flags_bitmap": 4288,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 43224332
+    },
+    {
+      "chain": "base",
+      "address": "0xb429d62f8f3bffb98cdb9569533ea23bf0ba28cc",
+      "pool_count": 630368,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 35579619,
+      "bytecode_sha256": "bbe2c5b48cf276e7919ccd5c8bfb1933c570ed2e23bae1eef1b82051b4f96425"
+    },
+    {
+      "chain": "base",
+      "address": "0x2b15a16b3ef024005ba899bb51764fcd58cf9040",
+      "pool_count": 569496,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 35754098,
+      "bytecode_sha256": "897c1dd6fd064357eea561ed687a824b8d1cca7e28599e106b4e280c8b69b4d1"
+    },
+    {
+      "chain": "base",
+      "address": "0xd61a675f8a0c67a73dc3b54fb7318b4d91409040",
+      "pool_count": 369331,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 32646859,
+      "bytecode_sha256": "7a113327c6c45554ea5ad791913f0811c8f4924486cf8c1e23bdcd7885f67a21"
+    },
+    {
+      "chain": "base",
+      "address": "0xd60d6b218116cfd801e28f78d011a203d2b068cc",
+      "pool_count": 362576,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 35579664,
+      "bytecode_sha256": "07b9d755a28a9a8c234bf2d3a91c85529ea86d636e3b49fd2bc6578e992b7968"
+    },
+    {
+      "chain": "base",
+      "address": "0xbdf938149ac6a781f94faa0ed45e6a0e984c6544",
+      "pool_count": 352907,
+      "flags_bitmap": 9540,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 43238050
+    },
+    {
+      "chain": "base",
+      "address": "0xff74be9d3596ea7a33bb4983dd7906fb34135040",
+      "pool_count": 122319,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 35586081,
+      "bytecode_sha256": "3503ecd9f039dcde8f514d8a1b89d12ca2b2aadb8bcecd56b05d98a489c2e1ec"
+    },
+    {
+      "chain": "base",
+      "address": "0x23321f11a6d44fd1ab790044fdfde5758c902fdc",
+      "pool_count": 118954,
+      "flags_bitmap": 12252,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 37432685,
+      "bytecode_sha256": "eabb15c516d99ee8900024aa138877992bf70d749d0ba0396d04a6cd76e64fd5"
+    },
+    {
+      "chain": "base",
+      "address": "0xdd5eeaff7bd481ad55db083062b13a3cdf0a68cc",
+      "pool_count": 94292,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 31528928,
+      "bytecode_sha256": "5697259ea10ae0f244fc46c99bdfae3516e26fef7be86f8dbd6357c078e38fad"
+    },
+    {
+      "chain": "base",
+      "address": "0x5bf219b3cc11e3f6dd8dc8fc89d7d1deb0431040",
+      "pool_count": 90167,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 31959774,
+      "bytecode_sha256": "c6eb1b90f2c8abe949270d3230c197afb8479c7412660a75a82fd5d918a6d552"
+    },
+    {
+      "chain": "base",
+      "address": "0xa1ebdd5ca6470bbd67114331387f2dda7bfad040",
+      "pool_count": 48439,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 31178873,
+      "bytecode_sha256": "b9449f4e87108e335e511c773e2c1ad28daef8cdf468a6c5c64b485c93429cba"
+    },
+    {
+      "chain": "base",
+      "address": "0x892d3c2b4abeaaf67d52a7b29783e2161b7cad40",
+      "pool_count": 39717,
+      "flags_bitmap": 11584,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 36202731,
+      "bytecode_sha256": "0fc59d55d673ae1e239aed053209046b83a69ba91e55ec9782fce341a4b6ea33"
+    },
+    {
+      "chain": "base",
+      "address": "0x1258e5f3c71ca9dce95ce734ba5759532e46d040",
+      "pool_count": 32786,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 35754109,
+      "bytecode_sha256": "cf235fe3e70238d68d09a7a2a36680c684bc35b55a37751df25c543af085a6c4"
+    },
+    {
+      "chain": "base",
+      "address": "0xf785bb58059fab6fb19bdda2cb9078d9e546efdc",
+      "pool_count": 30096,
+      "flags_bitmap": 12252,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 29696167,
+      "bytecode_sha256": "6353798fe80138e7a2c96dbb27e6d31cdd34b8f6589c1ed3cf77acbb8f233f65"
+    },
+    {
+      "chain": "base",
+      "address": "0x985c14baa2a18316ffda0aefb3a632fadfca2acc",
+      "pool_count": 25108,
+      "flags_bitmap": 10956,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 48460457
+    },
+    {
+      "chain": "base",
+      "address": "0x34a45c6b61876d739400bd71228cbcbd4f53e8cc",
+      "pool_count": 23282,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 31526724,
+      "bytecode_sha256": "2da6196e9c52eaec5cdd4eac4470f418f75272ee511185c4e91fdd1ff8cddabf"
+    },
+    {
+      "chain": "base",
+      "address": "0x5e5d19d22c85a4aef7c1fdf25fb22a5a38f71040",
+      "pool_count": 18921,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 31959786,
+      "bytecode_sha256": "6afa925f4a5413d3f20553d2772119e9776cc89c5e95521ff6706bc65ffe4c25"
+    },
+    {
+      "chain": "base",
+      "address": "0x3e342a06f9592459d75721d6956b570f02ef2dc0",
+      "pool_count": 17250,
+      "flags_bitmap": 11712,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 37099389,
+      "bytecode_sha256": "39a360a894a32301edae052d24454d4d47e38b5b94d51d5c01e6b687754515fe"
+    },
+    {
+      "chain": "base",
+      "address": "0x3aa3f28ae7c829a98359f31f3ddc5dae0a57afdc",
+      "pool_count": 16683,
+      "flags_bitmap": 12252,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 35648055,
+      "bytecode_sha256": "40c5fcc70a893af2c94227fdd76a0cadede43665f35b216498bd9d36041ec8a3"
+    },
+    {
+      "chain": "base",
+      "address": "0xb476c448da4453208df4e371fee26f4e630d3044",
+      "pool_count": 15228,
+      "flags_bitmap": 12356,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 28291319,
+      "bytecode_sha256": "ff11f6d0daed510680e7f432529130082b843f9e173b3d0a42d121b0893e1b0d"
+    },
+    {
+      "chain": "base",
+      "address": "0x9b47e436e216b2cb54d6f24154f86d946098d040",
+      "pool_count": 12239,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 31837800,
+      "bytecode_sha256": "fb5a37788b794d8f86f4ef76c7cba255f31f0a9a08ec407112cead29d179bb91"
+    },
+    {
+      "chain": "base",
+      "address": "0x9811f10cd549c754fa9e5785989c422a762c28cc",
+      "pool_count": 11079,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 43333784
+    },
+    {
+      "chain": "base",
+      "address": "0xd3d133469adc85e01a4887404d8ac12d630e9040",
+      "pool_count": 8657,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 31746595,
+      "bytecode_sha256": "c8a07a845297410ccbd63721dac6cffa31bf42fc98f73ac41d68424e2a1e0e65"
+    },
+    {
+      "chain": "base",
+      "address": "0x8218fa8d7922e22aed3556a09d5a715f16ad5040",
+      "pool_count": 6454,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 35586096,
+      "bytecode_sha256": "38a3c092e91b5cbe1bd81452c93247741b9239d1bdeece92342073e6a5a5a313"
+    },
+    {
+      "chain": "base",
+      "address": "0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc",
+      "pool_count": 5897,
+      "flags_bitmap": 10956,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50582259
+    },
+    {
+      "chain": "base",
+      "address": "0xa068cf4c52abdd3479145c4b3cbd8e3d71542a44",
+      "pool_count": 5233,
+      "flags_bitmap": 10820,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 48379232
+    },
+    {
+      "chain": "base",
+      "address": "0x2ef7ef5ced564a8ef6549271dbcd8401c6f300c8",
+      "pool_count": 4997,
+      "flags_bitmap": 200,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 46399228
+    },
+    {
+      "chain": "base",
+      "address": "0x51bba15255406cfe7099a42183302640ba7dafdc",
+      "pool_count": 4764,
+      "flags_bitmap": 12252,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 25771660,
+      "bytecode_sha256": "260f695cede19ecea7c6f5c286d96d19747b6f3947a29e61e609bfe40b2fabd8"
+    },
+    {
+      "chain": "base",
+      "address": "0x9278f6e55ce58519c79dc1ab0ad3b29ea7821040",
+      "pool_count": 3800,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 31837806,
+      "bytecode_sha256": "377575ba5b5ceffe17bef31f696180a612247d878efb0a6a2f79e76f5f37a22a"
+    },
+    {
+      "chain": "base",
+      "address": "0x84bbab8cac69bf6711ba81f9915dc346f4cf2088",
+      "pool_count": 3597,
+      "flags_bitmap": 8328,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 48379230
+    },
+    {
+      "chain": "base",
+      "address": "0xfff800b76768da8ab6aab527021e4a6a91219040",
+      "pool_count": 2752,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 31776945,
+      "bytecode_sha256": "199a3c8b821d95a828861dcf2d7edc8f45c936fe172360ccca339b10f0e0b13c"
+    },
+    {
+      "chain": "base",
+      "address": "0x2d0d55e8d4418ce6157cf31d9ffafb88117c0040",
+      "pool_count": 2392,
+      "flags_bitmap": 64,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 26003189,
+      "bytecode_sha256": "8e034688b25fa21977077a91a2e176c0ee6fe1c60c0d60166a288c765641ffcb"
+    },
+    {
+      "chain": "base",
+      "address": "0xacf358b129423f0107b0bf892b3eff6c770128cc",
+      "pool_count": 2228,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 47425119
+    },
+    {
+      "chain": "base",
+      "address": "0x7c672f3850afadcb8f83478e0a2a90d109fa6044",
+      "pool_count": 1956,
+      "flags_bitmap": 8260,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50639947
+    },
+    {
+      "chain": "base",
+      "address": "0x3b2b979df21036cee51b8debb13100e2cb8deacc",
+      "pool_count": 1856,
+      "flags_bitmap": 10956,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50144424
+    },
+    {
+      "chain": "base",
+      "address": "0x80e2f7dc8c2c880bbc4bdf80a5fb0eb8b1db68cc",
+      "pool_count": 1831,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 43327823
+    },
+    {
+      "chain": "base",
+      "address": "0x588c683ecc450f8b2aadb13d7f63792b840425dc",
+      "pool_count": 1801,
+      "flags_bitmap": 9692,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50281133
+    },
+    {
+      "chain": "base",
+      "address": "0x8dc3b85e1dc1c846ebf3971179a751896842e5dc",
+      "pool_count": 1542,
+      "flags_bitmap": 9692,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 33840618,
+      "bytecode_sha256": "4a9e0ac7339f698cffbf3ee760134b278939a79bd4ff47e5ddc9c4aa1438b404"
+    },
+    {
+      "chain": "base",
+      "address": "0xa52ee9411402a4c44cc87948343c6ce50258a8cc",
+      "pool_count": 1528,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 39240827,
+      "bytecode_sha256": "7b52a142477932f5e785c3c08440a8cbb4681828da074ccc546211750f09ab70"
+    },
+    {
+      "chain": "base",
+      "address": "0x4ab61d774b170d0610fdcc5559aae2c356c600c8",
+      "pool_count": 1112,
+      "flags_bitmap": 200,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 34456314,
+      "bytecode_sha256": "882a3d216049d22d7fb94f4d24a236036f9d2293cbda6aa04c1e1bd196f78549"
+    },
+    {
+      "chain": "base",
+      "address": "0x1aa368e255a2856523fad0b809dbfb90e5434088",
+      "pool_count": 1002,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45966397
+    },
+    {
+      "chain": "base",
+      "address": "0x5b409184204b86f708d3aebb3cad3f02835f68cc",
+      "pool_count": 963,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 37584651,
+      "bytecode_sha256": "f60a8d193d9a87d77b94968ae84b909da7e072e335b5795b4a6ce3821ecf4514"
+    },
+    {
+      "chain": "base",
+      "address": "0x487f034772b128e917b23a4edfd53442aa8de0cc",
+      "pool_count": 938,
+      "flags_bitmap": 8396,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 37179534,
+      "bytecode_sha256": "00defaebc5b664c1d7c844c319459ea16ac9b987a3e3d7aa1103682e3a4f970a"
+    },
+    {
+      "chain": "base",
+      "address": "0x3e83479b2276ecfb7c7181f67b5d092d3511e0c4",
+      "pool_count": 894,
+      "flags_bitmap": 8388,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 47868588
+    },
+    {
+      "chain": "base",
+      "address": "0xf71a0ff7bc998cd59dad3ab4242357477e4280c0",
+      "pool_count": 731,
+      "flags_bitmap": 192,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 44643451
+    },
+    {
+      "chain": "base",
+      "address": "0xaa096f558f3d4c9226de77e7cc05f18e180b2544",
+      "pool_count": 628,
+      "flags_bitmap": 9540,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 41919807
+    },
+    {
+      "chain": "base",
+      "address": "0x130b18baa7f6f0d7b3730acc605aabe56df028cc",
+      "pool_count": 627,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 48379231
+    },
+    {
+      "chain": "base",
+      "address": "0x4cd3be8768aea2a0297c22c17a7a3cae65adc0cc",
+      "pool_count": 545,
+      "flags_bitmap": 204,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 29366975,
+      "bytecode_sha256": "457f60610f7d05ef7d03e08b03097f619b1dee485f908a9126a18ab3532f64ba"
+    },
+    {
+      "chain": "base",
+      "address": "0x0ae73dfa41f1acacf32ad050924384b295e968cc",
+      "pool_count": 538,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 48379352
+    },
+    {
+      "chain": "base",
+      "address": "0x7eee5ae49efb772b54593e8872583b12422c00c0",
+      "pool_count": 520,
+      "flags_bitmap": 192,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 44526549
+    },
+    {
+      "chain": "base",
+      "address": "0x8d09e3df92c4c994d396e3c7558b4ddb16b21088",
+      "pool_count": 414,
+      "flags_bitmap": 4232,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45234842
+    },
+    {
+      "chain": "base",
+      "address": "0x24fc077bcd3af109a2acb9988ac2214393aa00c8",
+      "pool_count": 371,
+      "flags_bitmap": 200,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45560927
+    },
+    {
+      "chain": "base",
+      "address": "0x635aa18a64ed672285b3ba7f1a773b09f1fdca80",
+      "pool_count": 366,
+      "flags_bitmap": 2688,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 47976705
+    },
+    {
+      "chain": "base",
+      "address": "0x97edfabcc578743e3b1e77a03c7772eea28c40c8",
+      "pool_count": 340,
+      "flags_bitmap": 200,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 46091307
+    },
+    {
+      "chain": "base",
+      "address": "0x4440854b2d02c57a0dc5c58b7a884562d875c0c4",
+      "pool_count": 322,
+      "flags_bitmap": 196,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 30270989,
+      "bytecode_sha256": "34dde9d5086b998c9db8b1b98d6ea97c8066d1a623803c9d503f6d8bb746b01f"
+    },
+    {
+      "chain": "base",
+      "address": "0x7debe6943acefe85c4ee81aadd736466e07528cc",
+      "pool_count": 276,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 41659315
+    },
+    {
+      "chain": "base",
+      "address": "0xf85f1f3082cfbc5e1149972309b25054e4d420cc",
+      "pool_count": 269,
+      "flags_bitmap": 8396,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 48734356
+    },
+    {
+      "chain": "base",
+      "address": "0x03d2434d5a9ab7fb46bd3c7956a7c62e0cd46044",
+      "pool_count": 261,
+      "flags_bitmap": 8260,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50069724
+    },
+    {
+      "chain": "base",
+      "address": "0x1aea38f06dece45c252ef1ac5af989d51dc8e8cc",
+      "pool_count": 240,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 47219516
+    },
+    {
+      "chain": "base",
+      "address": "0x963e91a45148b39737b9df10c5b897b55ca9e8cc",
+      "pool_count": 218,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 43002972
+    },
+    {
+      "chain": "base",
+      "address": "0x4951d0e1cfb915f64ab19aed153bd6305a244088",
+      "pool_count": 206,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50237818
+    },
+    {
+      "chain": "base",
+      "address": "0x8606950fde102cd812ade1d0b032a1374a850ac4",
+      "pool_count": 206,
+      "flags_bitmap": 2756,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 47530749
+    },
+    {
+      "chain": "base",
+      "address": "0x5fcbfdafba96c8965d296c73e9d5d1c7b21f80c8",
+      "pool_count": 202,
+      "flags_bitmap": 200,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 46275077
+    },
+    {
+      "chain": "base",
+      "address": "0x1cfead8e66cebc5e51093dfd247ad34f841740c4",
+      "pool_count": 196,
+      "flags_bitmap": 196,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 37115605,
+      "bytecode_sha256": "6df3b1450c670c1e7e895fb5825a03a225c79b03849a252661921c7b81aae4d1"
+    },
+    {
+      "chain": "base",
+      "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
+      "pool_count": 189,
+      "flags_bitmap": 6280,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 26394901,
+      "bytecode_sha256": "3d8522e05e216da51184cd760840ec03bf860141601f0d22ba9e23df190f4476"
+    },
+    {
+      "chain": "base",
+      "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
+      "pool_count": 176,
+      "flags_bitmap": 6280,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 31571049,
+      "bytecode_sha256": "cabf1d107e4ce72438648d8c94e408a4f79ad5c4c472c8050431d793d1de2ca3"
+    },
+    {
+      "chain": "base",
+      "address": "0xdc86a826d4e794b34b25eec5d9c9b17f5dc05acc",
+      "pool_count": 175,
+      "flags_bitmap": 6860,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45438399
+    },
+    {
+      "chain": "base",
+      "address": "0x58477b067a59ed9effe0d8e44b545727a7851acc",
+      "pool_count": 174,
+      "flags_bitmap": 6860,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45435427
+    },
+    {
+      "chain": "base",
+      "address": "0xb44b7531f6a7574dc42a1d5f62996cf782e01acc",
+      "pool_count": 174,
+      "flags_bitmap": 6860,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 44561797
+    },
+    {
+      "chain": "base",
+      "address": "0x2d68264c9791c9f4b736510545566b7831a28088",
+      "pool_count": 145,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 46984792
+    },
+    {
+      "chain": "base",
+      "address": "0x94a8cbc33acd9ddb8c0eb9cc207befb005ab6aa8",
+      "pool_count": 144,
+      "flags_bitmap": 10920,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 47122850
+    },
+    {
+      "chain": "base",
+      "address": "0xa10a6f4b918e963ec8694d37aa22e438706fe8cc",
+      "pool_count": 144,
+      "flags_bitmap": 10444,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 48427721
+    },
+    {
+      "chain": "base",
+      "address": "0xd5252a67935fc6b913c4441ac0e5ebf3219faaa8",
+      "pool_count": 144,
+      "flags_bitmap": 10920,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 46135762
+    },
+    {
+      "chain": "base",
+      "address": "0x880cef920082950a19365dc0e87c27e16f3cc444",
+      "pool_count": 113,
+      "flags_bitmap": 1092,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 36527951,
+      "bytecode_sha256": "38d22e08c0eb98bb43c718091efc6d6d920467966f99c61f9c5ff84e6941b49e"
+    },
+    {
+      "chain": "base",
+      "address": "0x4d667e420bd4a42969cb27251a3f9a24661fd0cc",
+      "pool_count": 111,
+      "flags_bitmap": 4300,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45850135
+    },
+    {
+      "chain": "base",
+      "address": "0xbeff407b7062e2fe15928960a58aec93b0c76044",
+      "pool_count": 100,
+      "flags_bitmap": 8260,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50283146
+    },
+    {
+      "chain": "base",
+      "address": "0xd60a6a0f0d5e3fd451449c7256bbbdc59561e888",
+      "pool_count": 100,
+      "flags_bitmap": 10376,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 30561877,
+      "bytecode_sha256": "e5d2bd6f07461ff35d80c9d6ed327df3eef3f1760bc9a7749215e564dc68a2cf"
+    },
+    {
+      "chain": "base",
+      "address": "0x4db263809e6ea36d223161535173a01b5b3240c0",
+      "pool_count": 93,
+      "flags_bitmap": 192,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 50264270
+    },
+    {
+      "chain": "base",
+      "address": "0x35b9b5b023897da8c7375ba6141245b8416460cc",
+      "pool_count": 91,
+      "flags_bitmap": 8396,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 38966027,
+      "bytecode_sha256": "52d6addad705cb78041661aa1e20d27121c742e21d46f55d01b58804d939dd78"
+    },
+    {
+      "chain": "base",
+      "address": "0x932812ff52bfcd8c3fd753602f78a93363406888",
+      "pool_count": 89,
+      "flags_bitmap": 10376,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 49555172
+    },
+    {
+      "chain": "base",
+      "address": "0x937c03f5320506f72e7d25f85ff782466730e888",
+      "pool_count": 89,
+      "flags_bitmap": 10376,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45439978
+    },
+    {
+      "chain": "base",
+      "address": "0x9380d0b27282efc4ca76d04f465ecd8ef0042888",
+      "pool_count": 89,
+      "flags_bitmap": 10376,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 46551731
+    },
+    {
+      "chain": "base",
+      "address": "0x9389feebab090b8b0ad4d7ddc918186d13642888",
+      "pool_count": 89,
+      "flags_bitmap": 10376,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 46551929
+    },
+    {
+      "chain": "base",
+      "address": "0x590596c093ed4abb5e6a9a63721bd20ccd23d040",
+      "pool_count": 83,
+      "flags_bitmap": 4160,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 39228846,
+      "bytecode_sha256": "54bd648edd14db7d61aa77dc413ed016bcba8e08f694fbf4be1cb65ac5c73795"
+    },
+    {
+      "chain": "base",
+      "address": "0x6b9d4fafb166548e20c2d0d1fb180098a8808088",
+      "pool_count": 83,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 50905278
+    },
+    {
+      "chain": "base",
+      "address": "0x1d6229c8221dec4f0a70b8fc0090ff25f7040088",
+      "pool_count": 82,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45927942
+    },
+    {
+      "chain": "base",
+      "address": "0x4a503091f66b44bc82c108eae91e358c7e030088",
+      "pool_count": 74,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 46234638
+    },
+    {
+      "chain": "base",
+      "address": "0x653147d4d3f4a31f9b826ffcfb903933bc468088",
+      "pool_count": 74,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 46245601
+    },
+    {
+      "chain": "base",
+      "address": "0xb4684ab90b1f18fd0c61ae4f8bf59dc9e7968088",
+      "pool_count": 74,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45451438
+    },
+    {
+      "chain": "base",
+      "address": "0xd55bfda89980b3a517719f2e6fbd53be565b0844",
+      "pool_count": 70,
+      "flags_bitmap": 2116,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": true,
+      "allowlisted": true,
+      "first_seen_block": 38680734,
+      "bytecode_sha256": "52a16775594abe20c71fb57f6d43e7a39389f138b84adb620769f5c7f3559eb4"
+    },
+    {
+      "chain": "base",
+      "address": "0x5da2b7e2a88216d5ad129a0147a5e59aad4aea44",
+      "pool_count": 62,
+      "flags_bitmap": 10820,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 31737169,
+      "bytecode_sha256": "8f6503439a27b148336e8b4ce02d06d3c70be314450744fe1df870e9d2dd808e"
+    },
+    {
+      "chain": "base",
+      "address": "0x5c553eec9bfef1c33c94322618c886c097e6c088",
+      "pool_count": 61,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45410353
+    },
+    {
+      "chain": "base",
+      "address": "0xbbf0b679aee2d9e158730280a29e31e3875065c7",
+      "pool_count": 60,
+      "flags_bitmap": 9671,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 50483275
+    },
+    {
+      "chain": "base",
+      "address": "0x7400aa8c61c5e64a4fccbb7ad377b74af5a2c088",
+      "pool_count": 59,
+      "flags_bitmap": 136,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45834240
+    },
+    {
+      "chain": "base",
+      "address": "0xe44e34f3baa02c1fadae6f3af9568c198a4480c0",
+      "pool_count": 59,
+      "flags_bitmap": 192,
+      "volume_usd_30d": null,
+      "dynamic_fee": false,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": false,
+      "first_seen_block": 45936099
+    },
+    {
+      "chain": "base",
+      "address": "0x721eeec896f413ca7b971e0ef3cad2cd16b350c0",
+      "pool_count": 58,
+      "flags_bitmap": 4288,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": false,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 42891743
+    },
+    {
+      "chain": "base",
+      "address": "0x570a48f96035c2874de1c0f13c5075a05683b0cc",
+      "pool_count": 54,
+      "flags_bitmap": 12492,
+      "volume_usd_30d": null,
+      "dynamic_fee": true,
+      "returns_delta": true,
+      "upgradeable": false,
+      "verified": false,
+      "allowlisted": true,
+      "first_seen_block": 38006334,
+      "bytecode_sha256": "8f8762dbf9eeee3be68ab87925640bfcc7eb402504beca7b380f45e0788abadc"
+    }
+  ]
+}

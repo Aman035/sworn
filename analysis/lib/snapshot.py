@@ -157,13 +157,20 @@ def verify_snapshot(name: str) -> list[str]:
 
 def snapshot_ref(name: str) -> dict[str, object]:
     """The `meta.snapshots[]` entry a result file embeds to point back here."""
+    from .config import chains
+
     m = read_manifest(name)
     primary = m.files[0].sha256 if m.files else "0" * 64
-    return {
+    ref: dict[str, object] = {
         "name": m.name,
         "sha256": primary,
-        "chain": m.chain,
         "block_from": m.block_from,
         "block_to": m.block_to,
         "rows": m.rows,
     }
+    # Some snapshots are not chain-scoped (the hooklist covers 21 chains at once). The
+    # schema's `chain` is a strict enum, so a cross-chain snapshot omits the field rather
+    # than inventing a value for it.
+    if m.chain in chains():
+        ref["chain"] = m.chain
+    return ref

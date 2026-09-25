@@ -125,6 +125,10 @@ def build_chain(
         "verified": int(per_hook["verified"].sum()),
         "allowlisted": int(per_hook["allowlisted"].sum()),
         "by_flag_combination": by_combination,
+        # `upgradeable` and `verified` are counts *within this subset*. Publishing them
+        # without their denominator would read as "only N hooks on Base are upgradeable",
+        # which would be false.
+        "metadata_hooks_covered": metadata_covered,
     }
 
     top = per_hook.nlargest(min(TOP_HOOKS, len(per_hook)), "pool_count")
