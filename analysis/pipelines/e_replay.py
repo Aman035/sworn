@@ -46,7 +46,13 @@ from ..lib.requote import RequoteInput, result_key
 from ..lib.rpc import RpcClient
 from ..lib.schema import validate_result
 from ..lib.snapshot import script_commit, snapshot_dir, snapshot_ref
-from .b_divergence import archive_url, confirm_against_traces, eligible_fills, sample_uniform
+from .b_divergence import (
+    archive_url,
+    confirmed_sample,
+    eligible_fills,
+    load_confirmed,
+    sample_uniform,
+)
 
 # From docs/GAS.md, measured by `SwornGasTest` against a slippage-only router.
 PROBE_GAS_FIRST = 92_717
@@ -256,11 +262,18 @@ def main(argv: list[str] | None = None) -> int:
 
     load_dotenv(repo_root() / ".env")
 
-    fills = eligible_fills(args.chain)
-    sample = sample_uniform(fills, args.n, args.seed)
-    print(f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks")
+    # Deliberately the same cache key `b_divergence` writes: replay must answer "what
+    # would Sworn have done" about *the fills that were measured*, not about a fresh draw.
+    # Sharing the sample also means it costs no second index scan.
+    key = f"{args.chain}-uniform-{args.n}-{args.seed}"
+    sample = load_confirmed(key)
+    if sample is None:
+        fills = eligible_fills(args.chain)
+        sample = sample_uniform(fills, args.n, args.seed)
+        print(f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks")
+        del fills
+        sample = confirmed_sample(args.chain, sample, cache_key=key, refresh=True)
 
-    sample = confirm_against_traces(args.chain, sample)
     sample = sample[sample.confirmed].reset_index(drop=True)
     if sample.empty:
         raise SystemExit("no fills survived trace confirmation")

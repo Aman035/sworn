@@ -24,7 +24,7 @@ contract DemoTest is SwornTestBase {
     NaiveRouter internal naive;
     HookBook internal book;
 
-    uint16 internal constant BPS = 10_000;
+    uint256 internal constant BPS = 10_000;
 
     function setUp() public {
         setUpSworn();
@@ -97,13 +97,15 @@ contract DemoTest is SwornTestBase {
         // ---------------------------------------------------------------- act 5
         console.log("");
         console.log("ACT 5  What HookBook says, and what it refuses to say.");
-        book.setScore(toxicHook, 82, uint32(block.number), bytes32(uint256(1)), 0);
+        book.setScore(toxicHook, 82, 0, uint64(block.number), bytes32(uint256(1)));
 
-        (bool hasToxic, uint8 toxicScore,,,) = _read(toxicHook);
-        (bool hasUnknown,,,, uint16 unknownFlags) = _read(address(0xBEEF));
+        bool hasToxic = book.hasScore(toxicHook);
+        bool hasUnknown = book.hasScore(address(0xBEEF));
+        uint32 unknownFlags = book.flags(address(0xBEEF));
 
         console.log("  scored hook   hasScore:", hasToxic);
-        console.log("                score   :", toxicScore);
+        console.log("                score   :", book.score(toxicHook));
+        console.log("                flags   :", book.flags(toxicHook));
         console.log("  unseen hook   hasScore:", hasUnknown);
         console.log("                flags   :", unknownFlags);
         console.log("  an unmeasured hook reads as INSUFFICIENT_DATA, never as a clean 0");
@@ -123,17 +125,4 @@ contract DemoTest is SwornTestBase {
         return naive.swap(key, true, -int256(SWAP_AMOUNT), 0, address(this));
     }
 
-    function _read(
-        address hook
-    ) internal view returns (bool has, uint8 score, uint32 asOf, bytes32 snapshot, uint16 flags) {
-        has = book.hasScore(hook);
-        (score, asOf, snapshot, flags) = _fields(hook);
-    }
-
-    function _fields(
-        address hook
-    ) internal view returns (uint8 score, uint32 asOf, bytes32 snapshot, uint16 flags) {
-        HookBook.Score memory s = book.score(hook);
-        return (s.score, s.asOfBlock, s.snapshot, s.flags);
-    }
 }
