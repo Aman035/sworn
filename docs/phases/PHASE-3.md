@@ -1,6 +1,6 @@
 # Phase 3 — Settled-trade divergence
 
-> Status: **BLOCKED** · Gate: `make phase-3`
+> Status: IN PROGRESS (was BLOCKED; calibration now passes) · Gate: `make phase-3`
 
 ## Objective
 
@@ -17,7 +17,32 @@ The headline numbers: which hooks charge, how much, when, and who routed users i
   the pool's `sqrtPriceX96` there, so a surprising answer is falsifiable.
 - **Calibration harness** (`scripts/calibrate_requote.py`) — the gate on everything else.
 
-## Why this is BLOCKED
+## Resolution
+
+The blocker was a JSON parsing bug in the re-quote script, not a data problem.
+
+`stdJson.parseRaw` returns the ABI encoding of whatever the JSON value is. Amounts were
+encoded as JSON **strings** (they exceed int64 on the Python side), so that encoding is a
+dynamic `bytes` and `abi.decode(…, (uint256))` read its **offset word — 32**. Every fill
+was re-quoted with an input of 32, and every quote came back with the same tiny answer.
+
+It survived a long investigation because it looked exactly like a pool with no liquidity,
+and every other explanation checked out: pool key correct, fork at the right block,
+pre-state price matching the event's to 2e-7, liquidity genuinely 5.5e14. The tell was
+that **the output was 31 regardless of input size** — which read as "one-sided pool" but
+actually meant the input never varied. Having the script echo back what it parsed
+(`sent 118308819, parsed 32`) settled it in one run.
+
+Every field now uses the typed `read*` helpers, which parse numeric strings correctly.
+
+**After the fix, calibration passes: 19/20 within 1 bps (95%), median ratio 1.000000**,
+with most fills matching to the digit.
+
+The lesson worth keeping: a uniform bug producing *non-uniform* results was the real
+anomaly. Four fills appeared to pass, and a partial pass should have been treated as more
+suspicious than a total failure.
+
+## Why this was BLOCKED
 
 The calibration fails: **4 of 10 hookless fills re-quote exactly, 6 do not.**
 
@@ -71,10 +96,5 @@ Both would have produced confident, wrong headline numbers.
 
 ## Next step
 
-Characterise the failing population rather than exclude it by hand: for a larger sample,
-partition by whether the pre-state can produce the realized amount at all, and find what
-distinguishes the two groups. The restriction that survives becomes a documented
-population definition in `METRICS.md`, not a filter chosen to make a number look good.
-
-Until the calibration clears 95%, no divergence, intermittency or attribution number is
-computed, and `data/results/` gains no file from this phase.
+Pipelines B (divergence), C (intermittency) and D (attribution), now that the engine they
+depend on is verified against ground truth.
