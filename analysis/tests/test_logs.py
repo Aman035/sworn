@@ -312,3 +312,26 @@ def test_a_413_is_still_a_size_refusal_not_a_transient_error() -> None:
     exc = httpx.HTTPStatusError("413", request=request, response=response)
     assert not is_transient(exc)
     assert looks_like_range_limit(exc)
+
+
+def test_node_side_rpc_errors_are_retried() -> None:
+    """Observed in a real pull: Polygon returned this mid-census and killed the chain."""
+    from sworn_analysis.lib.logs import is_transient
+
+    for message in (
+        "failed to get logs for block #74592117 (0xc67aff..299d09)",
+        "missing trie node",
+        "header not found",
+    ):
+        exc = RpcError("eth_getLogs", -32000, message)
+        assert is_transient(exc), message
+        # And must not be mistaken for a size refusal, which would shrink the window.
+        assert not looks_like_range_limit(exc), message
+
+
+def test_a_genuine_error_is_still_fatal() -> None:
+    from sworn_analysis.lib.logs import is_transient
+
+    exc = RpcError("eth_getLogs", -32000, "unauthorized")
+    assert not is_transient(exc)
+    assert not looks_like_range_limit(exc)

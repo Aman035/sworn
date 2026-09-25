@@ -43,15 +43,27 @@ MAX_TRANSIENT_RETRIES = 8
 TRANSIENT_BASE_DELAY = 2.0
 
 
+# Node-side failures that say nothing about the request. Observed in practice: a
+# QuickNode 503 killed the BNB census at 10.6%, and Polygon returned
+# "failed to get logs for block #74592117" mid-pull.
+_TRANSIENT_RPC = re.compile(
+    r"(failed to get logs|missing trie node|header not found|unknown block|"
+    r"cannot query unfinalized|temporarily unavailable|try again)",
+    re.IGNORECASE,
+)
+
+
 def is_transient(exc: Exception) -> bool:
     """A server-side hiccup, not a statement about the request.
 
-    A multi-hour pull will meet at least one 502/503/504. Treating it as fatal throws
-    away the whole chain's progress; treating it as a range limit would shrink the chunk
-    for no reason. It is simply retried after a pause.
+    A multi-hour pull will meet at least one of these. Treating it as fatal throws away
+    the whole chain's progress; treating it as a range limit would shrink the chunk for
+    no reason. It is simply retried after a pause.
     """
     if isinstance(exc, httpx.HTTPStatusError):
         return exc.response.status_code in (500, 502, 503, 504)
+    if isinstance(exc, RpcError):
+        return bool(_TRANSIENT_RPC.search(exc.rpc_message))
     return isinstance(exc, httpx.ConnectError | httpx.RemoteProtocolError)
 
 
