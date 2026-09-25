@@ -111,6 +111,21 @@ abstract contract SwornTestBase is Test, Deployers {
         );
     }
 
+    /// @notice Same as `deployHookAndPool`, for fixtures in `RecordingHooks.sol`.
+    function deployRecordingHookAndPool(
+        string memory name,
+        bytes memory args,
+        uint160 flags,
+        uint256 salt
+    ) internal returns (address hookAddress, PoolKey memory key) {
+        require(salt < (1 << 128), "salt too large");
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint160 saltBits = uint160(salt) << 16;
+        hookAddress = address(flags | saltBits);
+        deployCodeTo(string.concat("out/RecordingHooks.sol/", name, ".json"), args, hookAddress);
+        key = initDeepPool(IHooks(hookAddress));
+    }
+
     // -----------------------------------------------------------------------------------
     // route construction
     // -----------------------------------------------------------------------------------
