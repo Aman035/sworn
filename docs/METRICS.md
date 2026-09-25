@@ -271,8 +271,8 @@ owner_switches  min(1, 2/5)        = 0.400 × 0.05 = 0.0200
 upgradeable     false              = 0.000 × 0.05 = 0.0000
 revert_gated    min(1, 0.05/0.25)  = 0.200 × 0.05 = 0.0100
                                       Σ           = 0.7720
-decay           0.5^(3/14)                        = 0.8623
-score           round(100 × 0.7720 × 0.8623)      = 67
+decay           0.5^(3/14)                        = 0.8620
+score           round(100 × 0.7720 × 0.8620)      = 67
 ```
 
 The flags word is a `uint32` whose bit positions are frozen in `config.yaml` under

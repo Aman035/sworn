@@ -119,12 +119,12 @@ def main() -> int:
         q = by_key.get(result_key(r.tx_hash, int(r.log_index)))
         if q is None or not q.ok or q.expected == 0:
             rows.append(
-                (r.tx_hash_fill, None, r.a1, None, q.error if q else "no result")
+                (r.tx_hash, None, r.a1, None, q.error if q else "no result")
             )
             continue
         rows.append(
             (
-                r.tx_hash_fill,
+                r.tx_hash,
                 q.expected,
                 r.a1,
                 excess_take_bps(q.expected, r.a1, int(r.fee)),
