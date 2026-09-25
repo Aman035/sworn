@@ -9,7 +9,7 @@ import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
 import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
 import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
-import {PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
+import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {IV4Quoter} from "v4-periphery/src/interfaces/IV4Quoter.sol";
 import {V4Quoter} from "v4-periphery/src/lens/V4Quoter.sol";
@@ -58,14 +58,14 @@ contract RequoteScript is Script {
         address poolManager
     ) external {
         string memory raw = vm.readFile(inputPath);
-        uint256 count = abi.decode(raw.parseRaw(".count"), (uint256));
+        uint256 count = raw.readUint(".count");
 
         string memory out = "[";
         for (uint256 i = 0; i < count; i++) {
             string memory base = string.concat(".fills[", vm.toString(i), "]");
             Fill memory f = _readFill(raw, base);
 
-            (bool ok, uint256 expected, string memory err, uint256 quotedAt, uint160 sqrtPrice) =
+            (bool ok, uint256 expected, string memory err, uint256 quotedAt, uint160 sqrtPrice, bytes32 poolId) =
                 _quoteAt(f, IPoolManager(poolManager));
 
             out = string.concat(
@@ -83,6 +83,10 @@ contract RequoteScript is Script {
                 vm.toString(quotedAt),
                 ',"sqrtPriceX96":"',
                 vm.toString(sqrtPrice),
+                '","poolId":"',
+                vm.toString(poolId),
+                '","parsedAmount":"',
+                vm.toString(f.amountSpecified),
                 '","error":"',
                 err,
                 '"}'
@@ -97,16 +101,16 @@ contract RequoteScript is Script {
         string memory raw,
         string memory base
     ) private pure returns (Fill memory f) {
-        f.txHash = abi.decode(raw.parseRaw(string.concat(base, ".txHash")), (bytes32));
-        f.currency0 = Currency.wrap(abi.decode(raw.parseRaw(string.concat(base, ".currency0")), (address)));
-        f.currency1 = Currency.wrap(abi.decode(raw.parseRaw(string.concat(base, ".currency1")), (address)));
-        f.fee = uint24(abi.decode(raw.parseRaw(string.concat(base, ".fee")), (uint256)));
-        f.tickSpacing = int24(abi.decode(raw.parseRaw(string.concat(base, ".tickSpacing")), (int256)));
-        f.hooks = IHooks(abi.decode(raw.parseRaw(string.concat(base, ".hooks")), (address)));
-        f.zeroForOne = abi.decode(raw.parseRaw(string.concat(base, ".zeroForOne")), (bool));
-        f.amountSpecified = abi.decode(raw.parseRaw(string.concat(base, ".amountSpecified")), (uint256));
-        f.hookData = abi.decode(raw.parseRaw(string.concat(base, ".hookData")), (bytes));
-        f.logIndex = abi.decode(raw.parseRaw(string.concat(base, ".logIndex")), (uint256));
+        f.txHash = raw.readBytes32(string.concat(base, ".txHash"));
+        f.currency0 = Currency.wrap(raw.readAddress(string.concat(base, ".currency0")));
+        f.currency1 = Currency.wrap(raw.readAddress(string.concat(base, ".currency1")));
+        f.fee = uint24(raw.readUint(string.concat(base, ".fee")));
+        f.tickSpacing = int24(raw.readInt(string.concat(base, ".tickSpacing")));
+        f.hooks = IHooks(raw.readAddress(string.concat(base, ".hooks")));
+        f.zeroForOne = raw.readBool(string.concat(base, ".zeroForOne"));
+        f.amountSpecified = raw.readUint(string.concat(base, ".amountSpecified"));
+        f.hookData = raw.readBytes(string.concat(base, ".hookData"));
+        f.logIndex = raw.readUint(string.concat(base, ".logIndex"));
     }
 
     /// @dev Rolls to the fill's own transaction and quotes the identical swap there.
@@ -116,7 +120,10 @@ contract RequoteScript is Script {
     function _quoteAt(
         Fill memory f,
         IPoolManager poolManager
-    ) private returns (bool ok, uint256 expected, string memory err, uint256 quotedAt, uint160 sqrtPrice) {
+    )
+        private
+        returns (bool ok, uint256 expected, string memory err, uint256 quotedAt, uint160 sqrtPrice, bytes32 poolId)
+    {
         try vm.rollFork(f.txHash) {
             quotedAt = block.number;
             // Deploy after rolling: the fork's state is replaced by the roll.
@@ -125,6 +132,7 @@ contract RequoteScript is Script {
             PoolKey memory key = PoolKey({
                 currency0: f.currency0, currency1: f.currency1, fee: f.fee, tickSpacing: f.tickSpacing, hooks: f.hooks
             });
+            poolId = PoolId.unwrap(key.toId());
 
             try quoter.quoteExactInputSingle(
                 IV4Quoter.QuoteExactSingleParams({
@@ -137,15 +145,15 @@ contract RequoteScript is Script {
                 uint256 amountOut, uint256
             ) {
                 (sqrtPrice,,,) = StateLibrary.getSlot0(poolManager, key.toId());
-                return (true, amountOut, "", quotedAt, sqrtPrice);
+                return (true, amountOut, "", quotedAt, sqrtPrice, poolId);
             } catch Error(string memory reason) {
-                return (false, 0, reason, quotedAt, 0);
+                return (false, 0, reason, quotedAt, 0, poolId);
             } catch {
                 // A hook that reverts for the quoter is itself a finding, not an error.
-                return (false, 0, "quote reverted", quotedAt, 0);
+                return (false, 0, "quote reverted", quotedAt, 0, poolId);
             }
         } catch {
-            return (false, 0, "rollFork failed", 0, 0);
+            return (false, 0, "rollFork failed", 0, 0, bytes32(0));
         }
     }
 }
