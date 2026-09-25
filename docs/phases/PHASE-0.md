@@ -64,6 +64,9 @@ Full log: `docs/phases/gate-logs/phase-0.log`. Ledger row: `PHASES.md`.
 - **`actionlint` is optional locally.** The gate uses it when present and falls back to
   `scripts/validate_workflows.py`; CI always runs the real `actionlint`.
 
+- **`.env.example` is named `.env.sample`.** Renamed at the user's request; the Phase 0
+  gate and `.gitignore` were updated together and the gate re-run.
+
 ## Friction (feeds FEEDBACK.md)
 
 - `Uniswap/v4-periphery` has no release tags, so downstream builders cannot pin to a

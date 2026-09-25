@@ -12,7 +12,7 @@ step "repo layout"
 for d in contracts analysis index probe attestor sdk app data docs scripts; do
   [ -d "$d" ] || fail "missing directory: $d"
 done
-for f in Makefile PHASES.md .env.example README.md; do
+for f in Makefile PHASES.md .env.sample README.md; do
   [ -f "$f" ] || fail "missing file: $f"
 done
 ok "layout matches SWORN_PLAN.md §1"
