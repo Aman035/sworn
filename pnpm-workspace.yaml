@@ -1,0 +1,6 @@
+packages:
+  - 'index'
+  - 'probe'
+  - 'attestor'
+  - 'sdk'
+  - 'app'
