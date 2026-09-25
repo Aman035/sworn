@@ -2,14 +2,23 @@
   "name": "sworn-app",
   "version": "0.0.0",
   "private": true,
-  "description": "Next.js dashboard: hook explorer, attribution, protected value.",
-  "type": "module",
-  "main": "src/index.ts",
+  "description": "Next.js dashboard: hook explorer, attribution, detection precision.",
   "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
   },
+  "dependencies": {
+    "next": "15.1.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
   "devDependencies": {
+    "@types/node": "22.10.5",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
     "typescript": "5.7.3",
     "vitest": "2.1.8"
   }

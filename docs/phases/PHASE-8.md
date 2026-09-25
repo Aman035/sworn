@@ -19,7 +19,7 @@ caching and freshness, and `explain()` to render a score in words.
 ## The part worth defending: candidate validation
 
 `SwornRouter` compares probed outputs as raw numbers. It has no way to know that two
-routes ended in *different tokens* — it would simply pick the larger number. That makes a
+routes ended in _different tokens_ — it would simply pick the larger number. That makes a
 malformed candidate set the most dangerous input the router can receive, and it is the
 integrator who constructs it.
 

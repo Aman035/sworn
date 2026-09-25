@@ -59,6 +59,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The analysis tests read the pinned v4-core source: `test_hookflags` parses
+          # `Hooks.sol` and asserts our flag table matches it, so a v4-core bump cannot
+          # silently mislabel every hook in the census. Without submodules that test
+          # fails with a bare FileNotFoundError.
+          submodules: recursive
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'

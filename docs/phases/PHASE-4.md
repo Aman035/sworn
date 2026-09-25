@@ -12,16 +12,16 @@ each method fails.
 **Presence of an environment opcode is almost meaningless. Execution on the swap path is
 not.** Across all 69,242 Base hooks:
 
-| Signal | Hooks | Share |
-| ------ | ----: | ----: |
-| contains *any* environment opcode | 68,665 | **99.2%** |
+| Signal                                          |  Hooks |     Share |
+| ----------------------------------------------- | -----: | --------: |
+| contains _any_ environment opcode               | 68,665 | **99.2%** |
 | contains a simulation-**distinguishing** opcode | 26,525 | **38.3%** |
-| `GAS` | 68,490 | 98.9% |
-| `ORIGIN` | 24,543 | 35.4% |
-| `GASLIMIT` | 1,059 | 1.5% |
-| `COINBASE` | 796 | 1.1% |
-| `PREVRANDAO` | 464 | 0.7% |
-| `GASPRICE` | 199 | **0.3%** |
+| `GAS`                                           | 68,490 |     98.9% |
+| `ORIGIN`                                        | 24,543 |     35.4% |
+| `GASLIMIT`                                      |  1,059 |      1.5% |
+| `COINBASE`                                      |    796 |      1.1% |
+| `PREVRANDAO`                                    |    464 |      0.7% |
+| `GASPRICE`                                      |    199 |  **0.3%** |
 
 `GAS` appears in almost every contract because solc emits it for every external call, so a
 detector built on "contains an env opcode" flags 99.2% of the chain and says nothing.
@@ -32,11 +32,11 @@ would miss almost everything.
 
 And on the top 40 hooks by pool count, tracing narrows it much further:
 
-| Method | Flags |
-| ------ | ----: |
-| static (contains a distinguishing opcode) | 4 |
-| differential (quote moved with the environment) | 0 |
-| **trace (hook executed one while pricing)** | **1** |
+| Method                                          | Flags |
+| ----------------------------------------------- | ----: |
+| static (contains a distinguishing opcode)       |     4 |
+| differential (quote moved with the environment) |     0 |
+| **trace (hook executed one while pricing)**     | **1** |
 
 Three of the four statically-flagged hooks contain `ORIGIN`, `PREVRANDAO` or `GASLIMIT`
 and **never execute one on the swap path**. One genuinely reads `ORIGIN` three times, by

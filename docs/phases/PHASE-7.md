@@ -84,6 +84,6 @@ attestor's dry-run publishes nothing and says so.
 
 ## Friction (feeds FEEDBACK.md)
 
-- Etherscan's free tier enforces 3 calls/second as a *burst* limit and reports throttling
+- Etherscan's free tier enforces 3 calls/second as a _burst_ limit and reports throttling
   as HTTP 200 with `status: "0"`, so it has to be read from the body. A metadata sweep
   died on it mid-run.
