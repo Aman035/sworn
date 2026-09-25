@@ -22,19 +22,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
 from dotenv import load_dotenv
 
+from ..lib.compact import compact, load_shards, shard_paths
 from ..lib.config import Chain, chains, path_for, repo_root
 from ..lib.deployments import INITIALIZE_TOPIC, load_deployments, pool_manager
-from ..lib.events import DecodeError, InitializeEvent, decode_initialize
-from ..lib.hookflags import bitmap, names, returns_delta, touches_swap
-from ..lib.logs import fetch_to_jsonl, iter_logs, resume_point
+from ..lib.logs import fetch_to_jsonl, resume_point
 from ..lib.rpc import RpcClient, redact
 from ..lib.snapshot import snapshot_dir, write_manifest
 
 # Stay this far behind the head so a reorg cannot change what the snapshot contains.
 DEFAULT_CONFIRMATIONS = 64
+
+# Pull this many blocks before compacting. Bounds peak disk to about one slice of raw
+# logs rather than the whole chain's history.
+SLICE_BLOCKS = 2_000_000
 
 
 @dataclass
@@ -50,7 +52,7 @@ class CensusResult:
     parquet: Path
 
 
-def _progress(chain: str, started: float, span_from: int, chain_start: int) -> Any:
+def _progress(chain: str, started: float, span_from: int, chain_start: int, chain_end: int) -> Any:
     """Throttled progress line. Percentage is of the *remaining* span, so a resumed run
     does not claim to start at 0%."""
     last = [0.0]
@@ -60,14 +62,15 @@ def _progress(chain: str, started: float, span_from: int, chain_start: int) -> A
         if now - last[0] < 10 and done < target:
             return
         last[0] = now
-        span = max(1, target - chain_start)
+        # Percentage is of the whole chain; the slice being fetched is only a window.
+        span = max(1, chain_end - chain_start)
         pct = 100.0 * min(1.0, max(0.0, (done - chain_start) / span))
         elapsed = now - started
         # Rate is this run's only; percentage is of the whole chain.
         rate = (done - span_from) / max(1e-9, elapsed)
-        eta = (target - done) / rate / 60 if rate > 0 else float("inf")
+        eta = (chain_end - done) / rate / 60 if rate > 0 else float("inf")
         print(
-            f"  {chain}: {done:,}/{target:,} ({pct:5.1f}%) "
+            f"  {chain}: {done:,}/{chain_end:,} ({pct:5.1f}%) "
             f"{stats.logs:,} logs, chunk<={stats.max_chunk_used:,}, "
             f"{stats.backoffs} backoffs, {elapsed / 60:.1f}m elapsed, ~{eta:.0f}m left",
             flush=True,
@@ -81,8 +84,14 @@ def pull_chain(
     *,
     confirmations: int = DEFAULT_CONFIRMATIONS,
     start_chunk: int = 10_000,
-    prune_raw: bool = True,
+    slice_blocks: int = SLICE_BLOCKS,
 ) -> CensusResult:
+    """Pull, compact and manifest one chain's pool census.
+
+    The pull runs in block slices, compacting to parquet after each one. A single
+    uninterrupted pull of Base produces ~14 GB of raw JSON; slicing keeps peak disk to
+    roughly one slice's worth while leaving the run fully resumable.
+    """
     url = os.environ.get(chain.rpc_env)
     if not url:
         raise RuntimeError(f"{chain.rpc_env} is not set")
@@ -95,27 +104,26 @@ def pull_chain(
     snapshot = f"census-{chain.name}"
     directory = snapshot_dir(snapshot)
     directory.mkdir(parents=True, exist_ok=True)
-    # Prefer whichever raw file already exists so a run started before compression was
-    # added still resumes rather than re-pulling from the deployment block.
+    # Prefer an existing uncompressed pull so a run started before compression was added
+    # still resumes rather than re-pulling from the deployment block.
     plain = directory / "initialize.jsonl"
     raw = plain if plain.is_file() else directory / "initialize.jsonl.gz"
+
+    from_block = deployment.deployment_block
+    undecodable = 0
 
     with RpcClient(url, timeout=90) as rpc:
         head = rpc.block_number()
         to_block = head - confirmations
-        from_block = deployment.deployment_block
+
+        already = resume_point(raw)
+        run_start = from_block if already is None else already + 1
 
         print(
             f"{chain.name}: {from_block:,} -> {to_block:,} "
             f"({to_block - from_block:,} blocks) via {redact(url)}",
             flush=True,
         )
-        started = time.time()
-        # Throughput must be measured from where *this* run actually started, not from
-        # the deployment block: a resumed run would otherwise credit itself with the
-        # previous run's blocks and report an ETA several times too optimistic.
-        already = resume_point(raw)
-        run_start = from_block if already is None else already + 1
         if already is not None:
             covered = 100.0 * (already - from_block) / max(1, to_block - from_block)
             print(
@@ -123,64 +131,40 @@ def pull_chain(
                 flush=True,
             )
 
-        stats = fetch_to_jsonl(
-            rpc,
-            address,
-            [INITIALIZE_TOPIC],
-            from_block,
-            to_block,
-            raw,
-            start_chunk=start_chunk,
-            progress=_progress(chain.name, started, run_start, from_block),
-        )
+        started = time.time()
+        cursor = run_start
+        while cursor <= to_block:
+            slice_end = min(cursor + slice_blocks - 1, to_block)
+            fetch_to_jsonl(
+                rpc,
+                address,
+                [INITIALIZE_TOPIC],
+                cursor,
+                slice_end,
+                raw,
+                start_chunk=start_chunk,
+                progress=_progress(chain.name, started, run_start, from_block, to_block),
+            )
+            result = compact(raw)
+            undecodable += result.undecodable
+            if result.rows:
+                print(
+                    f"  {chain.name}: compacted {result.rows:,} rows "
+                    f"(freed {result.freed_bytes / 1e9:.2f} GB), through block {slice_end:,}",
+                    flush=True,
+                )
+            cursor = slice_end + 1
+
         print(
-            f"  {chain.name}: pulled {stats.logs:,} logs in {(time.time() - started) / 60:.1f}m",
+            f"  {chain.name}: pull complete in {(time.time() - started) / 60:.1f}m",
             flush=True,
         )
 
-    events: list[InitializeEvent] = []
-    bad = 0
-    for log in iter_logs(raw):
-        try:
-            events.append(decode_initialize(log))
-        except DecodeError:
-            bad += 1
-    if bad:
-        print(f"  {chain.name}: WARNING {bad} undecodable logs", file=sys.stderr)
+    frame = load_shards(directory)
+    if undecodable:
+        print(f"  {chain.name}: WARNING {undecodable} undecodable logs", file=sys.stderr)
 
-    frame = pd.DataFrame(
-        [
-            {
-                "pool_id": e.pool_id,
-                "currency0": e.currency0,
-                "currency1": e.currency1,
-                "fee": e.fee,
-                "dynamic_fee": e.dynamic_fee,
-                "tick_spacing": e.tick_spacing,
-                "hook": e.hooks,
-                "hookless": e.hookless,
-                "flags_bitmap": 0 if e.hookless else bitmap(e.hooks),
-                "touches_swap": (not e.hookless) and touches_swap(e.hooks),
-                "returns_delta": (not e.hookless) and returns_delta(e.hooks),
-                "permissions": "|".join(names(e.hooks)) if not e.hookless else "",
-                "block_number": e.block_number,
-                "tx_hash": e.tx_hash,
-                "log_index": e.log_index,
-            }
-            for e in events
-        ]
-    )
-
-    # A pool can only be initialized once, but a reorg near the tail or an overlapping
-    # resume could duplicate a row. Dedupe on the identity the protocol guarantees.
-    before = len(frame)
-    frame = frame.drop_duplicates(subset=["pool_id"], keep="first").reset_index(drop=True)
-    if len(frame) != before:
-        print(f"  {chain.name}: dropped {before - len(frame)} duplicate pool ids", flush=True)
-
-    parquet = directory / "pools.parquet"
-    frame.to_parquet(parquet, index=False)
-
+    shards = shard_paths(directory)
     hooked = frame[~frame["hookless"]] if len(frame) else frame
     write_manifest(
         snapshot,
@@ -190,17 +174,10 @@ def pull_chain(
         block_to=to_block,
         rpc_provider=redact(url),
         rows=len(frame),
-        files=[parquet],
+        files=shards,
         source=f"eth_getLogs Initialize from {address}",
-        notes=f"{bad} undecodable logs" if bad else "",
+        notes=f"{undecodable} undecodable logs" if undecodable else "",
     )
-
-    if prune_raw and raw.is_file():
-        # The parquet is the artefact and the manifest hashes it; the raw JSONL only
-        # exists so an interrupted pull can resume. Keeping it costs gigabytes per chain.
-        freed = raw.stat().st_size
-        raw.unlink()
-        print(f"  {chain.name}: pruned {freed / 1e9:.2f} GB of raw logs", flush=True)
 
     return CensusResult(
         chain=chain.name,
@@ -211,7 +188,7 @@ def pull_chain(
         hooked_pools=len(hooked),
         hooks=int(hooked["hook"].nunique()) if len(hooked) else 0,
         snapshot=snapshot,
-        parquet=parquet,
+        parquet=shards[-1] if shards else directory,
     )
 
 
@@ -222,9 +199,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--confirmations", type=int, default=DEFAULT_CONFIRMATIONS)
     parser.add_argument("--start-chunk", type=int, default=10_000)
     parser.add_argument(
-        "--keep-raw",
-        action="store_true",
-        help="keep the raw JSONL pull after writing the parquet (uses GBs per chain)",
+        "--slice-blocks",
+        type=int,
+        default=SLICE_BLOCKS,
+        help="blocks to pull before compacting to parquet (bounds peak disk use)",
     )
     args = parser.parse_args(argv)
 
