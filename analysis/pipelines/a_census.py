@@ -76,7 +76,11 @@ def _progress(chain: str, started: float, span_from: int) -> Any:
 
 
 def pull_chain(
-    chain: Chain, *, confirmations: int = DEFAULT_CONFIRMATIONS, start_chunk: int = 10_000
+    chain: Chain,
+    *,
+    confirmations: int = DEFAULT_CONFIRMATIONS,
+    start_chunk: int = 10_000,
+    prune_raw: bool = True,
 ) -> CensusResult:
     url = os.environ.get(chain.rpc_env)
     if not url:
@@ -90,7 +94,10 @@ def pull_chain(
     snapshot = f"census-{chain.name}"
     directory = snapshot_dir(snapshot)
     directory.mkdir(parents=True, exist_ok=True)
-    raw = directory / "initialize.jsonl"
+    # Prefer whichever raw file already exists so a run started before compression was
+    # added still resumes rather than re-pulling from the deployment block.
+    plain = directory / "initialize.jsonl"
+    raw = plain if plain.is_file() else directory / "initialize.jsonl.gz"
 
     with RpcClient(url, timeout=90) as rpc:
         head = rpc.block_number()
@@ -175,6 +182,13 @@ def pull_chain(
         notes=f"{bad} undecodable logs" if bad else "",
     )
 
+    if prune_raw and raw.is_file():
+        # The parquet is the artefact and the manifest hashes it; the raw JSONL only
+        # exists so an interrupted pull can resume. Keeping it costs gigabytes per chain.
+        freed = raw.stat().st_size
+        raw.unlink()
+        print(f"  {chain.name}: pruned {freed / 1e9:.2f} GB of raw logs", flush=True)
+
     return CensusResult(
         chain=chain.name,
         chain_id=chain.chain_id,
@@ -194,6 +208,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--all", action="store_true", help="every configured chain")
     parser.add_argument("--confirmations", type=int, default=DEFAULT_CONFIRMATIONS)
     parser.add_argument("--start-chunk", type=int, default=10_000)
+    parser.add_argument(
+        "--keep-raw",
+        action="store_true",
+        help="keep the raw JSONL pull after writing the parquet (uses GBs per chain)",
+    )
     args = parser.parse_args(argv)
 
     load_dotenv(repo_root() / ".env")

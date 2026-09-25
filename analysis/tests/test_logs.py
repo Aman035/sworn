@@ -221,3 +221,28 @@ def test_ceiling_still_allows_growth_from_a_low_start() -> None:
     fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=100)  # type: ignore[arg-type]
     list(fetcher.fetch_range(0, 500_000))
     assert fetcher.chunk > 100
+
+
+def test_gzipped_pull_roundtrips(tmp_path: Path) -> None:
+    """Raw pulls are hundreds of MB per chain; gzip is what keeps them on disk."""
+    out = tmp_path / "pull.jsonl.gz"
+    rpc = LimitedRpc(max_span=1_000_000, logs_per_block=2)
+
+    fetch_to_jsonl(rpc, "0xpm", [], 0, 99, out, start_chunk=100)  # type: ignore[arg-type]
+
+    assert out.is_file()
+    assert out.read_bytes()[:2] == b"\x1f\x8b", "not actually gzipped"
+    assert len(list(iter_logs(out))) == 200
+    assert resume_point(out) == 99
+
+
+def test_gzipped_pull_resumes(tmp_path: Path) -> None:
+    out = tmp_path / "pull.jsonl.gz"
+    rpc = LimitedRpc(max_span=1_000_000, logs_per_block=1)
+
+    fetch_to_jsonl(rpc, "0xpm", [], 0, 49, out, start_chunk=50)  # type: ignore[arg-type]
+    rpc.requests.clear()
+    fetch_to_jsonl(rpc, "0xpm", [], 0, 99, out, start_chunk=50)  # type: ignore[arg-type]
+
+    assert all(lo >= 50 for lo, _ in rpc.requests)
+    assert len(list(iter_logs(out))) == 100

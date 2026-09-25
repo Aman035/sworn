@@ -9,6 +9,7 @@ chunk to disk as it goes so a six-hour pull survives a dropped connection.
 
 from __future__ import annotations
 
+import gzip
 import json
 import re
 import time
@@ -159,6 +160,18 @@ class LogFetcher:
                 self._clean_run = 0
 
 
+def _open_text(path: Path, mode: str):  # noqa: ANN202 — returns a text file object
+    """Open plain or gzipped JSONL transparently.
+
+    A full-history census pull is hundreds of megabytes of raw logs per chain. Gzip cuts
+    that by roughly an order of magnitude, which is the difference between "fits on the
+    machine" and "does not".
+    """
+    if path.suffix == ".gz":
+        return gzip.open(path, mode + "t", encoding="utf-8")
+    return path.open(mode, encoding="utf-8")
+
+
 def resume_point(path: Path) -> int | None:
     """Highest block already covered in a partial JSONL pull, or None if absent.
 
@@ -168,7 +181,7 @@ def resume_point(path: Path) -> int | None:
     if not path.is_file():
         return None
     highest: int | None = None
-    with path.open("r", encoding="utf-8") as fh:
+    with _open_text(path, "r") as fh:
         for line in fh:
             line = line.strip()
             if not line:
@@ -203,7 +216,7 @@ def fetch_to_jsonl(
         return FetchStats(last_block_done=done or to_block)
 
     fetcher = LogFetcher(rpc, address, topics, start_chunk=start_chunk)
-    with out.open("a", encoding="utf-8") as fh:
+    with _open_text(out, "a") as fh:
         for lo, hi, logs in fetcher.fetch_range(start, to_block):
             fh.write(json.dumps({"_from": lo, "_to": hi, "logs": logs}) + "\n")
             fh.flush()
@@ -214,7 +227,7 @@ def fetch_to_jsonl(
 
 def iter_logs(path: Path) -> Iterator[dict[str, Any]]:
     """Stream individual log entries out of a JSONL pull."""
-    with path.open("r", encoding="utf-8") as fh:
+    with _open_text(path, "r") as fh:
         for line in fh:
             line = line.strip()
             if not line:
