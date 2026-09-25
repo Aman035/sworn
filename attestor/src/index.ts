@@ -75,6 +75,18 @@ export interface AttestReport {
   batches: number;
   txHashes: Hex[];
   dryRun: boolean;
+  /** Batches the registry already holds at this `asOfBlock` or newer. */
+  skipped: number;
+}
+
+/** `StaleUpdate(uint64,uint64)` — the registry already holds this block or newer. */
+export const STALE_UPDATE_SELECTOR = '0xecef4381';
+
+export function isStaleUpdate(error: unknown): boolean {
+  // viem nests the revert data several layers down and the shape differs by transport, so
+  // match on the selector anywhere in the serialized error rather than on a class.
+  const text = error instanceof Error ? `${error.message}${error.stack ?? ''}` : String(error);
+  return text.includes(STALE_UPDATE_SELECTOR) || text.includes('StaleUpdate');
 }
 
 export async function attest(options: AttestOptions): Promise<AttestReport> {
@@ -101,7 +113,15 @@ export async function attest(options: AttestOptions): Promise<AttestReport> {
     // Not an error: before Phase 3 produces behavioural evidence this is the expected
     // state, and writing zeros would be worse than writing nothing.
     log('  nothing scored yet — nothing to publish');
-    return { chain, total: doc.hooks.length, publishable: 0, batches: 0, txHashes: [], dryRun };
+    return {
+      chain,
+      total: doc.hooks.length,
+      publishable: 0,
+      batches: 0,
+      txHashes: [],
+      dryRun,
+      skipped: 0,
+    };
   }
 
   if (dryRun) {
@@ -113,6 +133,7 @@ export async function attest(options: AttestOptions): Promise<AttestReport> {
       batches: batches.length,
       txHashes: [],
       dryRun: true,
+      skipped: 0,
     };
   }
 
@@ -134,19 +155,43 @@ export async function attest(options: AttestOptions): Promise<AttestReport> {
   }
 
   const txHashes: Hex[] = [];
+  let skipped = 0;
   for (const [i, batch] of batches.entries()) {
     const asOfBlock = BigInt(Math.max(...batch.map((r) => r.as_of_block)));
+    const args = [
+      batch.map((r) => r.address),
+      batch.map((r) => r.score as number),
+      batch.map((r) => r.flags_bitmap),
+      asOfBlock,
+      hash,
+    ] as const;
+
+    // `HookBook` rejects a write that is not newer than what it holds, which is replay
+    // protection and staleness protection in one. This job runs hourly and the analysis
+    // it publishes moves far more slowly, so *most* runs have nothing newer to say.
+    // Simulating first turns the expected case into a no-op instead of an hourly page.
+    try {
+      await publicClient.simulateContract({
+        account,
+        address: hookBook,
+        abi: hookBookAbi,
+        functionName: 'setScores',
+        args,
+      });
+    } catch (error) {
+      if (isStaleUpdate(error)) {
+        skipped += 1;
+        log(`  batch ${i + 1}/${batches.length}: already current at block ${asOfBlock}`);
+        continue;
+      }
+      throw error;
+    }
+
     const txHash = await wallet.writeContract({
       address: hookBook,
       abi: hookBookAbi,
       functionName: 'setScores',
-      args: [
-        batch.map((r) => r.address),
-        batch.map((r) => r.score as number),
-        batch.map((r) => r.flags_bitmap),
-        asOfBlock,
-        hash,
-      ],
+      args,
       chain: null,
     });
     txHashes.push(txHash);
@@ -161,5 +206,6 @@ export async function attest(options: AttestOptions): Promise<AttestReport> {
     batches: batches.length,
     txHashes,
     dryRun: false,
+    skipped,
   };
 }

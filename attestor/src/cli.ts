@@ -16,6 +16,11 @@ async function main(): Promise<number> {
       chain: { type: 'string', default: 'base' },
       scores: { type: 'string' },
       'hook-book': { type: 'string' },
+      // The chain whose *data* is being published is not always the chain the registry
+      // lives on: Base-derived scores are written to a Base Sepolia HookBook while the
+      // mainnet registry is unfunded. Keeping the two separate stops `--chain` from
+      // silently pointing the writer at the wrong network.
+      'rpc-url': { type: 'string' },
       'batch-size': { type: 'string' },
       'dry-run': { type: 'boolean', default: false },
     },
@@ -25,7 +30,10 @@ async function main(): Promise<number> {
   const scoresPath = resolve(values.scores ?? 'data/results/scores.json');
   const dryRun = values['dry-run'] as boolean;
 
-  const rpcUrl = env(`${chain.toUpperCase()}_RPC_ARCHIVE`) ?? env('BASE_SEPOLIA_RPC');
+  const rpcUrl =
+    (values['rpc-url'] as string | undefined) ??
+    env(`${chain.toUpperCase()}_RPC_ARCHIVE`) ??
+    env('BASE_SEPOLIA_RPC');
   const hookBook = (values['hook-book'] ?? env(`HOOKBOOK_ADDRESS_${chain.toUpperCase()}`)) as
     | Address
     | undefined;
@@ -51,8 +59,11 @@ async function main(): Promise<number> {
     dryRun,
   });
 
+  const written = report.batches - report.skipped;
   console.log(
-    `\n${report.chain}: ${report.publishable}/${report.total} published in ${report.batches} batch(es)` +
+    `\n${report.chain}: ${report.publishable}/${report.total} scored, ` +
+      `${written}/${report.batches} batch(es) written` +
+      (report.skipped ? `, ${report.skipped} already current` : '') +
       (report.dryRun ? ' (dry run)' : ''),
   );
   return 0;
