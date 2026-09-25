@@ -72,6 +72,34 @@ def archive_url(chain: str) -> str:
     return url
 
 
+def confirmed_sample(
+    chain: str,
+    sample: pd.DataFrame,
+    *,
+    cache_key: str,
+    refresh: bool = False,
+) -> pd.DataFrame:
+    """`confirm_against_traces`, memoised on disk.
+
+    Reaching the sample costs a full pass over the fills index — minutes, and gigabytes of
+    resident memory. Losing that to one dropped connection during tracing is why this
+    exists: the confirmed frame is written once and reused, so a failed run resumes at the
+    quoting step instead of the beginning.
+    """
+    cache = path_for("results").parent / "cache" / f"confirmed-{cache_key}.parquet"
+    if cache.is_file() and not refresh:
+        cached = pd.read_parquet(cache)
+        print(f"  reusing {len(cached):,} trace-confirmed fills from cache", flush=True)
+        return cached
+
+    confirmed = confirm_against_traces(chain, sample)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    tmp = cache.with_suffix(".tmp")
+    confirmed.to_parquet(tmp, index=False)
+    tmp.replace(cache)
+    return confirmed
+
+
 def confirm_against_traces(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
     """Replace event-derived swap arguments with what the transaction actually did.
 
@@ -176,6 +204,17 @@ def eligible_fills(chain: str) -> pd.DataFrame:
     return m[(m.a0 < 0) & (m.a1 > 0)]
 
 
+def sample_uniform(fills: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
+    """Draw `n` fills uniformly at random from the whole eligible population.
+
+    `sample_by_hook` answers "what do the busiest hooks do". This answers "what happens to
+    a fill", which is the question a headline charged-rate is read as answering, and it is
+    volume-weighted on purpose: a hook with a million fills should influence the rate a
+    million times more than a hook with one.
+    """
+    return fills.sample(n=min(n, len(fills)), random_state=seed).reset_index(drop=True)
+
+
 def sample_by_hook(fills: pd.DataFrame, per_hook: int, max_hooks: int, seed: int) -> pd.DataFrame:
     """Take up to `per_hook` fills from each of the busiest `max_hooks` hooks."""
     busiest = fills.groupby("hook").size().sort_values(ascending=False).head(max_hooks).index
@@ -235,6 +274,7 @@ def measure(
     *,
     reuse_quotes: bool = False,
     method: str = "exact",
+    batch_name: str = "divergence",
 ) -> pd.DataFrame:
     inputs = _inputs(sample)
     if method == "cheap":
@@ -246,11 +286,11 @@ def measure(
         # state fetches. The quotes are a pure function of (fill, chain state), so a
         # cached batch is as good as a fresh one — and re-running would produce identical
         # numbers at 30s per fill.
-        results = load_cached_batch(f"divergence-{chain}")
+        results = load_cached_batch(f"{batch_name}-{chain}")
         print(f"  reusing {len(results)} cached quotes", flush=True)
     else:
         print(f"  re-quoting {len(inputs)} hooked fills ...", flush=True)
-        results = run_batch(chain, inputs, name=f"divergence-{chain}", timeout=7200)
+        results = run_batch(chain, inputs, name=f"{batch_name}-{chain}", timeout=7200)
     by_key = {result_key(r.tx_hash, r.log_index): r.expected for r in results if r.ok}
     return _rows(chain, sample, by_key, approx=False)
 
@@ -352,6 +392,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-hooks", type=int, default=40)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
+        "--sample",
+        choices=("by-hook", "uniform"),
+        default="by-hook",
+        help="by-hook covers many hooks evenly; uniform gives a population charged rate",
+    )
+    parser.add_argument("--n", type=int, default=10_000, help="fills to draw when --sample uniform")
+    parser.add_argument(
+        "--refresh-traces",
+        action="store_true",
+        help="re-trace even if a confirmed sample is cached",
+    )
+    parser.add_argument(
         "--method",
         choices=("exact", "cheap"),
         default="exact",
@@ -379,17 +431,29 @@ def main(argv: list[str] | None = None) -> int:
     fills = eligible_fills(args.chain)
     print(f"  eligible hooked fills: {len(fills):,} across {fills.hook.nunique():,} hooks")
 
-    sample = sample_by_hook(fills, args.per_hook, args.max_hooks, args.seed)
-    print(f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks")
+    if args.sample == "uniform":
+        sample = sample_uniform(fills, args.n, args.seed)
+    else:
+        sample = sample_by_hook(fills, args.per_hook, args.max_hooks, args.seed)
+    print(
+        f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks " f"({args.sample})"
+    )
 
     # The event told us where to look; the trace tells us what to quote.
-    sample = confirm_against_traces(args.chain, sample)
+    key = f"{args.chain}-{args.sample}-{len(sample)}-{args.seed}"
+    sample = confirmed_sample(args.chain, sample, cache_key=key, refresh=args.refresh_traces)
     dropped = sample[~sample.confirmed].drop_reason.value_counts().to_dict()
     sample = sample[sample.confirmed].reset_index(drop=True)
     if sample.empty:
         raise SystemExit("no fills survived trace confirmation")
 
-    measured = measure(args.chain, sample, reuse_quotes=args.reuse_quotes, method=args.method)
+    measured = measure(
+        args.chain,
+        sample,
+        reuse_quotes=args.reuse_quotes,
+        method=args.method,
+        batch_name="divergence" if args.sample == "by-hook" else "divergence-uniform",
+    )
 
     # Keep the per-fill rows: pipeline C is a time-series view of exactly this data, and
     # re-quoting for it would be both slow and liable to disagree with these numbers.
@@ -433,6 +497,7 @@ def main(argv: list[str] | None = None) -> int:
             "min_fills": params["min_fills"],
             "min_charged_rate": params["min_charged_rate"],
             "min_median_charged_excess_bps": params["min_median_charged_excess_bps"],
+            "sampling": args.sample,
             # The schema's vocabulary: "cheap" quoting is approximate by construction.
             "expected_output_method": "approx" if args.method == "cheap" else args.method,
             # Quotes carry the hookData the router actually passed, recovered per fill.

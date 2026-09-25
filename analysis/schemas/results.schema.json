@@ -317,6 +317,14 @@
             "realized_output_source": {
               "type": "string",
               "description": "Where the realized output came from. The Swap event is emitted before afterSwap and so is not the swapper's output."
+            },
+            "sampling": {
+              "type": "string",
+              "enum": [
+                "by-hook",
+                "uniform"
+              ],
+              "description": "by-hook covers hooks evenly; uniform gives a population rate."
             }
           }
         },

@@ -31,12 +31,13 @@ Those three are the identical-swap definition `docs/METRICS.md` requires.
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from typing import Any
 
 from eth_utils import keccak
 
-from .rpc import RpcClient, RpcError
+from .rpc import RpcClient, RpcError, scrub
 
 SWAP_SELECTOR = (
     "0x"
@@ -160,15 +161,34 @@ def _walk(node: dict[str, Any], out: list[dict[str, Any]]) -> None:
         _walk(child, out)
 
 
-def recover(rpc: RpcClient, tx_hash: str) -> list[SwapCall]:
-    """Every `PoolManager.swap` in one transaction, as it actually happened."""
-    try:
-        trace = rpc.call(
-            "debug_traceTransaction",
-            [tx_hash, {"tracer": "callTracer", "tracerConfig": {"withLog": False}}],
-        )
-    except RpcError as exc:
-        return [SwapCall(tx_hash, 0, "", "", 0, 0, "", False, 0, "0x", 0, 0, False, str(exc)[:120])]
+def recover(rpc: RpcClient, tx_hash: str, *, attempts: int = 4) -> list[SwapCall]:
+    """Every `PoolManager.swap` in one transaction, as it actually happened.
+
+    Never raises. A run covering ten thousand transactions will meet a DNS hiccup or a
+    dropped connection somewhere, and losing twelve minutes of indexing to one of them is
+    not acceptable — so transport failures are retried, and a transaction that still
+    cannot be traced comes back as an unusable `SwapCall` that the caller drops.
+    """
+    trace = None
+    last = ""
+    for attempt in range(attempts):
+        try:
+            trace = rpc.call(
+                "debug_traceTransaction",
+                [tx_hash, {"tracer": "callTracer", "tracerConfig": {"withLog": False}}],
+            )
+            break
+        except RpcError as exc:
+            # The node answered and said no. Retrying will get the same answer.
+            return [
+                SwapCall(tx_hash, 0, "", "", 0, 0, "", False, 0, "0x", 0, 0, False, str(exc)[:120])
+            ]
+        except Exception as exc:  # noqa: BLE001 - transport failures are expected at scale
+            last = scrub(str(exc), rpc.url)[:120]
+            if attempt < attempts - 1:
+                time.sleep(0.4 * 2**attempt)
+    if trace is None:
+        return [SwapCall(tx_hash, 0, "", "", 0, 0, "", False, 0, "0x", 0, 0, False, last)]
 
     nodes: list[dict[str, Any]] = []
     _walk(trace, nodes)
@@ -179,7 +199,7 @@ def recover_many(
     url: str,
     tx_hashes: list[str],
     *,
-    workers: int = 8,
+    workers: int = 6,
     timeout: float = 90.0,
 ) -> dict[str, list[SwapCall]]:
     """`recover` over many transactions, keyed by hash. Duplicates are traced once."""

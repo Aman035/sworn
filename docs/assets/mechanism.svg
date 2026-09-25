@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="How SwornRouter probes candidates inside the transaction">
+  <rect width="700" height="450" rx="10" fill="#0f1419"/>
+  <defs>
+    <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#5a6675"/>
+    </marker>
+  </defs>
+  <text x="28" y="38" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="600" fill="#e8ecf1" text-anchor="start">SwornRouter: probe inside the transaction</text>
+  <text x="28" y="60" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12.5" font-weight="400" fill="#5a6675" text-anchor="start">No simulation is trusted, because every probe runs where the money does.</text>
+  <rect x="28" y="88" width="644" height="50" rx="6" fill="#171d26" stroke="#232c38"/>
+  <circle cx="56" cy="113" r="13" fill="none" stroke="#e8b84b"/>
+  <text x="56" y="118" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#e8b84b" text-anchor="middle">1</text>
+  <text x="84" y="109" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#e8b84b" text-anchor="start">unlock</text>
+  <text x="84" y="127" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#5a6675" text-anchor="start">PoolManager hands control back to the router</text>
+  <rect x="28" y="148" width="644" height="50" rx="6" fill="#171d26" stroke="#232c38"/>
+  <circle cx="56" cy="173" r="13" fill="none" stroke="#e8b84b"/>
+  <text x="56" y="178" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#e8b84b" text-anchor="middle">2</text>
+  <text x="84" y="169" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#e8b84b" text-anchor="start">probe each candidate</text>
+  <text x="84" y="187" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#5a6675" text-anchor="start">run the real route, then revert — state and transient storage roll back</text>
+  <rect x="28" y="208" width="644" height="50" rx="6" fill="#171d26" stroke="#232c38"/>
+  <circle cx="56" cy="233" r="13" fill="none" stroke="#e8b84b"/>
+  <text x="56" y="238" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#e8b84b" text-anchor="middle">3</text>
+  <text x="84" y="229" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#e8b84b" text-anchor="start">select</text>
+  <text x="84" y="247" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#5a6675" text-anchor="start">keep the best probed delta and the route that produced it</text>
+  <rect x="28" y="268" width="644" height="50" rx="6" fill="#171d26" stroke="#232c38"/>
+  <circle cx="56" cy="293" r="13" fill="none" stroke="#e8b84b"/>
+  <text x="56" y="298" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#e8b84b" text-anchor="middle">4</text>
+  <text x="84" y="289" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#e8b84b" text-anchor="start">execute</text>
+  <text x="84" y="307" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#5a6675" text-anchor="start">run that route for real, through the same entry point</text>
+  <rect x="28" y="328" width="644" height="50" rx="6" fill="#171d26" stroke="#232c38"/>
+  <circle cx="56" cy="353" r="13" fill="none" stroke="#e5644e"/>
+  <text x="56" y="358" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#e5644e" text-anchor="middle">5</text>
+  <text x="84" y="349" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#e5644e" text-anchor="start">assert</text>
+  <text x="84" y="367" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#5a6675" text-anchor="start">executedDelta == probed[chosen], or the whole transaction reverts</text>
+  <text x="28" y="406" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12.5" font-weight="400" fill="#e8ecf1" text-anchor="start">Step 5 is the guarantee. A hook that quotes one price and executes another</text>
+  <text x="28" y="426" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12.5" font-weight="400" fill="#e8ecf1" text-anchor="start">makes those two deltas differ, and the trade does not happen at all.</text>
+</svg>
