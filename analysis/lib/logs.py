@@ -172,15 +172,51 @@ def _open_text(path: Path, mode: str):  # noqa: ANN202 — returns a text file o
     return path.open(mode, encoding="utf-8")
 
 
-def resume_point(path: Path) -> int | None:
-    """Highest block already covered in a partial JSONL pull, or None if absent.
+def progress_path(out: Path) -> Path:
+    """Sidecar recording how far a pull got, independent of the raw file.
 
-    Each line carries the chunk's `_to` so a resume never re-requests completed ranges
-    and never skips a gap, even if the process died mid-write.
+    A full-history pull is far larger than the decoded result — Base's raw `Initialize`
+    logs are ~14 GB against a parquet of a few hundred MB. Compaction decodes the raw
+    file into a parquet shard and deletes it, and this marker is what lets the next run
+    resume even though the evidence of progress is gone.
     """
+    name = out.name
+    for suffix in (".jsonl.gz", ".jsonl"):
+        if name.endswith(suffix):
+            name = name[: -len(suffix)]
+            break
+    return out.parent / f"{name}.progress.json"
+
+
+def record_progress(out: Path, last_block: int) -> None:
+    path = progress_path(out)
+    prior = read_progress(out)
+    if prior is not None and prior >= last_block:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"last_block": last_block}), encoding="utf-8")
+
+
+def read_progress(out: Path) -> int | None:
+    path = progress_path(out)
     if not path.is_file():
         return None
-    highest: int | None = None
+    try:
+        return int(json.loads(path.read_text(encoding="utf-8"))["last_block"])
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+        return None
+
+
+def resume_point(path: Path) -> int | None:
+    """Highest block already covered, from the compaction marker or the raw file.
+
+    Each raw line carries its chunk's `_to`, so a resume never re-requests completed
+    ranges and never skips a gap, even if the process died mid-write.
+    """
+    marker = read_progress(path)
+    if not path.is_file():
+        return marker
+    highest: int | None = marker
     with _open_text(path, "r") as fh:
         for line in fh:
             line = line.strip()
