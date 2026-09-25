@@ -48,7 +48,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from ..lib.cheap_quote import quote_many
-from ..lib.compact import SWAP_SHARD_PREFIX, load_shards
+from ..lib.compact import SWAP_SHARD_PREFIX, load_shards, parquet_safe
 from ..lib.config import load_config, path_for, repo_root
 from ..lib.deployments import pool_manager
 from ..lib.requote import (
@@ -95,7 +95,7 @@ def confirmed_sample(
     confirmed = confirm_against_traces(chain, sample)
     cache.parent.mkdir(parents=True, exist_ok=True)
     tmp = cache.with_suffix(".tmp")
-    confirmed.to_parquet(tmp, index=False)
+    parquet_safe(confirmed).to_parquet(tmp, index=False)
     tmp.replace(cache)
     return confirmed
 
@@ -202,9 +202,11 @@ def eligible_fills(chain: str) -> pd.DataFrame:
     m = m.join(counts, on=["tx_hash", "pool_id"])
     m = m[m.n == 1]
 
-    # Exact-input, token0 in. Restricting the direction keeps the re-quote a single
-    # well-defined call; the opposite direction is a straightforward extension.
-    return m[(m.a0 < 0) & (m.a1 > 0)]
+    # Exact-input, token0 in *as the event reports it*. This is only a cheap pre-filter:
+    # `confirm_against_traces` decides what the swap actually was, and 13% of what passes
+    # here turns out to be exact-output. The signed columns are dropped because they are
+    # Python ints beyond int64 and would break the on-disk cache.
+    return m[(m.a0 < 0) & (m.a1 > 0)].drop(columns=["a0", "a1"])
 
 
 def sample_uniform(fills: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
@@ -462,7 +464,7 @@ def main(argv: list[str] | None = None) -> int:
     # re-quoting for it would be both slow and liable to disagree with these numbers.
     cache = path_for("results").parent / "cache"
     cache.mkdir(parents=True, exist_ok=True)
-    measured.to_parquet(cache / "b_divergence_fills.parquet", index=False)
+    parquet_safe(measured).to_parquet(cache / "b_divergence_fills.parquet", index=False)
 
     usable = measured[measured.usable]
     print(f"  usable quotes: {len(usable)}/{len(measured)}")

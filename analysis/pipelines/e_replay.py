@@ -38,7 +38,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from ..lib.cheap_quote import quote_many
-from ..lib.compact import load_shards
+from ..lib.compact import load_shards, parquet_safe
 from ..lib.config import load_config, path_for, repo_root
 from ..lib.deployments import pool_manager
 from ..lib.pricing import WETH, price
@@ -312,7 +312,7 @@ def main(argv: list[str] | None = None) -> int:
 
     cache = path_for("results").parent / "cache"
     cache.mkdir(parents=True, exist_ok=True)
-    rep.to_parquet(cache / "e_replay_fills.parquet", index=False)
+    parquet_safe(rep).to_parquet(cache / "e_replay_fills.parquet", index=False)
 
     print(f"\n  fills considered  {totals['fills_considered']:,}")
     print(f"  fills protected   {totals['fills_protected']:,}")

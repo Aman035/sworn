@@ -177,3 +177,28 @@ def load_shards(
     if not set(key).issubset(frame.columns):
         return frame.reset_index(drop=True)
     return frame.drop_duplicates(subset=key, keep="first").reset_index(drop=True)
+
+
+def parquet_safe(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return `frame` with any out-of-int64-range integer column stored as strings.
+
+    Parquet has no 128-bit integer, and a v4 swap amount routinely exceeds 2^63 — one fill
+    in the Base sample is 1.9e25 raw units. Writing such a column raises
+    `OverflowError: Python int too large to convert to C long` **at write time**, which in
+    this repo means after ten thousand transactions have already been traced. This is
+    applied before every cache write so that a long run cannot be lost to it.
+    """
+    limit = 2**63
+    out = frame
+    for name in frame.columns:
+        column = frame[name]
+        if column.dtype != object:
+            continue
+        values = column.dropna()
+        if values.empty or not isinstance(values.iloc[0], int):
+            continue
+        if values.map(lambda v: abs(int(v)) >= limit).any():
+            if out is frame:
+                out = frame.copy()
+            out[name] = column.map(lambda v: None if v is None else str(v))
+    return out
