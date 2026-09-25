@@ -140,3 +140,62 @@ def test_nothing_to_do_when_already_complete(tmp_path: Path) -> None:
     stats = fetch_to_jsonl(rpc, "0xpm", [], 0, 999, out)  # type: ignore[arg-type]
     assert stats.chunks == 0
     assert rpc.requests == []
+
+
+class RateLimitedRpc:
+    """Refuses the first `fail_times` requests with 429, then succeeds."""
+
+    def __init__(self, fail_times: int) -> None:
+        self.fail_times = fail_times
+        self.attempts = 0
+        self.served: list[tuple[int, int]] = []
+
+    def call(self, method: str, params: list[Any] | None = None) -> Any:
+        self.attempts += 1
+        if self.attempts <= self.fail_times:
+            request = httpx.Request("POST", "https://node.example/v2/key")
+            response = httpx.Response(429, text="rate limited", request=request)
+            raise httpx.HTTPStatusError("429", request=request, response=response)
+        f = int(params[0]["fromBlock"], 16)  # type: ignore[index]
+        t = int(params[0]["toBlock"], 16)  # type: ignore[index]
+        self.served.append((f, t))
+        return []
+
+
+def test_rate_limit_is_waited_out_not_shrunk() -> None:
+    from sworn_analysis.lib.logs import is_rate_limit
+
+    rpc = RateLimitedRpc(fail_times=2)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=1000)  # type: ignore[arg-type]
+    slept: list[float] = []
+    fetcher._sleep = slept.append  # type: ignore[method-assign]
+
+    list(fetcher.fetch_range(0, 999))
+
+    assert slept == [1.0, 2.0], "should back off exponentially"
+    assert fetcher.chunk == 1000, "a 429 must not shrink the window"
+    assert fetcher.stats.backoffs == 0
+    assert rpc.served == [(0, 999)]
+    assert is_rate_limit(
+        httpx.HTTPStatusError(
+            "429",
+            request=httpx.Request("POST", "https://x"),
+            response=httpx.Response(429, request=httpx.Request("POST", "https://x")),
+        )
+    )
+
+
+def test_413_is_a_size_refusal_whatever_the_body() -> None:
+    # QuickNode answers with a 413 whose body is not JSON-RPC at all.
+    request = httpx.Request("POST", "https://node.example/v2/key")
+    response = httpx.Response(413, text="<html>Request Entity Too Large</html>", request=request)
+    exc = httpx.HTTPStatusError("413", request=request, response=response)
+    assert looks_like_range_limit(exc)
+
+
+def test_rate_limit_gives_up_after_the_retry_budget() -> None:
+    rpc = RateLimitedRpc(fail_times=99)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=1000)  # type: ignore[arg-type]
+    fetcher._sleep = lambda _s: None  # type: ignore[method-assign]
+    with pytest.raises(httpx.HTTPStatusError):
+        list(fetcher.fetch_range(0, 999))

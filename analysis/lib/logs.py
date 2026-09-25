@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -34,15 +35,31 @@ MIN_CHUNK = 8
 MAX_CHUNK = 500_000
 # Grow only after a run of clean chunks, so one lucky response does not undo the backoff.
 GROWTH_AFTER = 8
+MAX_RATE_LIMIT_RETRIES = 6
+RATE_LIMIT_BASE_DELAY = 1.0
+
+
+def is_rate_limit(exc: Exception) -> bool:
+    """429 means *slow down*, not *ask for less*.
+
+    Shrinking the chunk here would be exactly wrong: it multiplies the number of
+    requests. These are retried after a pause at the same width instead.
+    """
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code == 429
+    return isinstance(exc, RpcError) and exc.code == -32005
 
 
 def looks_like_range_limit(exc: Exception) -> bool:
     if isinstance(exc, RpcError):
         return bool(_TOO_BIG.search(exc.rpc_message))
     if isinstance(exc, httpx.HTTPStatusError):
-        return exc.response.status_code in (400, 413, 429) and bool(
-            _TOO_BIG.search(exc.response.text)
-        )
+        # 413 is unambiguous — the *response* was too big, regardless of the body, which
+        # for some providers is HTML rather than JSON-RPC. This is the common case on
+        # QuickNode: 10k blocks is fine until a dense stretch blows the size cap.
+        if exc.response.status_code == 413:
+            return True
+        return exc.response.status_code == 400 and bool(_TOO_BIG.search(exc.response.text))
     # A timeout on a wide range is the same signal as an explicit refusal: ask for less.
     return isinstance(exc, httpx.ReadTimeout | httpx.ConnectTimeout)
 
@@ -52,6 +69,7 @@ class FetchStats:
     chunks: int = 0
     logs: int = 0
     backoffs: int = 0
+    rate_limit_waits: int = 0
     min_chunk_used: int = MAX_CHUNK
     max_chunk_used: int = 0
     last_block_done: int = -1
@@ -73,6 +91,10 @@ class LogFetcher:
         self.stats = FetchStats()
         self._clean_run = 0
 
+    # Seam for tests: a real sleep would make the rate-limit path untestable.
+    def _sleep(self, seconds: float) -> None:
+        time.sleep(seconds)
+
     def _request(self, lo: int, hi: int) -> list[dict[str, Any]]:
         return self.rpc.call(
             "eth_getLogs",
@@ -91,17 +113,28 @@ class LogFetcher:
     ) -> Iterator[tuple[int, int, list[dict[str, Any]]]]:
         """Yield `(lo, hi, logs)` for consecutive sub-ranges covering the whole span."""
         lo = from_block
+        rate_limit_waits = 0
         while lo <= to_block:
             hi = min(lo + self.chunk - 1, to_block)
             try:
                 logs = self._request(lo, hi)
             except Exception as exc:  # noqa: BLE001 — classified immediately below
+                if is_rate_limit(exc):
+                    if rate_limit_waits >= MAX_RATE_LIMIT_RETRIES:
+                        raise
+                    delay = RATE_LIMIT_BASE_DELAY * (2**rate_limit_waits)
+                    rate_limit_waits += 1
+                    self.stats.rate_limit_waits += 1
+                    self._sleep(delay)
+                    continue
                 if not looks_like_range_limit(exc) or self.chunk <= MIN_CHUNK:
                     raise
                 self.chunk = max(MIN_CHUNK, self.chunk // 2)
                 self.stats.backoffs += 1
                 self._clean_run = 0
                 continue
+
+            rate_limit_waits = 0
 
             self.stats.chunks += 1
             self.stats.logs += len(logs)
