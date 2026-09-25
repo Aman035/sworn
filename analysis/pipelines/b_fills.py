@@ -25,7 +25,7 @@ from ..lib.compact import SWAP_SHARD_PREFIX, compact, load_shards, shard_paths
 from ..lib.config import Chain, chains, repo_root
 from ..lib.deployments import SWAP_TOPIC, pool_manager
 from ..lib.logs import fetch_to_jsonl, resume_point
-from ..lib.rpc import RpcClient, redact
+from ..lib.rpc import RpcClient, redact, scrub
 from ..lib.snapshot import snapshot_dir, write_manifest
 
 DEFAULT_DAYS = 30
@@ -211,8 +211,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(f"  {r.chain}: {r.fills:,} fills in blocks {r.block_from:,}-{r.block_to:,}")
         except Exception as exc:  # noqa: BLE001 — continue to the next chain
-            failures.append(f"{name}: {type(exc).__name__}: {exc}")
-            print(f"  FAIL {name}: {exc}", file=sys.stderr)
+            detail = scrub(str(exc), os.environ.get(known[name].rpc_env, ""))
+            failures.append(f"{name}: {type(exc).__name__}: {detail}")
+            print(f"  FAIL {name}: {detail}", file=sys.stderr)
 
     if failures:
         for f in failures:

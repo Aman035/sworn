@@ -1,0 +1,33 @@
+{
+  "name": "census-mainnet",
+  "chain": "mainnet",
+  "chain_id": 1,
+  "block_from": 21688329,
+  "block_to": 26055251,
+  "rpc_provider": "proportionate-holy-sanctuary.ethereum-mainnet.quiknode.pro/\u2026feee",
+  "script_commit": "2ddc059",
+  "created_at": "2026-09-25T15:21:05Z",
+  "rows": 143218,
+  "source": "eth_getLogs Initialize from 0x000000000004444c5dc75cB358380D2e3dE08A90",
+  "notes": "",
+  "files": [
+    {
+      "path": "pools-part-0000.parquet",
+      "sha256": "dc7c4e414cb2c8c15c5b37c282d614e39bdbcd87b442d4cdf59bc780719153ea",
+      "bytes": 3206856,
+      "rows": null
+    },
+    {
+      "path": "pools-part-0001.parquet",
+      "sha256": "a48f4e0760dc0a978a42af2ca13b7d0a4b53e23c4bbc9492a1c5b0a16e8a8bcf",
+      "bytes": 15350822,
+      "rows": null
+    },
+    {
+      "path": "pools-part-0002.parquet",
+      "sha256": "e89177401c1f9a144c33121ca6f9fff403d3d85d2157899ccc5c0027b83e7824",
+      "bytes": 4348016,
+      "rows": null
+    }
+  ]
+}

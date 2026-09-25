@@ -28,7 +28,7 @@ from ..lib.compact import compact, load_shards, shard_paths
 from ..lib.config import Chain, chains, path_for, repo_root
 from ..lib.deployments import INITIALIZE_TOPIC, load_deployments, pool_manager
 from ..lib.logs import fetch_to_jsonl, resume_point
-from ..lib.rpc import RpcClient, redact
+from ..lib.rpc import RpcClient, redact, scrub
 from ..lib.snapshot import snapshot_dir, write_manifest
 
 # Stay this far behind the head so a reorg cannot change what the snapshot contains.
@@ -227,8 +227,10 @@ def main(argv: list[str] | None = None) -> int:
                 )
             )
         except Exception as exc:  # noqa: BLE001 — one chain must not take down the run
-            failures.append(f"{name}: {type(exc).__name__}: {exc}")
-            print(f"  {name}: FAILED {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+            # Provider errors embed the full RPC URL, and the URL embeds the API key.
+            detail = scrub(str(exc), os.environ.get(known[name].rpc_env, ""))
+            failures.append(f"{name}: {type(exc).__name__}: {detail}")
+            print(f"  {name}: FAILED {type(exc).__name__}: {detail}", file=sys.stderr, flush=True)
 
     print("\ncensus pulls complete:")
     for r in results:

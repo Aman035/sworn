@@ -38,6 +38,21 @@ MAX_CHUNK = 500_000
 GROWTH_AFTER = 8
 MAX_RATE_LIMIT_RETRIES = 6
 RATE_LIMIT_BASE_DELAY = 1.0
+# A long pull will meet transient 5xx errors; give the provider real time to recover.
+MAX_TRANSIENT_RETRIES = 8
+TRANSIENT_BASE_DELAY = 2.0
+
+
+def is_transient(exc: Exception) -> bool:
+    """A server-side hiccup, not a statement about the request.
+
+    A multi-hour pull will meet at least one 502/503/504. Treating it as fatal throws
+    away the whole chain's progress; treating it as a range limit would shrink the chunk
+    for no reason. It is simply retried after a pause.
+    """
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code in (500, 502, 503, 504)
+    return isinstance(exc, httpx.ConnectError | httpx.RemoteProtocolError)
 
 
 def is_rate_limit(exc: Exception) -> bool:
@@ -71,6 +86,7 @@ class FetchStats:
     logs: int = 0
     backoffs: int = 0
     rate_limit_waits: int = 0
+    transient_retries: int = 0
     min_chunk_used: int = MAX_CHUNK
     max_chunk_used: int = 0
     last_block_done: int = -1
@@ -119,11 +135,20 @@ class LogFetcher:
         """Yield `(lo, hi, logs)` for consecutive sub-ranges covering the whole span."""
         lo = from_block
         rate_limit_waits = 0
+        transient_retries = 0
         while lo <= to_block:
             hi = min(lo + self.chunk - 1, to_block)
             try:
                 logs = self._request(lo, hi)
             except Exception as exc:  # noqa: BLE001 — classified immediately below
+                if is_transient(exc):
+                    if transient_retries >= MAX_TRANSIENT_RETRIES:
+                        raise
+                    delay = TRANSIENT_BASE_DELAY * (2**transient_retries)
+                    transient_retries += 1
+                    self.stats.transient_retries += 1
+                    self._sleep(delay)
+                    continue
                 if is_rate_limit(exc):
                     if rate_limit_waits >= MAX_RATE_LIMIT_RETRIES:
                         raise
@@ -141,6 +166,7 @@ class LogFetcher:
                 continue
 
             rate_limit_waits = 0
+            transient_retries = 0
 
             self.stats.chunks += 1
             self.stats.logs += len(logs)

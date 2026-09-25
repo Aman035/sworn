@@ -246,3 +246,69 @@ def test_gzipped_pull_resumes(tmp_path: Path) -> None:
 
     assert all(lo >= 50 for lo, _ in rpc.requests)
     assert len(list(iter_logs(out))) == 100
+
+
+class FlakyRpc:
+    """Fails the first `fail_times` requests with a 503, then succeeds."""
+
+    def __init__(self, fail_times: int, status: int = 503) -> None:
+        self.fail_times = fail_times
+        self.status = status
+        self.attempts = 0
+        self.served: list[tuple[int, int]] = []
+
+    def call(self, method: str, params: list[Any] | None = None) -> Any:
+        self.attempts += 1
+        if self.attempts <= self.fail_times:
+            request = httpx.Request("POST", "https://node.example/v2/key")
+            response = httpx.Response(self.status, text="Service Unavailable", request=request)
+            raise httpx.HTTPStatusError("503", request=request, response=response)
+        f = int(params[0]["fromBlock"], 16)  # type: ignore[index]
+        t = int(params[0]["toBlock"], 16)  # type: ignore[index]
+        self.served.append((f, t))
+        return []
+
+
+def test_transient_server_errors_are_retried_not_fatal() -> None:
+    """A multi-hour pull will meet a 5xx; losing the whole chain to one is unacceptable.
+
+    This is not hypothetical: the BNB census died at 10.6% on a QuickNode 503.
+    """
+    from sworn_analysis.lib.logs import is_transient
+
+    rpc = FlakyRpc(fail_times=3)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=1000)  # type: ignore[arg-type]
+    slept: list[float] = []
+    fetcher._sleep = slept.append  # type: ignore[method-assign]
+
+    list(fetcher.fetch_range(0, 999))
+
+    assert slept == [2.0, 4.0, 8.0], "should back off exponentially"
+    assert fetcher.chunk == 1000, "a 5xx says nothing about request size"
+    assert fetcher.stats.backoffs == 0
+    assert rpc.served == [(0, 999)]
+    assert is_transient(
+        httpx.HTTPStatusError(
+            "502",
+            request=httpx.Request("POST", "https://x"),
+            response=httpx.Response(502, request=httpx.Request("POST", "https://x")),
+        )
+    )
+
+
+def test_transient_retries_are_bounded() -> None:
+    rpc = FlakyRpc(fail_times=99)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=1000)  # type: ignore[arg-type]
+    fetcher._sleep = lambda _s: None  # type: ignore[method-assign]
+    with pytest.raises(httpx.HTTPStatusError):
+        list(fetcher.fetch_range(0, 999))
+
+
+def test_a_413_is_still_a_size_refusal_not_a_transient_error() -> None:
+    from sworn_analysis.lib.logs import is_transient
+
+    request = httpx.Request("POST", "https://node.example/v2/key")
+    response = httpx.Response(413, text="too large", request=request)
+    exc = httpx.HTTPStatusError("413", request=request, response=response)
+    assert not is_transient(exc)
+    assert looks_like_range_limit(exc)
