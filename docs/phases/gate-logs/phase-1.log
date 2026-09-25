@@ -1,0 +1,21 @@
+==> required docs exist
+  ok  story, sources, metrics, threat model, architecture
+==> schema is a valid draft 2020-12 document
+schema ok
+  ok  results.schema.json validates as a schema
+==> docs linter
+  note: mmdc not installed; used the structural mermaid check
+  ok  metrics <-> config <-> schema
+  ok  result files documented
+  ok  story claim table
+  ok  sources
+  ok  mermaid
+  ok  links
+docs are consistent with config.yaml and results.schema.json
+  ok  metrics, parameters and result fields agree
+==> python tests
+..........................                                               [100%]
+26 passed in 0.08s
+  ok  config and schema tests pass
+==> no fabricated numbers yet
+  ok  data/results is empty, as it must be before Phase 2
