@@ -15,7 +15,11 @@ optimizer = true
 optimizer_runs = 44444444
 bytecode_hash = "none"
 ffi = false
-fs_permissions = [{ access = "read-write", path = "./" }]
+fs_permissions = [
+    { access = "read-write", path = "./" },
+    # Re-quote inputs and outputs live with the rest of the data, outside contracts/.
+    { access = "read-write", path = "../data" },
+]
 gas_reports = ["SwornRouter", "HookBook"]
 verbosity = 1
 

@@ -49,6 +49,7 @@ contract RequoteScript is Script {
         string memory outputPath,
         address poolManager
     ) external {
+        console.log("fork starts at block", block.number);
         string memory raw = vm.readFile(inputPath);
         uint256 count = abi.decode(raw.parseRaw(".count"), (uint256));
 
@@ -98,7 +99,9 @@ contract RequoteScript is Script {
         Fill memory f,
         IPoolManager poolManager
     ) private returns (bool ok, uint256 expected, string memory err) {
+        uint256 blockBefore = block.number;
         try vm.rollFork(f.txHash) {
+            console.log("rollFork: block", blockBefore, "->", block.number);
             // Deploy after rolling: the fork's state is replaced by the roll.
             V4Quoter quoter = new V4Quoter(poolManager);
 
