@@ -8,7 +8,11 @@ solc_version = "0.8.26"
 evm_version = "cancun"
 via_ir = true
 optimizer = true
-optimizer_runs = 800
+# Matches Uniswap/v4-core exactly. This is not a tuning choice: at 800 runs, solc 0.8.26
+# with via-IR fails to compile PoolManager at all — "Variable memPtr_1 is 1 too deep in
+# the stack". The Yul optimizer only clears that stack pressure at v4-core's own setting,
+# so anything that compiles v4-core has to use it too.
+optimizer_runs = 44444444
 bytecode_hash = "none"
 ffi = false
 fs_permissions = [{ access = "read-write", path = "./" }]

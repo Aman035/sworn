@@ -1,0 +1,122 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.26;
+
+import {Test} from "forge-std/Test.sol";
+import {ISignatureTransfer} from "permit2/src/interfaces/ISignatureTransfer.sol";
+import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
+import {Hooks} from "v4-core/src/libraries/Hooks.sol";
+import {Currency} from "v4-core/src/types/Currency.sol";
+import {PoolKey} from "v4-core/src/types/PoolKey.sol";
+import {Deployers} from "v4-core/test/utils/Deployers.sol";
+
+import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+
+/// @notice Shared setup for every Sworn unit test: a live `PoolManager`, two currencies,
+///         a hookless reference pool, and helpers for placing hooks at addresses whose
+///         bits actually grant the permissions the fixture needs.
+///
+/// @dev v4 derives a hook's permissions from its address, so a fixture cannot simply be
+///      deployed anywhere — `deployHook` mines the address by construction using
+///      `deployCodeTo`, which is how these tests stay honest about permissions.
+abstract contract SwornTestBase is Test, Deployers {
+    SwornRouter internal sworn;
+
+    /// @dev Permissions every skimming fixture needs: run before the swap, and be allowed
+    ///      to return a delta that changes the amounts.
+    uint160 internal constant SKIM_FLAGS = uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG);
+
+    /// @dev A hook that only reverts or observes needs no delta permission.
+    uint160 internal constant OBSERVE_FLAGS = uint160(Hooks.BEFORE_SWAP_FLAG);
+
+    uint256 internal constant DEFAULT_PROBE_GAS = 2_000_000;
+    uint256 internal constant SWAP_AMOUNT = 1e18;
+
+    PoolKey internal hooklessKey;
+
+    function setUpSworn() internal {
+        deployFreshManagerAndRouters();
+        (currency0, currency1) = deployMintAndApprove2Currencies();
+
+        sworn = new SwornRouter(manager, ISignatureTransfer(address(0)));
+
+        // The hookless pool every test uses as the honest baseline.
+        (hooklessKey,) = initPoolAndAddLiquidity(currency0, currency1, IHooks(address(0)), 3000, SQRT_PRICE_1_1);
+
+        // Fund the router's caller and approve it.
+        _approveSworn();
+    }
+
+    function _approveSworn() internal {
+        deal(Currency.unwrap(currency0), address(this), 1_000_000e18);
+        deal(Currency.unwrap(currency1), address(this), 1_000_000e18);
+        _approve(currency0);
+        _approve(currency1);
+    }
+
+    function _approve(
+        Currency currency
+    ) private {
+        (bool ok,) = Currency.unwrap(currency)
+            .call(abi.encodeWithSignature("approve(address,uint256)", address(sworn), type(uint256).max));
+        require(ok, "approve failed");
+    }
+
+    /// @notice Deploy a fixture at an address carrying `flags`, and init a pool on it.
+    /// @param artifact e.g. "ToxicHooks.sol:GaspriceSniffHook"
+    /// @param args abi-encoded constructor arguments
+    function deployHookAndPool(
+        string memory artifact,
+        bytes memory args,
+        uint160 flags,
+        uint256 salt
+    ) internal returns (address hookAddress, PoolKey memory key) {
+        // Any address with the right low bits works; `salt` keeps fixtures distinct.
+        // The cast is bounded by construction: `salt` is a small test-supplied counter.
+        require(salt < (1 << 128), "salt too large");
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint160 saltBits = uint160(salt) << 16;
+        hookAddress = address(flags | saltBits);
+        deployCodeTo(artifact, args, hookAddress);
+        (key,) = initPoolAndAddLiquidity(currency0, currency1, IHooks(hookAddress), 3000, SQRT_PRICE_1_1);
+    }
+
+    // -----------------------------------------------------------------------------------
+    // route construction
+    // -----------------------------------------------------------------------------------
+
+    function singleHop(
+        PoolKey memory key,
+        bool zeroForOne
+    ) internal pure returns (Candidate memory c) {
+        c.hops = new Hop[](1);
+        c.hops[0] = Hop({key: key, zeroForOne: zeroForOne, hookData: ""});
+    }
+
+    function candidates(
+        PoolKey memory a,
+        PoolKey memory b,
+        bool zeroForOne
+    ) internal pure returns (Candidate[] memory out) {
+        out = new Candidate[](2);
+        out[0] = singleHop(a, zeroForOne);
+        out[1] = singleHop(b, zeroForOne);
+    }
+
+    function defaultParams() internal view returns (SwornParams memory) {
+        return SwornParams({
+            tokenIn: currency0,
+            tokenOut: currency1,
+            // forge-lint: disable-next-line(unsafe-typecast)
+            amountSpecified: -int256(SWAP_AMOUNT),
+            minOut: 0,
+            hookMarginBps: 0,
+            // forge-lint: disable-next-line(unsafe-typecast)
+            probeGas: uint64(DEFAULT_PROBE_GAS),
+            maxProbes: 8,
+            recipient: address(this),
+            deadline: type(uint256).max,
+            usePermit2: false,
+            permit: ""
+        });
+    }
+}
