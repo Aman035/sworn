@@ -116,10 +116,21 @@ def encode_quote_call(
     hooks: str,
     zero_for_one: bool,
     amount: int,
+    hook_data: str = "0x",
 ) -> str:
+    # A hook that prices on `hookData` and is quoted with empty bytes is being asked a
+    # different question than the one the router asked, so the real bytes are recovered
+    # from the transaction (see `lib/swapcalls.py`) and passed through.
     payload = abi_encode(
         ["((address,address,uint24,int24,address),bool,uint128,bytes)"],
-        [((currency0, currency1, fee, tick_spacing, hooks), zero_for_one, amount, b"")],
+        [
+            (
+                (currency0, currency1, fee, tick_spacing, hooks),
+                zero_for_one,
+                amount,
+                bytes.fromhex(hook_data[2:]),
+            )
+        ],
     )
     return QUOTE_EXACT_INPUT_SINGLE + payload.hex()
 
