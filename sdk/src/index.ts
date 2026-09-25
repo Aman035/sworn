@@ -22,6 +22,16 @@ export {
   type BuildSwornCallArgs,
 } from './buildCall.js';
 export {
+  filterByScore,
+  hookedCandidateCount,
+  prepareSwornSwap,
+  swornSwap,
+  SwornPolicyError,
+  type SimulateClient,
+  type SwornSwapArgs,
+  type WriteClient,
+} from './action.js';
+export {
   HookBookReader,
   explain,
   explainFlags,

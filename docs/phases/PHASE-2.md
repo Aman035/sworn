@@ -9,12 +9,12 @@ everything: a divergence rate means nothing without a trustworthy count of what 
 
 ## What was measured
 
-| Chain | Pools | Hooked | Distinct hooks | Blocks |
-| ----- | ----: | -----: | -------------: | ------ |
-| Base | 15,309,659 | 15,076,019 (98.5%) | 69,242 | 25,350,988 – 51,778,292 |
-| BNB | 256,187 | 45,060 (17.6%) | 6,363 | 45,970,610 – 123,972,139 |
-| Ethereum | 143,218 | 34,459 (24.1%) | 8,582 | 21,688,329 – 26,055,251 |
-| Arbitrum | 19,143 | 4,752 (24.8%) | 840 | 297,842,872 – 508,800,002 |
+| Chain    |      Pools |             Hooked | Distinct hooks | Blocks                    |
+| -------- | ---------: | -----------------: | -------------: | ------------------------- |
+| Base     | 15,309,659 | 15,076,019 (98.5%) |         69,242 | 25,350,988 – 51,778,292   |
+| BNB      |    256,187 |     45,060 (17.6%) |          6,363 | 45,970,610 – 123,972,139  |
+| Ethereum |    143,218 |     34,459 (24.1%) |          8,582 | 21,688,329 – 26,055,251   |
+| Arbitrum |     19,143 |      4,752 (24.8%) |            840 | 297,842,872 – 508,800,002 |
 
 Unichain is excluded: the available endpoint is on Alchemy's free tier, which caps
 `eth_getLogs` at a 10-block range and blocks `debug_traceCall` entirely.
@@ -30,17 +30,17 @@ chain, and it is allowlisted.
 
 **Presence of an environment opcode is almost meaningless.** Across all 69,242 Base hooks:
 
-| | |
-| --- | ---: |
-| contains *any* environment opcode | 68,665 (99.2%) |
+|                                                 |                |
+| ----------------------------------------------- | -------------: |
+| contains _any_ environment opcode               | 68,665 (99.2%) |
 | contains a **simulation-distinguishing** opcode | 26,525 (38.3%) |
-| `GAS` | 98.9% |
-| `ORIGIN` | 35.4% |
-| `GASPRICE` | 0.3% |
+| `GAS`                                           |          98.9% |
+| `ORIGIN`                                        |          35.4% |
+| `GASPRICE`                                      |           0.3% |
 
 `GAS` appears in almost every contract because solc emits it for every external call. A
 detector built on "does the bytecode contain an env opcode" would flag 99.2% of Base and
-say nothing. This is why `METRICS.md` requires the opcode to *execute on the swap path*.
+say nothing. This is why `METRICS.md` requires the opcode to _execute on the swap path_.
 
 The ordering is also a surprise: `tx.origin` is two orders of magnitude more common than
 `tx.gasprice`, the textbook spoofing signal. Whether those reads are on the swap path or
@@ -68,12 +68,12 @@ plan asked for 50 addresses.
 
 Reconciliation, 40 random 2,000-block windows per chain:
 
-| Chain | Pools (independent / snapshot) | Hooks | Delta |
-| ----- | ----------------------------- | ----- | ----- |
-| Base | 47,380 / 47,380 | 221 / 221 | **0.00%** |
-| BNB | 246 / 246 | 24 / 24 | **0.00%** |
+| Chain | Pools (independent / snapshot) | Hooks     | Delta     |
+| ----- | ------------------------------ | --------- | --------- |
+| Base  | 47,380 / 47,380                | 221 / 221 | **0.00%** |
+| BNB   | 246 / 246                      | 24 / 24   | **0.00%** |
 
-The tolerance is 5%; the agreement is exact. The check is deliberately a *second*
+The tolerance is 5%; the agreement is exact. The check is deliberately a _second_
 implementation: it re-requests logs from the node rather than reading the snapshot, and
 decodes the hook address by byte offset instead of through `eth_abi`, so a bug in one
 decoder cannot hide in the other.
@@ -83,13 +83,13 @@ decoder cannot hide in the other.
 - **No Ponder indexer.** The plan specifies Ponder for `index/`. Direct `eth_getLogs`
   with a resumable, self-compacting fetcher produced the census faster and is what the
   reconciliation check needs anyway (it must not share code with the indexer). Ponder
-  remains the right tool for the *live* index in Phase 9; it was the wrong tool for a
+  remains the right tool for the _live_ index in Phase 9; it was the wrong tool for a
   one-shot historical sweep.
 - **Volume and TVL are deferred to Phase 3.** They need `Swap` amounts and a price source.
   `census.json` carries `volume_usd_30d: null` rather than an estimate — a fabricated
   number is worse than a missing one.
 - **`metadata_hooks_covered` was added to the schema.** Etherscan is rate limited, so
-  `upgradeable` and `verified` are counts *within the subset that was fetched*. Publishing
+  `upgradeable` and `verified` are counts _within the subset that was fetched_. Publishing
   them without their denominator would read as a claim about all 69,242 hooks.
 
 ## Friction (feeds FEEDBACK.md)
@@ -98,6 +98,6 @@ decoder cannot hide in the other.
   pool", but `PoolManager.sol:241` emits `delta.amount0()` — the **swapper's** delta, the
   opposite sign. Anyone implementing from the documentation gets every fill backwards.
 - Provider behaviour varies enough that a single fetch strategy cannot work: QuickNode
-  caps on *response size* (413) while Alchemy caps on *block range*, and both emit
+  caps on _response size_ (413) while Alchemy caps on _block range_, and both emit
   transient 5xx and node-level errors during long pulls. Each needs a different response —
   shrink, wait, or retry — and conflating them either corrupts the data or wastes hours.

@@ -10,12 +10,12 @@ below is something that cost real time during this build, with the evidence in-r
 **Roughly four hours** from an empty directory to a passing swap through a custom router
 on a locally deployed `PoolManager`, and most of that was not spent on v4 concepts.
 
-| Step | Time | Note |
-| ---- | ---- | ---- |
-| Toolchain, deps, gating harness | ~2h | mostly repo scaffolding, not v4 |
-| Reading `Hooks.sol`, `IPoolManager`, delta accounting | ~45m | the docs were adequate here |
-| First compiling router | ~30m | |
-| First *passing* swap | ~45m | all of it spent on two problems below |
+| Step                                                  | Time | Note                                  |
+| ----------------------------------------------------- | ---- | ------------------------------------- |
+| Toolchain, deps, gating harness                       | ~2h  | mostly repo scaffolding, not v4       |
+| Reading `Hooks.sol`, `IPoolManager`, delta accounting | ~45m | the docs were adequate here           |
+| First compiling router                                | ~30m |                                       |
+| First _passing_ swap                                  | ~45m | all of it spent on two problems below |
 
 The two problems were the compiler settings and the test pool's depth. Neither is about
 v4's design; both are about the gap between "the code compiles" and "the code runs".
@@ -70,7 +70,7 @@ Keeping both versions is not an option — the compiler then has two distinct `I
 types, and a `PoolKey` built from one cannot be passed to a quoter built from the other.
 The only way through is to abandon the release tag and pin the commit periphery pins.
 
-`permit2` has a related problem: its only git tag is the *deployed address string*, which
+`permit2` has a related problem: its only git tag is the _deployed address string_, which
 is not a version.
 
 **Suggestion:** tag `v4-periphery` releases, and state which `v4-core` each is built
@@ -81,13 +81,13 @@ against. This is the single biggest source of avoidable setup cost.
 Nothing here is Uniswap's fault, but it is the dominant cost of building anything
 data-driven on v4, and a first-party indexing story would remove it. Across one census:
 
-| Failure | Provider | Correct response |
-| ------- | -------- | ---------------- |
-| `413` on response size | QuickNode | shrink the block window |
-| 10-block `eth_getLogs` cap | Alchemy free tier | shrink, or upgrade |
-| `429` | both | wait, do **not** shrink |
-| `503` mid-pull | QuickNode | retry, do not shrink |
-| `failed to get logs for block #N` | QuickNode | retry; may be permanent |
+| Failure                           | Provider          | Correct response        |
+| --------------------------------- | ----------------- | ----------------------- |
+| `413` on response size            | QuickNode         | shrink the block window |
+| 10-block `eth_getLogs` cap        | Alchemy free tier | shrink, or upgrade      |
+| `429`                             | both              | wait, do **not** shrink |
+| `503` mid-pull                    | QuickNode         | retry, do not shrink    |
+| `failed to get logs for block #N` | QuickNode         | retry; may be permanent |
 
 Conflating any two of these either corrupts the data or wastes hours. A 10.6%-complete BNB
 census died on a single 503 before this was handled.

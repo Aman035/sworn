@@ -6,9 +6,7 @@
       "contractName": "HookBook",
       "contractAddress": "0x8a4470f7dda8525b484527b21b19c3bc876a04c3",
       "function": null,
-      "arguments": [
-        "0x57bf4893035CfA76f592e8C835049EDc63bAAB21"
-      ],
+      "arguments": ["0x57bf4893035CfA76f592e8C835049EDc63bAAB21"],
       "transaction": {
         "from": "0x57bf4893035cfa76f592e8c835049edc63baab21",
         "gas": "0x1798df",
@@ -26,10 +24,7 @@
       "contractName": "HookBook",
       "contractAddress": "0x8a4470f7dda8525b484527b21b19c3bc876a04c3",
       "function": "setAttestor(address,bool)",
-      "arguments": [
-        "0x57bf4893035CfA76f592e8C835049EDc63bAAB21",
-        "true"
-      ],
+      "arguments": ["0x57bf4893035CfA76f592e8C835049EDc63bAAB21", "true"],
       "transaction": {
         "from": "0x57bf4893035cfa76f592e8c835049edc63baab21",
         "to": "0x8a4470f7dda8525b484527b21b19c3bc876a04c3",

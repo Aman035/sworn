@@ -13,15 +13,15 @@ Both hooks named in the 0x report of 14 September 2026 were located in our censu
 strong check: a wrong key hashes to a pool id that was never initialized, and `slot0`
 would read zero.
 
-| | Base hook `0x800cef…a5c7` | BNB hook `0x141984…c880` |
-| --- | --- | --- |
-| Pair | ETH / `0xb2000…108c` | USDT / WBNB |
-| 0x reported | "ETH/NVDAc", median 18% when charged | "USDT/WBNB", fee range 0–12.8% |
-| Fee mode | dynamic (`0x800000`) | dynamic (`0x800000`) |
-| Permission bits | `0x25c7`, includes `AFTER_SWAP_RETURNS_DELTA` | `0x0880`, **no returns-delta** |
-| `sqrtPriceX96` at pin | 2,726,724,300,712,797,452,135,401 | 3,007,820,621,519,910,873,998,791,271 |
-| Liquidity at pin | 4,184,499,386,950,196 | **0 (dormant)** |
-| Fills in 30d window | 1,088 | — |
+|                       | Base hook `0x800cef…a5c7`                     | BNB hook `0x141984…c880`              |
+| --------------------- | --------------------------------------------- | ------------------------------------- |
+| Pair                  | ETH / `0xb2000…108c`                          | USDT / WBNB                           |
+| 0x reported           | "ETH/NVDAc", median 18% when charged          | "USDT/WBNB", fee range 0–12.8%        |
+| Fee mode              | dynamic (`0x800000`)                          | dynamic (`0x800000`)                  |
+| Permission bits       | `0x25c7`, includes `AFTER_SWAP_RETURNS_DELTA` | `0x0880`, **no returns-delta**        |
+| `sqrtPriceX96` at pin | 2,726,724,300,712,797,452,135,401             | 3,007,820,621,519,910,873,998,791,271 |
+| Liquidity at pin      | 4,184,499,386,950,196                         | **0 (dormant)**                       |
+| Fills in 30d window   | 1,088                                         | —                                     |
 
 **The two hooks take value by different mechanisms.** The Base hook holds
 `AFTER_SWAP_RETURNS_DELTA` and can skim an arbitrary share of the output. The BNB hook
@@ -41,7 +41,7 @@ candidate 1 (hookless, fee 10%)    amountIn 1e16   amountOut  9,983,990
 ```
 
 **The hooked pool probed 17.9% more output than the hookless one.** At probe time — inside
-the real transaction, at a real gas price — this hook prices *better*, which is how a hook
+the real transaction, at a real gas price — this hook prices _better_, which is how a hook
 wins routing in the first place. Sworn selected it on its probed merits, which is the
 correct behaviour: the guarantee is that what executes equals what was probed, not that
 hooked pools are avoided.

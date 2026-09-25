@@ -28,12 +28,12 @@ Sworn returns the user to the honest price exactly.
 From `SwornGasTest`, against `NaiveRouter` — a slippage-only router that does what a
 competent router does today:
 
-| Route | Gas | Overhead |
-| ----- | --: | -------: |
-| NaiveRouter, 1 pool, no probe | 111,553 | — |
-| `swornSwap`, 1 candidate | 204,270 | +92,717 |
-| `swornSwap`, 2 candidates | 275,159 | +163,606 |
-| `swornSwap`, 3 candidates | 341,845 | +230,292 |
+| Route                         |     Gas | Overhead |
+| ----------------------------- | ------: | -------: |
+| NaiveRouter, 1 pool, no probe | 111,553 |        — |
+| `swornSwap`, 1 candidate      | 204,270 |  +92,717 |
+| `swornSwap`, 2 candidates     | 275,159 | +163,606 |
+| `swornSwap`, 3 candidates     | 341,845 | +230,292 |
 
 Each additional candidate costs about 68,000 gas and the cost is linear, which is the
 design: one more candidate is one more probe, not a re-run of the route. On Base at
@@ -43,20 +43,20 @@ design: one more candidate is one more probe, not a re-run of the route. On Base
 
 Every capability in `THREAT_MODEL.md` has a fixture and a passing test.
 
-| # | Capability | Fixture | Outcome |
-| - | ---------- | ------- | ------- |
-| 1 | Gas-price sniffing | `GaspriceSniffHook` | routed around |
-| 2 | Origin sniffing | `OriginSniffHook` | routed around |
-| 3 | Coinbase / basefee sniffing | `CoinbaseBasefeeSniffHook` | routed around |
-| 4 | Dice roll, block-sourced | `DiceRollBlockHook` | probe sees the true roll |
-| 5 | Dice roll, counter-sourced | `DiceRollCounterHook` | probe's revert rolls the counter back |
-| 6 | Owner switch | `OwnerSwitchHook` | routed around while toxic, usable once off |
-| 7 | Router whitelisting | `RouterWhitelistHook` | avoided when toxic, used when honest |
-| 8 | Gas-left sniffing | `GasSniffHook` | identical `gasleft()` in both phases |
-| 9 | Callback probing | `CallbackSniffHook` | router answers identically |
-| 10 | Revert griefing | `RevertGriefHook` | candidate skipped, swap succeeds |
-| 11 | Gas burning | `GasBurnHook` | bounded by the stipend, swap succeeds |
-| 12 | **Anything unmodelled** | `CheatingDivergentHook` | `Divergence` reverts; user loses nothing |
+| #   | Capability                  | Fixture                    | Outcome                                    |
+| --- | --------------------------- | -------------------------- | ------------------------------------------ |
+| 1   | Gas-price sniffing          | `GaspriceSniffHook`        | routed around                              |
+| 2   | Origin sniffing             | `OriginSniffHook`          | routed around                              |
+| 3   | Coinbase / basefee sniffing | `CoinbaseBasefeeSniffHook` | routed around                              |
+| 4   | Dice roll, block-sourced    | `DiceRollBlockHook`        | probe sees the true roll                   |
+| 5   | Dice roll, counter-sourced  | `DiceRollCounterHook`      | probe's revert rolls the counter back      |
+| 6   | Owner switch                | `OwnerSwitchHook`          | routed around while toxic, usable once off |
+| 7   | Router whitelisting         | `RouterWhitelistHook`      | avoided when toxic, used when honest       |
+| 8   | Gas-left sniffing           | `GasSniffHook`             | identical `gasleft()` in both phases       |
+| 9   | Callback probing            | `CallbackSniffHook`        | router answers identically                 |
+| 10  | Revert griefing             | `RevertGriefHook`          | candidate skipped, swap succeeds           |
+| 11  | Gas burning                 | `GasBurnHook`              | bounded by the stipend, swap succeeds      |
+| 12  | **Anything unmodelled**     | `CheatingDivergentHook`    | `Divergence` reverts; user loses nothing   |
 
 Two of these are worth singling out.
 
@@ -66,7 +66,7 @@ demonstrated rather than argued.
 
 **The safety net is tested by defeating it.** Every other fixture loses because the EVM
 gives a hook no way to distinguish a probe from an execution. `CheatingDivergentHook`
-cheats: it keeps its invocation count *host-side* via cheatcodes, where the probe's revert
+cheats: it keeps its invocation count _host-side_ via cheatcodes, where the probe's revert
 cannot reach, quotes free and then charges. No deployable hook can do this — that is the
 point. The test proves that when the threat model's reasoning is wrong, the transaction
 reverts and the user's balance is unchanged. **Denial, not theft.**
@@ -101,7 +101,7 @@ reverts and the user's balance is unchanged. **Denial, not theft.**
 - **Probe and execution share one `runRoute` entry point.** The plan asks for
   byte-identical calldata; that is not literally achievable since the two calls must
   differ somehow. They share a selector and a prologue, and the only differing parameter
-  is read *after* every externally observable call, so gas at hook entry is identical —
+  is read _after_ every externally observable call, so gas at hook entry is identical —
   which is the property that actually matters, and is tested.
 
 ## Friction (feeds FEEDBACK.md)

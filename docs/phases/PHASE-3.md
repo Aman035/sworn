@@ -12,7 +12,7 @@ The headline numbers: which hooks charge, how much, when, and who routed users i
   30-day window, resumable, with a guard that refuses to write a snapshot claiming a wider
   window than it covers.
 - **Re-quote engine** (`contracts/script/Requote.s.sol` + `analysis/lib/requote.py`) —
-  `vm.rollFork(txHash)` then a `V4Quoter` deployed *on the fork*, so the quote comes from
+  `vm.rollFork(txHash)` then a `V4Quoter` deployed _on the fork_, so the quote comes from
   the pinned periphery rather than a looked-up address. Records the block it quoted at and
   the pool's `sqrtPriceX96` there, so a surprising answer is falsifiable.
 - **Calibration harness** (`scripts/calibrate_requote.py`) — the gate on everything else.
@@ -38,7 +38,7 @@ Every field now uses the typed `read*` helpers, which parse numeric strings corr
 **After the fix, calibration passes: 19/20 within 1 bps (95%), median ratio 1.000000**,
 with most fills matching to the digit.
 
-The lesson worth keeping: a uniform bug producing *non-uniform* results was the real
+The lesson worth keeping: a uniform bug producing _non-uniform_ results was the real
 anomaly. Four fills appeared to pass, and a partial pass should have been treated as more
 suspicious than a total failure.
 
@@ -64,20 +64,20 @@ condition, not a tuning opportunity.
 
 Each of these was tested, not assumed:
 
-| Hypothesis | Verdict |
-| ---------- | ------- |
-| Wrong pool key | **No** — the reconstructed `PoolKey` hashes to the fill's `poolId` exactly |
-| Fork not rolling | **No** — `quotedAtBlock` equals the fill's block for every sample |
-| Wrong pre-state | **No** — quoted-state `sqrtPriceX96` matches the fill's event price to 2e-7 |
-| Same-block interference | **No** — zero PoolManager events touched the pool earlier in the block |
-| JIT liquidity in the tx | **No** — the failing transactions emit no `ModifyLiquidity` |
-| Direction inverted | **No** — quoting the flipped direction returns 30 instead of 31 |
-| Batch state leakage | **No** — quoting a failing fill alone returns the same answer |
-| Amount-dependent bug | **No** — the quote returns **31 for every input size**, from 1,000 to 118,308,819 |
+| Hypothesis              | Verdict                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| Wrong pool key          | **No** — the reconstructed `PoolKey` hashes to the fill's `poolId` exactly        |
+| Fork not rolling        | **No** — `quotedAtBlock` equals the fill's block for every sample                 |
+| Wrong pre-state         | **No** — quoted-state `sqrtPriceX96` matches the fill's event price to 2e-7       |
+| Same-block interference | **No** — zero PoolManager events touched the pool earlier in the block            |
+| JIT liquidity in the tx | **No** — the failing transactions emit no `ModifyLiquidity`                       |
+| Direction inverted      | **No** — quoting the flipped direction returns 30 instead of 31                   |
+| Batch state leakage     | **No** — quoting a failing fill alone returns the same answer                     |
+| Amount-dependent bug    | **No** — the quote returns **31 for every input size**, from 1,000 to 118,308,819 |
 
 That last row is the shape of the answer: the pool is one-sided at the pre-fill state and
-can only deliver 31 units in that direction. The quoter is correct *about the state it is
-given*. What is unexplained is how the real transaction obtained 118,309,433 from that
+can only deliver 31 units in that direction. The quoter is correct _about the state it is
+given_. What is unexplained is how the real transaction obtained 118,309,433 from that
 same pre-transaction state, on a hookless pool, with no liquidity event in between.
 
 ## Two bugs found and fixed along the way
@@ -89,10 +89,10 @@ Both would have produced confident, wrong headline numbers.
    fills' realized amounts. A fill's identity is now `(txHash, logIndex)`.
 2. **The calibration could only fail in one direction.** It used `excess_take_bps`, which
    is clipped at zero by design — it answers "how much was taken from the user" — so a
-   quote that came back far too *low* scored a perfect 0.000 and passed. It reported
+   quote that came back far too _low_ scored a perfect 0.000 and passed. It reported
    "10/10 within 1 bps, calibration passed" while half the ratios were 1e-6. It now
    measures `|expected/realized − 1|`, which is what the config's
-   `calibration_max_abs_excess_bps` meant by *abs*.
+   `calibration_max_abs_excess_bps` meant by _abs_.
 
 ## Next step
 
