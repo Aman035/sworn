@@ -1,0 +1,51 @@
+==> python tests
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 84%]
+........................................                                 [100%]
+256 passed in 2.42s
+  ok  pipeline tests pass
+==> hookless calibration
+  eligible hookless fills: 3,815,363
+  re-quoting 10 fills on base ...
+
+  usable quotes: 10/10
+    0x46b35ffe43ae… expected=2474228455934366424307   realized=2474228455934366424307   |dev|=         0.0 bps
+    0x7aabfbc6ad21… expected=265524857698566558       realized=265524857698566558       |dev|=         0.0 bps
+    0xa5d7cd1af16b… expected=118309433                realized=118309433                |dev|=         0.0 bps
+    0xa6d066e18069… expected=7814750469186256649008   realized=7814750469186256649008   |dev|=         0.0 bps
+    0x4fd33018e281… expected=138870958                realized=138870958                |dev|=         0.0 bps
+    0x0c696ac041e4… expected=173919671                realized=173919671                |dev|=         0.0 bps
+    0xdc1a87588938… expected=56743394656565705587     realized=56743394656565705587     |dev|=         0.0 bps
+    0x7c82722e5c48… expected=39444384110359426148247  realized=39444384110359426148247  |dev|=         0.0 bps
+    0xbb5c355ec326… expected=46904288                 realized=46904288                 |dev|=         0.0 bps
+    0x730f485147f5… expected=1197446918606401557      realized=1197446918606399822      |dev|=         0.0 bps
+
+  ratio expected/realized : median=1.000000
+  excess take bps         : median=0.000  max=0.000
+  within 1.0 bps          : 10/10 (100%)  required >= 95%
+
+  calibration passed: hookless pools show no excess take
+  ok  hookless pools show no excess take
+==> result files
+  ok  divergence and attribution produced
+==> schema validation
+    attribution.json ok
+    census.json ok
+    divergence.json ok
+    intermittency.json ok
+    precision.json ok
+    probe.json ok
+    scores.json ok
+  ok  every result file validates
+==> sensitivity sweep is present
+    swept thresholds [2.0, 5.0, 10.0, 25.0], published 5.0
+  ok  divergent-hook count reported across thresholds
+==> divergence discloses its hookData coverage
+    hookData unknown for up to 100% of fills per hook (disclosed)
+  ok  hookData coverage is reported alongside every hook
+==> attribution publishes its own coverage
+    unlabeled share 50.2%
+  ok  unlabeled share is published, not hidden
+==> no number without a snapshot
+  ok  every result references the snapshot it came from

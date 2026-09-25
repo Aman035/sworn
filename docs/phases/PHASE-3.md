@@ -1,6 +1,6 @@
 # Phase 3 — Settled-trade divergence
 
-> Status: IN PROGRESS (was BLOCKED; calibration now passes) · Gate: `make phase-3`
+> Status: DONE, with a stated limitation on what the numbers mean · Gate: `make phase-3`
 
 ## Objective
 
@@ -94,7 +94,67 @@ Both would have produced confident, wrong headline numbers.
    measures `|expected/realized − 1|`, which is what the config's
    `calibration_max_abs_excess_bps` meant by _abs_.
 
+## Results
+
+Sample: the 25 busiest Base hooks by fill count, 4 fills each, from a 30-day window of
+12,855,496 fills across 5,257 hooks.
+
+| | |
+| --- | --: |
+| hooks measured | 24 |
+| fills measured | 92 (of 100 quoted; 8 unusable) |
+| charged fills (> 5 bps excess) | 1 |
+| divergent hooks | **0** |
+
+Zero divergent hooks, and the sensitivity sweep does not move it: 2, 5, 10 and 25 bps
+thresholds crossed with 10, 20 and 50 minimum fills all give the same answer. The headline
+is not an artefact of a threshold choice, because there is no headline to be an artefact of.
+
+**This is a finding, not a null result.** 0x reported 54.2% malicious across all 84,163
+hooks. We sampled the *busiest* hooks by fill count, which on Base are largely allowlisted
+infrastructure — the largest holds 8,170,323 pools, 54% of the chain. Toxicity, if it is
+where 0x found it, lives in the long tail rather than in the hooks carrying volume. A
+sample drawn by volume and a sample drawn uniformly answer different questions, and the
+difference is itself worth reporting.
+
+Attribution, which needs no re-quoting and therefore covers all 12.8M fills:
+
+| Product | Fills | Into hooked pools |
+| ------- | ----: | ----------------: |
+| Uniswap UniversalRouter | 3,220,269 | 30.9% |
+| Uniswap UniversalRouter (2nd) | 1,602,197 | 44.7% |
+| 0x BaseSettler | 458,339 | 45.3% |
+| 0x BaseSettler (2nd) | 350,231 | 43.6% |
+| Doppler | 300,653 | 100.0% |
+
+**50.2% of fills are unlabeled**, published as a field. An attribution table that hides
+its own coverage is not evidence.
+
+## The limitation these numbers carry
+
+**Every hooked re-quote was made with empty `hookData`**, and `divergence.json` records
+`hook_data_unknown_share: 1.0` for every hook. Recovering what a router actually passed
+needs a per-router calldata decoder, which does not exist yet.
+
+This is not a footnote. Several hooks show a median take of about **-101 bps** — users
+apparently receiving 1% *more* than quoted. The obvious explanation, that the quote applies
+a fee the real swap did not, was tested and fails: hooks with pool fee **0** show the same
+-101 bps as hooks with fee 3000. A systematic offset across unrelated fee tiers is the
+signature of the hook seeing a different call, not of generosity.
+
+So: the hookless calibration validates the **state and the engine** — it agrees to 0.00 bps
+on fills with no hook involved. It says nothing about the `hookData` assumption, and
+conflating the two would repeat the earlier mistake where a check that could only fail in
+one direction was read as a pass.
+
+**What these numbers support:** the machinery works end to end, the sample contains no
+divergent hooks at any threshold, and the attribution is solid.
+
+**What they do not support:** a claim about how often hooks charge. That needs the
+`hookData` decoder, and until it exists the divergence figures are preliminary.
+
 ## Next step
 
-Pipelines B (divergence), C (intermittency) and D (attribution), now that the engine they
-depend on is verified against ground truth.
+A per-router `hookData` decoder, starting with Universal Router, which alone accounts for
+37.5% of fills. Then re-run against a uniformly drawn sample rather than a
+volume-weighted one, so the population matches the question 0x's number answers.

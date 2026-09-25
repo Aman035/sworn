@@ -58,6 +58,24 @@ print(f"    swept thresholds {sorted(thresholds)}, published {published}")
 PYEOF
 ok "divergent-hook count reported across thresholds"
 
+step "divergence discloses its hookData coverage"
+# Hooked re-quotes are made with whatever hookData we could recover. When that is none,
+# a hook which prices on hookData is being measured against a call it never received —
+# and the result must say so rather than present the number bare.
+"$PY" - <<'PYEOF' || fail "divergence.json does not disclose hookData coverage"
+import json, sys
+doc = json.load(open("data/results/divergence.json"))
+hooks = doc.get("hooks") or []
+missing = [h["address"] for h in hooks if "hook_data_unknown_share" not in h]
+if missing:
+    print(f"    {len(missing)} hook(s) do not report hook_data_unknown_share")
+    sys.exit(1)
+if hooks:
+    worst = max(h["hook_data_unknown_share"] for h in hooks)
+    print(f"    hookData unknown for up to {worst:.0%} of fills per hook (disclosed)")
+PYEOF
+ok "hookData coverage is reported alongside every hook"
+
 step "attribution publishes its own coverage"
 "$PY" - <<'PYEOF' || fail "attribution.json hides its unlabeled share"
 import json, sys

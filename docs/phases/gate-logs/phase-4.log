@@ -1,0 +1,401 @@
+==> static analyser tests
+................                                                         [100%]
+  ok  PUSH immediates are not mistaken for opcodes
+==> detector fixtures compile and are detected
+No files changed, compilation skipped
+note[unused-import]: unused imports should be removed
+ --> test/unit/SwornNative.t.sol:9:9
+  |
+9 | import {PoolKey} from "v4-core/src/types/PoolKey.sol";
+  |         ^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> test/fixtures/ToxicHooks.sol:57:30
+   |
+57 |     address public immutable friendlyOrigin;
+   |                              ^^^^^^^^^^^^^^ help: consider using: `FRIENDLY_ORIGIN`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[unused-import]: unused imports should be removed
+  --> test/unit/SwornRouter.t.sol:10:20
+   |
+10 | import {Candidate, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+   |                    ^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unused-import]: unused imports should be removed
+  --> test/unit/SwornRouter.t.sol:10:33
+   |
+10 | import {Candidate, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+   |                                 ^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> test/unit/SwornNative.t.sol:49:31
+   |
+49 |             amountSpecified: -int256(SWAP_AMOUNT),
+   |                               ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'int256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/HookBook.sol:67:31
+   |
+67 |     bytes32 private immutable _domainSeparator;
+   |                               ^^^^^^^^^^^^^^^^ help: consider using: `_DOMAIN_SEPARATOR`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   --> test/unit/SwornInvariants.t.sol:190:31
+    |
+190 |         sworn.runRoute(hops, -int256(SWAP_AMOUNT), false);
+    |                               ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: consider disabling this lint if you're certain the cast is safe
+            
+            // casting to 'int256' is safe because [explain why]
+            // forge-lint: disable-next-line(unsafe-typecast)
+            
+            
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[unused-import]: unused imports should be removed
+ --> test/unit/SwornRoutes.t.sol:4:9
+  |
+4 | import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
+  |         ^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> test/unit/SwornRoutes.t.sol:55:29
+   |
+55 |         p.amountSpecified = int256(wantOut);
+   |                             ^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'int256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/SwornRouter.sol:69:35
+   |
+69 |     IPoolManager public immutable poolManager;
+   |                                   ^^^^^^^^^^^ help: consider using: `POOL_MANAGER`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> src/SwornRouter.sol:70:41
+   |
+70 |     ISignatureTransfer public immutable permit2;
+   |                                         ^^^^^^^ help: consider using: `PERMIT2`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   --> test/unit/SwornRoutes.t.sol:105:22
+    |
+105 |             assertEq(bytes4(reason), SwornRouter.ExcessiveInput.selector, "wrong error");
+    |                      ^^^^^^^^^^^^^^
+    |
+    = note: consider disabling this lint if you're certain the cast is safe
+            
+            // casting to 'bytes4' is safe because [explain why]
+            // forge-lint: disable-next-line(unsafe-typecast)
+            
+            
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[unused-import]: unused imports should be removed
+ --> test/unit/ToxicHooks.t.sol:8:20
+  |
+8 | import {Candidate, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+  |                    ^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unused-import]: unused imports should be removed
+  --> test/fork/NamedHooks.fork.t.sol:12:9
+   |
+12 | import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
+   |         ^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unsafe-cheatcode]: usage of unsafe cheatcodes that can perform dangerous operations
+   --> test/unit/SwornTestBase.sol:131:32
+    |
+131 |         if (vm.exists(obs)) vm.removeFile(obs);
+    |                                ^^^^^^^^^^
+    |
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-cheatcode
+
+note[unwrapped-modifier-logic]: wrap modifier logic to reduce code size
+   --> src/HookBook.sol:106:5
+    |
+106 | /     modifier onlyOwner() {
+107 | |         if (msg.sender != owner) revert NotOwner();
+108 | |         _;
+109 | |     }
+    | |_____^
+    |
+help: wrap modifier logic to reduce code size
+    |
+106 ~     modifier onlyOwner() {
+107 +         _onlyOwner();
+108 +         _;
+109 +     }
+110 + 
+111 +     function _onlyOwner() internal {
+112 +         if (msg.sender != owner) revert NotOwner();
+113 +     }
+    |
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unwrapped-modifier-logic
+
+note[unused-import]: unused imports should be removed
+  --> test/fork/BnbNamedHook.fork.t.sol:10:9
+   |
+10 | import {IERC20Minimal} from "v4-core/src/interfaces/external/IERC20Minimal.sol";
+   |         ^^^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unused-import]: unused imports should be removed
+  --> test/fork/BnbNamedHook.fork.t.sol:16:9
+   |
+16 | import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+   |         ^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> test/fixtures/BaseTestHook.sol:19:35
+   |
+19 |     IPoolManager public immutable poolManager;
+   |                                   ^^^^^^^^^^^ help: consider using: `POOL_MANAGER`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> test/unit/ToxicHooks.t.sol:63:39
+   |
+63 |         return naive.swap(key, true, -int256(SWAP_AMOUNT), 0, address(this));
+   |                                       ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'int256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   --> test/fork/NamedHooks.fork.t.sol:106:31
+    |
+106 |             amountSpecified: -int256(amountIn),
+    |                               ^^^^^^^^^^^^^^^^
+    |
+    = note: consider disabling this lint if you're certain the cast is safe
+            
+            // casting to 'int256' is safe because [explain why]
+            // forge-lint: disable-next-line(unsafe-typecast)
+            
+            
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   --> test/fork/NamedHooks.fork.t.sol:131:31
+    |
+131 |             console.logBytes4(bytes4(reason));
+    |                               ^^^^^^^^^^^^^^
+    |
+    = note: consider disabling this lint if you're certain the cast is safe
+            
+            // casting to 'bytes4' is safe because [explain why]
+            // forge-lint: disable-next-line(unsafe-typecast)
+            
+            
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[unused-import]: unused imports should be removed
+ --> test/unit/SwornTestBase.sol:7:9
+  |
+7 | import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+  |         ^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unused-import]: unused imports should be removed
+ --> test/unit/SwornGas.t.sol:8:20
+  |
+8 | import {Candidate, SwornParams} from "../../src/SwornRouter.sol";
+  |                    ^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unused-import]: unused imports should be removed
+  --> test/fork/BnbNamedHook.fork.t.sol:16:20
+   |
+16 | import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+   |                    ^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unused-import]: unused imports should be removed
+  --> test/fork/BnbNamedHook.fork.t.sol:16:25
+   |
+16 | import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+   |                         ^^^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[screaming-snake-case-const]: constants should use SCREAMING_SNAKE_CASE
+  --> test/fixtures/RecordingHooks.sol:24:26
+   |
+24 |     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+   |                          ^^ help: consider using: `VM`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-const
+
+note[screaming-snake-case-immutable]: immutables should use SCREAMING_SNAKE_CASE
+  --> test/fixtures/NaiveRouter.sol:22:35
+   |
+22 |     IPoolManager public immutable poolManager;
+   |                                   ^^^^^^^^^^^ help: consider using: `POOL_MANAGER`
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#screaming-snake-case-immutable
+
+note[unsafe-cheatcode]: usage of unsafe cheatcodes that can perform dangerous operations
+  --> script/Requote.s.sol:70:32
+   |
+70 |         string memory raw = vm.readFile(inputPath);
+   |                                ^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-cheatcode
+
+note[unsafe-cheatcode]: usage of unsafe cheatcodes that can perform dangerous operations
+  --> script/Requote.s.sol:80:12
+   |
+80 |         vm.writeFile(outputPath, out);
+   |            ^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-cheatcode
+
+note[asm-keccak256]: use of inefficient hashing mechanism; consider using inline assembly
+   --> src/HookBook.sol:206:26
+    |
+206 |           bytes32 digest = keccak256(
+    |  __________________________^
+207 | |             abi.encodePacked(
+208 | |                 "\x19\x01",
+209 | |                 _domainSeparator,
+...   |
+212 | |         );
+    | |_________^
+    |
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#asm-keccak256
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+  --> test/unit/SwornGas.t.sol:51:40
+   |
+51 |         naive.swap(hooklessKey, true, -int256(SWAP_AMOUNT), 0, address(this));
+   |                                        ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: consider disabling this lint if you're certain the cast is safe
+           
+           // casting to 'int256' is safe because [explain why]
+           // forge-lint: disable-next-line(unsafe-typecast)
+           
+           
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[unsafe-cheatcode]: usage of unsafe cheatcodes that can perform dangerous operations
+  --> test/fixtures/RecordingHooks.sol:44:12
+   |
+44 |         vm.writeLine(_path(), value);
+   |            ^^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-cheatcode
+
+note[unsafe-cheatcode]: usage of unsafe cheatcodes that can perform dangerous operations
+  --> test/fixtures/RecordingHooks.sol:50:16
+   |
+50 |         try vm.readFile(_path()) returns (string memory contents) {
+   |                ^^^^^^^^
+   |
+   = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-cheatcode
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   --> test/unit/SwornRoutes.t.sol:203:22
+    |
+203 |             assertEq(bytes4(reason), SwornRouter.Divergence.selector, "wrong error");
+    |                      ^^^^^^^^^^^^^^
+    |
+    = note: consider disabling this lint if you're certain the cast is safe
+            
+            // casting to 'bytes4' is safe because [explain why]
+            // forge-lint: disable-next-line(unsafe-typecast)
+            
+            
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   --> test/unit/SwornRoutes.t.sol:224:22
+    |
+224 |             assertEq(bytes4(reason), SwornRouter.StipendUnavailable.selector, "wrong error");
+    |                      ^^^^^^^^^^^^^^
+    |
+    = note: consider disabling this lint if you're certain the cast is safe
+            
+            // casting to 'bytes4' is safe because [explain why]
+            // forge-lint: disable-next-line(unsafe-typecast)
+            
+            
+    = help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+note[unused-import]: unused imports should be removed
+ --> test/fixtures/RecordingHooks.sol:5:9
+  |
+5 | import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
+  |         ^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+note[unused-import]: unused imports should be removed
+ --> test/fixtures/RecordingHooks.sol:9:9
+  |
+9 | import {BaseTestHook, SkimmingHook} from "./BaseTestHook.sol";
+  |         ^^^^^^^^^^^^
+  |
+  = help: https://book.getfoundry.sh/reference/forge/forge-lint#unused-import
+
+    decoy clean, real read detected
+  ok  static detection is correct on compiled fixtures
+==> probe results
+    40 hooks: static flags 4, traced 40, on-path 1
+  ok  probe.json validates and trace is stricter than static presence
+==> precision matrix
+    static         precision=0.00 recall=0.00
+    dynamic        precision=0.00 recall=0.00
+    trace          precision=0.00 recall=0.00
+    union          precision=0.00 recall=0.00
+    settled_trade  precision=0.00 recall=0.00
+  ok  per-method precision and recall reported against settled trades
