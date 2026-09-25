@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import statistics
 from datetime import UTC, datetime
 from pathlib import Path
@@ -72,6 +73,26 @@ def archive_url(chain: str) -> str:
     return url
 
 
+def fills_cache() -> Path:
+    """Per-fill measurements. Pipeline C reads these, and `--reaggregate` rebuilds the
+    document from them so that trying a different threshold costs seconds, not an hour."""
+    return path_for("results").parent / "cache" / "b_divergence_fills.parquet"
+
+
+def confirmed_cache_path(cache_key: str) -> Path:
+    return path_for("results").parent / "cache" / f"confirmed-{cache_key}.parquet"
+
+
+def load_confirmed(cache_key: str) -> pd.DataFrame | None:
+    """The trace-confirmed sample from a previous run, if one was written."""
+    cache = confirmed_cache_path(cache_key)
+    if not cache.is_file():
+        return None
+    cached = pd.read_parquet(cache)
+    print(f"  reusing {len(cached):,} trace-confirmed fills from cache", flush=True)
+    return cached
+
+
 def confirmed_sample(
     chain: str,
     sample: pd.DataFrame,
@@ -86,11 +107,11 @@ def confirmed_sample(
     exists: the confirmed frame is written once and reused, so a failed run resumes at the
     quoting step instead of the beginning.
     """
-    cache = path_for("results").parent / "cache" / f"confirmed-{cache_key}.parquet"
+    cache = confirmed_cache_path(cache_key)
     if cache.is_file() and not refresh:
-        cached = pd.read_parquet(cache)
-        print(f"  reusing {len(cached):,} trace-confirmed fills from cache", flush=True)
-        return cached
+        cached = load_confirmed(cache_key)
+        if cached is not None:
+            return cached
 
     confirmed = confirm_against_traces(chain, sample)
     cache.parent.mkdir(parents=True, exist_ok=True)
@@ -352,19 +373,44 @@ def _rows(
 def aggregate(
     measured: pd.DataFrame, threshold_bps: float, params: dict[str, Any]
 ) -> list[dict[str, Any]]:
+    """Per-hook rollup, with the measurement's own error subtracted.
+
+    **A hook cannot deliver more than it quoted.** Any fill measured as over-delivering by
+    more than the threshold is therefore pure measurement error — and because that error is
+    symmetric, the size of the negative tail estimates how many of the positive tail are
+    false. Counting the positives alone is how an earlier run of this pipeline reported 15
+    divergent hooks when only 6 survived their own noise floor, including two whose
+    negative tail was *larger* than their positive one.
+
+    So `charged` keeps its plain meaning, and a hook is only called divergent when its
+    positive tail beats its negative tail by more than the counting error on that negative
+    tail — two standard deviations of a Poisson count, which is the weakest test that can
+    still reject a hook whose excess is symmetric noise.
+    """
     out: list[dict[str, Any]] = []
     for hook, g in measured.groupby("hook"):
         usable = g[g.usable]
         if usable.empty:
             continue
         charged = usable[usable.excess_bps > threshold_bps]
+        # The control: impossible fills, at the same magnitude and the same sign convention.
+        overdelivered = usable[usable.take_bps < -threshold_bps]
         excesses = sorted(charged.excess_bps.tolist())
         rate = len(charged) / len(usable)
         median_excess = statistics.median(excesses) if excesses else 0.0
 
-        divergent = len(usable) >= params["min_fills"] and (
-            rate >= params["min_charged_rate"]
-            or median_excess >= params["min_median_charged_excess_bps"]
+        noise = len(overdelivered)
+        net_charged = max(0, len(charged) - noise)
+        net_rate = net_charged / len(usable)
+        beats_noise = len(charged) > noise + 2.0 * math.sqrt(max(noise, 1))
+
+        divergent = (
+            len(usable) >= params["min_fills"]
+            and beats_noise
+            and (
+                net_rate >= params["min_charged_rate"]
+                or median_excess >= params["min_median_charged_excess_bps"]
+            )
         )
         row: dict[str, Any] = {
             "chain": params["chain"],
@@ -377,6 +423,12 @@ def aggregate(
             "fills": int(len(usable)),
             "charged_fills": int(len(charged)),
             "charged_rate": rate,
+            # Fills that came out *better* than quoted by the same margin. Impossible from
+            # hook behaviour, so this is the per-hook false-positive estimate.
+            "overdelivered_fills": int(noise),
+            "net_charged_fills": int(net_charged),
+            "net_charged_rate": net_rate,
+            "beats_noise_floor": bool(beats_noise),
             "divergent": bool(divergent),
             "coverage": "sampled",
             "dynamic_fee": bool(usable.dynamic_fee.any()),
@@ -409,6 +461,11 @@ def main(argv: list[str] | None = None) -> int:
         help="re-trace even if a confirmed sample is cached",
     )
     parser.add_argument(
+        "--reaggregate",
+        action="store_true",
+        help="rebuild the document from cached per-fill measurements without re-quoting",
+    )
+    parser.add_argument(
         "--method",
         choices=("exact", "cheap"),
         default="exact",
@@ -433,38 +490,53 @@ def main(argv: list[str] | None = None) -> int:
         ),
     }
 
-    fills = eligible_fills(args.chain)
-    print(f"  eligible hooked fills: {len(fills):,} across {fills.hook.nunique():,} hooks")
-
-    if args.sample == "uniform":
-        sample = sample_uniform(fills, args.n, args.seed)
-    else:
-        sample = sample_by_hook(fills, args.per_hook, args.max_hooks, args.seed)
-    print(
-        f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks " f"({args.sample})"
+    # Keyed on the arguments rather than on the result, so a cache hit skips the index scan
+    # entirely — that scan is minutes of wall time and gigabytes of resident memory before
+    # anything is quoted.
+    shape = (
+        f"uniform-{args.n}"
+        if args.sample == "uniform"
+        else f"by-hook-{args.per_hook}x{args.max_hooks}"
     )
+    key = f"{args.chain}-{shape}-{args.seed}"
 
-    # The event told us where to look; the trace tells us what to quote.
-    key = f"{args.chain}-{args.sample}-{len(sample)}-{args.seed}"
-    sample = confirmed_sample(args.chain, sample, cache_key=key, refresh=args.refresh_traces)
+    sample = None if args.refresh_traces else load_confirmed(key)
+    if sample is None:
+        fills = eligible_fills(args.chain)
+        print(f"  eligible hooked fills: {len(fills):,} across {fills.hook.nunique():,} hooks")
+
+        if args.sample == "uniform":
+            sample = sample_uniform(fills, args.n, args.seed)
+        else:
+            sample = sample_by_hook(fills, args.per_hook, args.max_hooks, args.seed)
+        print(
+            f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks ({args.sample})"
+        )
+        del fills
+
+        # The event told us where to look; the trace tells us what to quote.
+        sample = confirmed_sample(args.chain, sample, cache_key=key, refresh=True)
     dropped = sample[~sample.confirmed].drop_reason.value_counts().to_dict()
     sample = sample[sample.confirmed].reset_index(drop=True)
     if sample.empty:
         raise SystemExit("no fills survived trace confirmation")
 
-    measured = measure(
-        args.chain,
-        sample,
-        reuse_quotes=args.reuse_quotes,
-        method=args.method,
-        batch_name="divergence" if args.sample == "by-hook" else "divergence-uniform",
-    )
+    if args.reaggregate:
+        measured = pd.read_parquet(fills_cache())
+        print(f"  re-aggregating {len(measured):,} cached measurements", flush=True)
+    else:
+        measured = measure(
+            args.chain,
+            sample,
+            reuse_quotes=args.reuse_quotes,
+            method=args.method,
+            batch_name="divergence" if args.sample == "by-hook" else "divergence-uniform",
+        )
 
     # Keep the per-fill rows: pipeline C is a time-series view of exactly this data, and
     # re-quoting for it would be both slow and liable to disagree with these numbers.
-    cache = path_for("results").parent / "cache"
-    cache.mkdir(parents=True, exist_ok=True)
-    parquet_safe(measured).to_parquet(cache / "b_divergence_fills.parquet", index=False)
+    fills_cache().parent.mkdir(parents=True, exist_ok=True)
+    parquet_safe(measured).to_parquet(fills_cache(), index=False)
 
     usable = measured[measured.usable]
     print(f"  usable quotes: {len(usable)}/{len(measured)}")
@@ -483,6 +555,7 @@ def main(argv: list[str] | None = None) -> int:
                     "min_fills": int(mf),
                     "divergent_hooks": sum(1 for r in rows if r["divergent"]),
                     "charged_fills": sum(r["charged_fills"] for r in rows),
+                    "overdelivered_fills": sum(r["overdelivered_fills"] for r in rows),
                 }
             )
 
@@ -518,7 +591,27 @@ def main(argv: list[str] | None = None) -> int:
             "fills": int(len(usable)),
             "charged_fills": sum(h["charged_fills"] for h in hooks),
             "hooks": len(hooks),
+            # Hooks with enough fills to be classifiable at all. The headline denominator:
+            # "15 of 1404" and "15 of 25" are very different claims, and only one is true.
+            "eligible_hooks": sum(1 for h in hooks if h["fills"] >= params["min_fills"]),
             "divergent_hooks": sum(1 for h in hooks if h["divergent"]),
+        },
+        "noise_floor": {
+            "method": "over-delivered fills at the same magnitude",
+            "rationale": (
+                "A hook cannot deliver more than it quoted, so fills measured as "
+                "over-delivering are measurement error. The error is symmetric, so their "
+                "count estimates the false positives among charged fills."
+            ),
+            "charged_fills": sum(h["charged_fills"] for h in hooks),
+            "overdelivered_fills": sum(h["overdelivered_fills"] for h in hooks),
+            "estimated_false_positive_share": (
+                sum(h["overdelivered_fills"] for h in hooks)
+                / max(1, sum(h["charged_fills"] for h in hooks))
+            ),
+            "hooks_failing_the_floor": sum(
+                1 for h in hooks if h["fills"] >= params["min_fills"] and not h["beats_noise_floor"]
+            ),
         },
         "hooks": hooks,
         "sensitivity": sensitivity,

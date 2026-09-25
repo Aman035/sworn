@@ -349,6 +349,10 @@
                 "number",
                 "null"
               ]
+            },
+            "eligible_hooks": {
+              "type": "integer",
+              "description": "Hooks with enough fills to be classifiable; the honest denominator."
             }
           }
         },
@@ -433,6 +437,18 @@
               "hook_data_nonempty_fills": {
                 "type": "integer",
                 "description": "Measured fills whose router passed non-empty hookData."
+              },
+              "overdelivered_fills": {
+                "type": "integer"
+              },
+              "net_charged_fills": {
+                "type": "integer"
+              },
+              "net_charged_rate": {
+                "$ref": "#/$defs/rate"
+              },
+              "beats_noise_floor": {
+                "type": "boolean"
               }
             }
           }
@@ -459,6 +475,9 @@
                 "type": "integer"
               },
               "charged_fills": {
+                "type": "integer"
+              },
+              "overdelivered_fills": {
                 "type": "integer"
               }
             }
@@ -504,6 +523,35 @@
               "additionalProperties": {
                 "type": "integer"
               }
+            }
+          }
+        },
+        "noise_floor": {
+          "type": "object",
+          "description": "The measurement's own false-positive estimate, from fills that came out better than quoted.",
+          "required": [
+            "overdelivered_fills",
+            "estimated_false_positive_share"
+          ],
+          "additionalProperties": true,
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "charged_fills": {
+              "type": "integer"
+            },
+            "overdelivered_fills": {
+              "type": "integer"
+            },
+            "estimated_false_positive_share": {
+              "$ref": "#/$defs/rate"
+            },
+            "hooks_failing_the_floor": {
+              "type": "integer"
             }
           }
         }
