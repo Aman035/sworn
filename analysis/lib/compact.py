@@ -139,12 +139,34 @@ def compact(
     return CompactResult(shard, total, undecodable, last_block, freed)
 
 
-def load_shards(directory: Path, prefix: str = SHARD_PREFIX) -> pd.DataFrame:
-    """Concatenate every shard into one frame, deduplicated on its natural key."""
+def load_shards(
+    directory: Path,
+    prefix: str = SHARD_PREFIX,
+    *,
+    columns: list[str] | None = None,
+    where: Callable[[pd.DataFrame], pd.DataFrame] | None = None,
+) -> pd.DataFrame:
+    """Concatenate every shard into one frame, deduplicated on its natural key.
+
+    `columns` and `where` are applied **per shard, before concatenating**. That is not an
+    optimisation detail: Base has 12.8M fills whose numeric fields are stored as strings
+    (they exceed int64), and loading them all before filtering costs the better part of
+    ten gigabytes and pushes the machine into swap.
+    """
     shards = shard_paths(directory, prefix)
     if not shards:
         return pd.DataFrame()
-    frame = pd.concat([pd.read_parquet(s) for s in shards], ignore_index=True)
+
+    parts = []
+    for s in shards:
+        part = pd.read_parquet(s, columns=columns)
+        if where is not None:
+            part = where(part)
+        if len(part):
+            parts.append(part)
+    if not parts:
+        return pd.DataFrame()
+    frame = pd.concat(parts, ignore_index=True)
     # A pool is initialized once; a fill is identified by (tx, log index). An overlapping
     # resume can replay a chunk, so both are deduplicated on what the chain guarantees.
     key = ["pool_id"] if prefix == SHARD_PREFIX else ["tx_hash", "log_index"]
