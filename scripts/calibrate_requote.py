@@ -42,14 +42,14 @@ def build_population(chain: str):  # noqa: ANN201
     and pushes the machine into swap, so the hookless pools (233k of 15.3M) are selected
     first and the fills are narrowed to that set before anything else happens.
     """
-    pools = load_shards(snapshot_dir(f"census-{chain}"))
-    if pools.empty:
+    hookless = load_shards(
+        snapshot_dir(f"census-{chain}"),
+        columns=["pool_id", "currency0", "currency1", "fee", "tick_spacing", "hook", "hookless"],
+        where=lambda part: part[part.hookless],
+    )
+    if hookless.empty:
         raise SystemExit(f"missing census for {chain}")
-    hookless = pools.loc[
-        pools.hookless,
-        ["pool_id", "currency0", "currency1", "fee", "tick_spacing", "hook"],
-    ]
-    del pools
+    hookless = hookless.drop(columns=["hookless"])
 
     wanted = set(hookless.pool_id)
     fills = load_shards(
@@ -101,7 +101,7 @@ def main() -> int:
             log_index=int(r.log_index),
             currency0=r.currency0,
             currency1=r.currency1,
-            fee=int(r.fee_pool),
+            fee=int(r.fee),
             tick_spacing=int(r.tick_spacing),
             hooks=r.hook,
             zero_for_one=True,
@@ -127,7 +127,7 @@ def main() -> int:
                 r.tx_hash_fill,
                 q.expected,
                 r.a1,
-                excess_take_bps(q.expected, r.a1, int(r.fee_pool)),
+                excess_take_bps(q.expected, r.a1, int(r.fee)),
                 "",
             )
         )
