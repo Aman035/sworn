@@ -1,0 +1,21 @@
+{
+  "name": "hooks-bnb",
+  "chain": "bnb",
+  "chain_id": 56,
+  "block_from": 0,
+  "block_to": 0,
+  "rpc_provider": "sly-practical-market.bsc.quiknode.pro/\u20261cad",
+  "script_commit": "5539423-dirty",
+  "created_at": "2026-09-25T21:11:06Z",
+  "rows": 6363,
+  "source": "eth_getCode + EIP-1967 slots + etherscan getsourcecode",
+  "notes": "",
+  "files": [
+    {
+      "path": "hooks.parquet",
+      "sha256": "01afb58abcf3e33943c320e7cec3d6f5632395ac32abdf80229a5da3ce4d5e38",
+      "bytes": 528867,
+      "rows": null
+    }
+  ]
+}

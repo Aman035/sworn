@@ -1,0 +1,36 @@
+==> python tests
+........................................................................ [ 29%]
+........................................................................ [ 58%]
+........................................................................ [ 87%]
+................................                                         [100%]
+248 passed in 2.49s
+All checks passed!
+  ok  census, decoding and reconciliation tests pass
+==> flag decoding matches the pinned Hooks.sol
+  ok  address-derived permissions agree with Hooks.sol and all hooklist entries
+==> census snapshots present
+    base: 15309659 pools
+    bnb: 256187 pools
+  ok  census snapshots exist for: base bnb
+==> snapshot manifests verify
+  ok  every snapshot file hashes to its manifest
+==> independent reconciliation
+  reconciling base via rough-silent-surf.base-mainnet.quiknode.pro/…97f4
+    windows          40 x 2000 blocks in [25,350,988, 51,778,292]
+    pools   independent   47,380  snapshot   47,380  delta  0.00%
+    hooks   independent      221  snapshot      221  delta  0.00%
+    ok (tolerance 5%)
+
+  reconciling bnb via sly-practical-market.bsc.quiknode.pro/…1cad
+    windows          40 x 2000 blocks in [45,970,610, 123,972,139]
+    pools   independent      246  snapshot      246  delta  0.00%
+    hooks   independent       24  snapshot       24  delta  0.00%
+    ok (tolerance 5%)
+
+census reconciles with an independent count
+  ok  census within tolerance of a second, independent implementation
+==> census.json
+    4 chain(s), 100 top hooks
+  ok  census.json validates and carries snapshot provenance
+==> no number without a snapshot
+  ok  every result file references the snapshot it came from
