@@ -77,4 +77,4 @@ Full log: `docs/phases/gate-logs/phase-0.log`. Ledger row: `PHASES.md`.
 
 Phase 1 freezes the metric definitions (`docs/METRICS.md`), the parameters in
 `analysis/config.yaml` and the output fields in `analysis/schemas/results.schema.json`
-*before* any data is pulled, so the numbers cannot drift later.
+_before_ any data is pulled, so the numbers cannot drift later.

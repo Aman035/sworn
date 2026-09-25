@@ -1,12 +1,49 @@
 /**
- * sworn-sdk — build SwornRouter calldata from a quote.
+ * sworn-sdk — build `SwornRouter` calldata, and read `HookBook` scores.
  *
- * Phase 8 fills in `buildSwornCall`, the quote adapters and the viem action. Until then this
- * module only exports the chain set the rest of the repo agrees on, so that consumers can
- * already pin against it.
+ * The router's guarantee does not depend on anything in this package: a swap routed
+ * through `SwornRouter` cannot be served a price different from the one that executes,
+ * whatever the SDK does. What the SDK adds is a candidate set that is coherent, and a way
+ * to read the advisory scores.
  */
 
-export const SDK_VERSION = '0.0.0';
+export { swornRouterAbi, hookBookAbi } from './abi.js';
+export {
+  buildSwornCall,
+  candidateIsHooked,
+  isHooked,
+  isNative,
+  validateCandidates,
+  SwornSdkError,
+  DEFAULT_DEADLINE_SECONDS,
+  DEFAULT_HOOK_MARGIN_BPS,
+  DEFAULT_MAX_PROBES,
+  DEFAULT_PROBE_GAS,
+  type BuildSwornCallArgs,
+} from './buildCall.js';
+export {
+  HookBookReader,
+  explain,
+  explainFlags,
+  type HookScore,
+  type HookBookReaderOptions,
+  type ReadClient,
+} from './hookbook.js';
+export {
+  ADDRESS_ZERO,
+  DYNAMIC_FEE_FLAG,
+  HOOK_FLAGS,
+  type Address,
+  type Candidate,
+  type Hex,
+  type Hop,
+  type HookFlagName,
+  type PoolKey,
+  type SwornCall,
+  type SwornParams,
+} from './types.js';
+
+export const SDK_VERSION = '0.1.0';
 
 /** Chains Sworn targets, in the build-priority order used across the repo. */
 export const SWORN_CHAINS = {

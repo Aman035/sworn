@@ -20,7 +20,7 @@ order makes the Phase 3 sensitivity sweep credible rather than defensive.
   `analysis/config.yaml` and its fields in `analysis/schemas/results.schema.json`,
   including the divergence-score formula and a fully worked example.
 - **`docs/THREAT_MODEL.md`** — eleven attacker capabilities, what Sworn does about each,
-  the gas-stipend argument, and an explicit list of what Sworn does *not* protect.
+  the gas-stipend argument, and an explicit list of what Sworn does _not_ protect.
 - **`docs/ARCHITECTURE.md`** — components, a mermaid data-flow diagram, the RPC capability
   matrix, and why `evm_version = cancun` is load-bearing.
 - **`analysis/schemas/results.schema.json`** — all nine result files, `additionalProperties: false`
@@ -40,12 +40,12 @@ order makes the Phase 3 sensitivity sweep credible rather than defensive.
 
 ## Evidence
 
-| Claim | Where it comes from | Snapshot |
-| ----- | ------------------- | -------- |
-| The five claims each have an owning artefact | `docs/STORY.md` table, linted for empty cells | n/a (no data yet) |
-| Every metric has a parameter and a result field | `scripts/lint_docs.py` check 1 | n/a |
-| External figures are quoted, not paraphrased | `docs/SOURCES.md`, fetched 2026-09-25 | n/a |
-| No number has been fabricated | gate asserts `data/results/` is empty | n/a |
+| Claim                                           | Where it comes from                           | Snapshot          |
+| ----------------------------------------------- | --------------------------------------------- | ----------------- |
+| The five claims each have an owning artefact    | `docs/STORY.md` table, linted for empty cells | n/a (no data yet) |
+| Every metric has a parameter and a result field | `scripts/lint_docs.py` check 1                | n/a               |
+| External figures are quoted, not paraphrased    | `docs/SOURCES.md`, fetched 2026-09-25         | n/a               |
+| No number has been fabricated                   | gate asserts `data/results/` is empty         | n/a               |
 
 ## Decisions and deviations from the plan
 
@@ -59,7 +59,7 @@ order makes the Phase 3 sensitivity sweep credible rather than defensive.
   rather than quietly presented as checked.
 - **`min_fills_for_score` yields `null`, not `0`.** A hook with too little data gets
   `INSUFFICIENT_DATA`, not a clean bill of health. This matters for claim 4: an honest
-  builder needs a low score to *mean* something.
+  builder needs a low score to _mean_ something.
 - **Dynamic-fee hooks are reported twice.** Excess over their own nominal fee, and excess
   over the nearest static tier — otherwise a dynamic-fee hook could legitimise any take by
   declaring it as its fee.

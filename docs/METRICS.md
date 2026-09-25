@@ -3,11 +3,11 @@
 Frozen in Phase 1, before any data was pulled, so the numbers cannot be tuned after the
 fact. Three artefacts must agree and `make phase-1` checks that they do:
 
-| Artefact | Role |
-| -------- | ---- |
-| this file | the definition, in words, with the edge cases |
-| `analysis/config.yaml` | every threshold, as a parameter |
-| `analysis/schemas/results.schema.json` | the field the value lands in |
+| Artefact                               | Role                                          |
+| -------------------------------------- | --------------------------------------------- |
+| this file                              | the definition, in words, with the edge cases |
+| `analysis/config.yaml`                 | every threshold, as a parameter               |
+| `analysis/schemas/results.schema.json` | the field the value lands in                  |
 
 Each metric below names its parameters and its result fields. A pipeline that hard-codes
 a threshold, or writes a field not listed here, fails the gate.
@@ -23,7 +23,7 @@ hooked pool. All windows are UTC.
 
 ### `expected_output`
 
-**Definition.** The output of the *identical* swap — same pool, same direction, same
+**Definition.** The output of the _identical_ swap — same pool, same direction, same
 `amountSpecified`, same `sqrtPriceLimitX96`, same `hookData` — evaluated against the pool
 state immediately **before** the fill's transaction.
 
@@ -70,7 +70,7 @@ that. Native ETH pools (`currency0 == address(0)`) use the same delta convention
 
 **Definition.** `(expected_output − realized_output) / expected_output`, unitless and
 signed. Positive means the user received less than the pre-trade state implied. Negative
-values are kept, not clipped: a hook that pays out *more* than quoted is evidence about
+values are kept, not clipped: a hook that pays out _more_ than quoted is evidence about
 the engine's accuracy and must stay visible.
 
 For exact-output fills the comparison is made on the input side — the user's loss shows
@@ -95,7 +95,7 @@ unit every threshold and every published figure uses.
 
 ### `nominal_fee`
 
-**Definition.** The fee the pool *says* it charges.
+**Definition.** The fee the pool _says_ it charges.
 
 - **Static-fee pools**: the LP fee encoded in the `PoolKey`.
 - **Dynamic-fee pools** (`fee == 0x800000`): the fee emitted on the `Swap` event for that
@@ -169,7 +169,7 @@ with pool state. Established when either:
 - a `debug_traceCall` shows an environment opcode (`GASPRICE`, `ORIGIN`, `COINBASE`,
   `BASEFEE`, `PREVRANDAO`, `GASLIMIT`, `GAS`) actually **executing on the swap path**.
 
-Mere presence of the opcode in bytecode is *not* sufficient: libraries and access-control
+Mere presence of the opcode in bytecode is _not_ sufficient: libraries and access-control
 code read `tx.origin` and `gasleft()` for benign reasons. Presence is recorded as a
 static signal; the flag requires execution on the path.
 
@@ -183,7 +183,7 @@ static signal; the flag requires execution on the path.
 
 **Definition.** The hook's hourly charged rate crosses the charged threshold at least
 `min_crossings` times within `window_days`. This is the "toggled 26 times" pattern: a
-hook that is toxic for part of the day defeats any one-shot simulation *and* any
+hook that is toxic for part of the day defeats any one-shot simulation _and_ any
 allowlist refreshed slower than the toggle.
 
 An hour with fewer than `min_fills_per_bucket` fills cannot count as a crossing, so a
@@ -199,7 +199,7 @@ single fill cannot flip the regime.
 
 **Definition.** `Swap.sender` is the contract that called `PoolManager.swap` — a router,
 not the user. Mapping it to a product (a wallet, an aggregator, a filler) is how the
-exposure question gets answered: *which front-end routed users into this hook?*
+exposure question gets answered: _which front-end routed users into this hook?_
 
 The map is hand-curated in `analysis/data/routers.csv` with a source URL and a confidence
 per row. Anything unmapped goes to `unlabeled` and the unlabeled share is published —
@@ -224,7 +224,7 @@ at the same pre-fill state. Probe gas is charged against the saving, priced in t
 token, because a guarantee that costs more than it saves is not a saving.
 
 USD totals are published only where the price source clears `min_price_confidence`;
-fill *counts* are published everywhere.
+fill _counts_ are published everywhere.
 
 **Parameters.** `metrics.protected_value.probe_gas_per_candidate`, `metrics.protected_value.default_candidates`, `metrics.protected_value.min_price_confidence`
 
@@ -244,15 +244,15 @@ fᵢ = 1 or 0                            for the boolean inputs
 decay = 0.5 ^ (days_since_last_evidence / half_life_days)
 ```
 
-| Input | Weight | `full_at` | Why it counts |
-| ----- | ------ | --------- | ------------- |
-| `charged_rate` | 0.30 | 0.50 | how often a user is hurt |
-| `median_excess` | 0.25 | 1000 bps | how badly, when it happens |
-| `intermittency` | 0.15 | 10 crossings | defeats one-shot checks and slow allowlists |
-| `env_sensitive` | 0.15 | boolean | proves intent: state cannot explain it |
-| `owner_switches` | 0.05 | 5 | the operator can turn it on at will |
-| `upgradeable` | 0.05 | boolean | today's bytecode is not tomorrow's |
-| `revert_gated` | 0.05 | 0.25 asymmetry | griefing is a cost even without extraction |
+| Input            | Weight | `full_at`      | Why it counts                               |
+| ---------------- | ------ | -------------- | ------------------------------------------- |
+| `charged_rate`   | 0.30   | 0.50           | how often a user is hurt                    |
+| `median_excess`  | 0.25   | 1000 bps       | how badly, when it happens                  |
+| `intermittency`  | 0.15   | 10 crossings   | defeats one-shot checks and slow allowlists |
+| `env_sensitive`  | 0.15   | boolean        | proves intent: state cannot explain it      |
+| `owner_switches` | 0.05   | 5              | the operator can turn it on at will         |
+| `upgradeable`    | 0.05   | boolean        | today's bytecode is not tomorrow's          |
+| `revert_gated`   | 0.05   | 0.25 asymmetry | griefing is a cost even without extraction  |
 
 A hook with fewer than `min_fills_for_score` fills gets `score = null` and the
 `INSUFFICIENT_DATA` flag — **not** a zero. Absence of evidence is reported as absence of
