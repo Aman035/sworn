@@ -24,9 +24,9 @@ lies makes those two disagree, and the trade does not happen.
 Four assumptions hold everything up, and v4 guarantees none of them:
 
 | Assumed                            | Actually                                                         |
-| ---------------------------------- | ---------------------------------------------------------------- |
+| ---------------------------------- | ---------------------------------------------------------------- | -------------------------------------- |
 | A quote predicts execution         | A hook runs in both and can tell them apart                      |
-| Hook code is reviewable            | 10,430 hooks on Base sit behind a proxy                          |
+| Hook code is reviewable            | {{result:census.json:chains[chain=base].upgradeable              | int}} hooks on Base sit behind a proxy |
 | Routers can price safely off-chain | Every router prices with `eth_call`, which is the honest path    |
 | Allowlists are enough              | An allowlisted hook can be upgraded the block after it is listed |
 
@@ -79,9 +79,33 @@ Front-end attribution covers every fill and publishes its own blind spot:
 hides its coverage is not evidence.
 
 Divergence is measured by re-quoting settled trades against the state immediately before
-them. In the sample measured so far there are
-0 divergent hooks at every threshold in
-the sensitivity sweep — a real result, and a small one. See [Limits](#11-threat-model-and-limits).
+them, over a uniform random sample of
+10,000 Base fills:
+
+|                                     |       |
+| ----------------------------------- | ----: |
+| fills measured                      | 5,121 |
+| hooks seen                          | 1,404 |
+| hooks with enough fills to classify |    25 |
+| **divergent hooks**                 | **4** |
+
+The denominator that matters is `eligible_hooks`, not `hooks`. A hook seen three times
+cannot be called clean or dirty, and this repo will not do either.
+
+**Half of the charged fills are measurement error, and that is published too.** A hook
+cannot deliver _more_ than it quoted, so every fill measured as over-delivering is a known
+false positive — and because the error is symmetric, its count estimates the false
+positives among the charged fills:
+
+|                                               |       |
+| --------------------------------------------- | ----: |
+| charged fills                                 |   732 |
+| over-delivered fills (impossible; pure error) |   354 |
+| estimated false-positive share                | 48.4% |
+| eligible hooks that failed the floor          |    20 |
+
+Counting positives alone gave a larger and wronger headline. Subtracting a hook's own
+negative tail is what the published number does.
 
 Each figure resolves from [`data/results/`](data/results), and every result file carries the
 sha256 of the snapshot it was computed from.
@@ -111,9 +135,9 @@ token0 from exact-output on token1. They are identical.
 
 So every measured fill is confirmed against its own transaction trace — `amountSpecified`,
 `hookData` and the realized output all come from the traced `PoolManager.swap` call. Of
-100 sampled fills,
-85 survived, and
-13 were exact-output
+10,000 sampled fills,
+8,968 survived, and
+449 were exact-output
 swaps the event had disguised. Both defects are filed upstream in [FEEDBACK.md](FEEDBACK.md).
 
 ## 6. Sworn

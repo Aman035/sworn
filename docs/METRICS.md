@@ -53,16 +53,28 @@ assumed.
 
 ### `realized_output`
 
-**Definition.** What the swapper actually received, taken from the `Swap` event's signed
-deltas (`amount0` / `amount1`) for the fill.
+**Definition.** What the swapper actually received, taken from the **return value of the
+traced `PoolManager.swap` call** for the fill.
 
-Deliberately **not** measured from token transfers: a hook may move tokens to and from
-the router within the same transaction, and transfer-based accounting double-counts
-that. Native ETH pools (`currency0 == address(0)`) use the same delta convention.
+**Not from the `Swap` event.** `PoolManager` emits that event between `beforeSwap` and
+`afterSwap`, so its amounts exclude anything the hook takes in `afterSwap`. On Base, a
+hook taking one percent there produced an event `amount1` of `3,941,355,102,139,778,949`
+against a returned `3,901,941,551,118,381,160` — reading the event, the hook appears to
+_pay_ the user one percent. An earlier version of this document specified the event, and
+the resulting -101 bps median take took a day to run down.
+
+Nor from token transfers: a hook may move tokens to and from the router within the same
+transaction, and transfer-based accounting double-counts that. Native ETH pools
+(`currency0 == address(0)`) use the same delta convention.
+
+The same trace supplies `amountSpecified` and `hookData`, because the event cannot
+distinguish exact-input on token0 from exact-output on token1 — 13% of fills selected as
+exact-input by event sign were exact-output. Fills whose call cannot be recovered are
+dropped, never estimated.
 
 **Parameters.** `metrics.realized_output.source`
 
-**Result fields.** `divergence.totals.fills`, `divergence.hooks[].fills`
+**Result fields.** `divergence.totals.fills`, `divergence.hooks[].fills`, `divergence.trace_confirmation`, `divergence.params.realized_output_source`
 
 ---
 
@@ -142,20 +154,44 @@ threshold must be one of the swept values (asserted in `analysis/tests/test_conf
 
 ### `divergent_hook`
 
-**Definition.** A hook with at least `min_fills` fills **and** either
+**Definition.** A hook with at least `min_fills` fills that **beats its own noise floor**
+and then satisfies either
 
-- a charged rate ≥ `min_charged_rate` (it charges often), **or**
+- a net charged rate ≥ `min_charged_rate` (it charges often), **or**
 - a median charged excess ≥ `min_median_charged_excess_bps` (it charges rarely but hard).
 
 Two arms because the two observed attack shapes are different: the env-sniffer charges
 almost every simulated trade a little, the dice-roller charges a few trades enormously.
 A single-arm rule misses one of them.
 
-`min_fills` exists so that a hook with three fills cannot reach the README.
+`min_fills` exists so that a hook with three fills cannot reach the README. The honest
+denominator for any headline is `totals.eligible_hooks`, the hooks that clear it — not
+every hook that appeared in the sample.
+
+#### The noise floor
+
+**A hook cannot deliver more than it quoted.** So a fill measured as over-delivering by
+more than the charged threshold is pure measurement error, and because the error is
+symmetric, the count of such fills estimates how many _charged_ fills are false at the
+same magnitude.
+
+    overdelivered = fills with take_bps < -threshold
+    net_charged   = max(0, charged - overdelivered)
+    beats_floor   = charged > overdelivered + 2 * sqrt(max(overdelivered, 1))
+
+The margin is two standard deviations of a Poisson count on the negative tail: the weakest
+test that still rejects a hook whose excess is symmetric noise.
+
+This is not a refinement. On the 10,000-fill uniform Base sample, 354 fills over-delivered
+against 732 charged — **roughly half of all charged fills are measurement error** — and
+counting positives alone reported 15 divergent hooks where 4 survive the floor. Two of the
+discarded 15 had a _larger_ negative tail than positive.
+
+Every result therefore publishes `divergence.noise_floor` next to the headline.
 
 **Parameters.** `metrics.divergent_hook.min_fills`, `metrics.divergent_hook.min_charged_rate`, `metrics.divergent_hook.min_median_charged_excess_bps`, `metrics.divergent_hook.sensitivity_min_fills`
 
-**Result fields.** `divergence.hooks[].divergent`, `divergence.totals.divergent_hooks`, `divergence.sensitivity[].divergent_hooks`, `divergence.params.min_fills`, `divergence.params.min_charged_rate`, `divergence.params.min_median_charged_excess_bps`
+**Result fields.** `divergence.hooks[].divergent`, `divergence.hooks[].beats_noise_floor`, `divergence.hooks[].overdelivered_fills`, `divergence.hooks[].net_charged_fills`, `divergence.hooks[].net_charged_rate`, `divergence.totals.divergent_hooks`, `divergence.totals.eligible_hooks`, `divergence.noise_floor`, `divergence.sensitivity[].divergent_hooks`, `divergence.sensitivity[].overdelivered_fills`, `divergence.params.min_fills`, `divergence.params.min_charged_rate`, `divergence.params.min_median_charged_excess_bps`
 
 ---
 

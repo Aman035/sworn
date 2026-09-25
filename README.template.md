@@ -79,9 +79,33 @@ Front-end attribution covers every fill and publishes its own blind spot:
 hides its coverage is not evidence.
 
 Divergence is measured by re-quoting settled trades against the state immediately before
-them. In the sample measured so far there are
-{{result:divergence.json:totals.divergent_hooks|int}} divergent hooks at every threshold in
-the sensitivity sweep — a real result, and a small one. See [Limits](#11-threat-model-and-limits).
+them, over a uniform random sample of
+{{result:divergence.json:trace_confirmation.sampled|int}} Base fills:
+
+|                                     |                                                     |
+| ----------------------------------- | --------------------------------------------------: | --------- |
+| fills measured                      |               {{result:divergence.json:totals.fills | int}}     |
+| hooks seen                          |               {{result:divergence.json:totals.hooks | int}}     |
+| hooks with enough fills to classify |      {{result:divergence.json:totals.eligible_hooks | int}}     |
+| **divergent hooks**                 | \*\*{{result:divergence.json:totals.divergent_hooks | int}}\*\* |
+
+The denominator that matters is `eligible_hooks`, not `hooks`. A hook seen three times
+cannot be called clean or dirty, and this repo will not do either.
+
+**Half of the charged fills are measurement error, and that is published too.** A hook
+cannot deliver _more_ than it quoted, so every fill measured as over-delivering is a known
+false positive — and because the error is symmetric, its count estimates the false
+positives among the charged fills:
+
+|                                               |                                                                     |
+| --------------------------------------------- | ------------------------------------------------------------------: | ----- |
+| charged fills                                 |                  {{result:divergence.json:noise_floor.charged_fills | int}} |
+| over-delivered fills (impossible; pure error) |            {{result:divergence.json:noise_floor.overdelivered_fills | int}} |
+| estimated false-positive share                | {{result:divergence.json:noise_floor.estimated_false_positive_share | pct}} |
+| eligible hooks that failed the floor          |        {{result:divergence.json:noise_floor.hooks_failing_the_floor | int}} |
+
+Counting positives alone gave a larger and wronger headline. Subtracting a hook's own
+negative tail is what the published number does.
 
 Each figure resolves from [`data/results/`](data/results), and every result file carries the
 sha256 of the snapshot it was computed from.
