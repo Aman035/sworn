@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sworn-analysis"
+version = "0.0.0"
+description = "Sworn: Uniswap v4 hook divergence measurement pipelines"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "pandas==2.2.3",
+  "pyarrow==18.1.0",
+  "duckdb==1.1.3",
+  "pyyaml==6.0.2",
+  "jsonschema==4.23.0",
+  "httpx==0.28.1",
+  "python-dotenv==1.0.1",
+  "tqdm==4.67.1",
+  "eth-utils==5.1.0",
+  "eth-abi==5.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.3.4",
+  "pytest-cov==6.0.0",
+  "ruff==0.8.6",
+  "mypy==1.14.1",
+  "types-PyYAML==6.0.12.20241230",
+]
+
+[tool.setuptools]
+packages = ["sworn_analysis", "sworn_analysis.lib", "sworn_analysis.pipelines"]
+
+[tool.setuptools.package-dir]
+"sworn_analysis" = "."
+"sworn_analysis.lib" = "lib"
+"sworn_analysis.pipelines" = "pipelines"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+  "rpc: requires a live archive RPC endpoint",
+  "slow: long-running pipeline test",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
