@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from sworn_analysis.lib.config import Chain, chain, chains, load_config, path_for
 
 # Priority order is a build decision (Base and BNB first: that is where the named
