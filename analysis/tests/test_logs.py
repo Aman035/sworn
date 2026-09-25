@@ -1,0 +1,142 @@
+"""Adaptive log fetching: back off on provider limits, resume after a crash.
+
+A census pull is hours long and spans tens of millions of blocks. Both failure modes here
+are silent and catastrophic — a skipped range quietly shrinks the denominator for every
+downstream number — so they are tested rather than observed.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import httpx
+import pytest
+from sworn_analysis.lib.logs import (
+    MIN_CHUNK,
+    LogFetcher,
+    fetch_to_jsonl,
+    iter_logs,
+    looks_like_range_limit,
+    resume_point,
+)
+from sworn_analysis.lib.rpc import RpcError
+
+
+class LimitedRpc:
+    """A provider that refuses any range wider than `max_span` blocks."""
+
+    def __init__(self, max_span: int, logs_per_block: int = 0, error: str | None = None) -> None:
+        self.max_span = max_span
+        self.logs_per_block = logs_per_block
+        self.error = error or "query returned more than 10000 results"
+        self.requests: list[tuple[int, int]] = []
+
+    def call(self, method: str, params: list[Any] | None = None) -> Any:
+        assert method == "eth_getLogs"
+        f = int(params[0]["fromBlock"], 16)  # type: ignore[index]
+        t = int(params[0]["toBlock"], 16)  # type: ignore[index]
+        span = t - f + 1
+        if span > self.max_span:
+            raise RpcError("eth_getLogs", -32600, self.error)
+        self.requests.append((f, t))
+        return [
+            {"blockNumber": hex(b)} for b in range(f, t + 1) for _ in range(self.logs_per_block)
+        ]
+
+
+def test_range_limit_phrases_are_recognised() -> None:
+    for message in (
+        "query returned more than 10000 results",
+        "Under the Free tier plan, you can make eth_getLogs requests with up to a 10 block range",
+        "block range is too large",
+        "exceeds the maximum block range",
+        "response size exceeded",
+    ):
+        assert looks_like_range_limit(RpcError("eth_getLogs", -32600, message)), message
+
+
+def test_unrelated_errors_are_not_treated_as_limits() -> None:
+    # Retrying these would silently produce an incomplete census.
+    assert not looks_like_range_limit(RpcError("eth_getLogs", -32000, "unauthorized"))
+    assert not looks_like_range_limit(RpcError("eth_getLogs", -32601, "method not found"))
+
+
+def test_timeouts_count_as_a_reason_to_shrink() -> None:
+    assert looks_like_range_limit(httpx.ReadTimeout("slow"))
+
+
+def test_fetcher_backs_off_to_the_provider_limit() -> None:
+    rpc = LimitedRpc(max_span=10)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=10_000)  # type: ignore[arg-type]
+    list(fetcher.fetch_range(0, 99))
+    assert fetcher.stats.backoffs > 0
+    assert fetcher.stats.max_chunk_used <= 10
+
+
+def test_fetched_ranges_are_contiguous_and_complete() -> None:
+    rpc = LimitedRpc(max_span=64)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=1000)  # type: ignore[arg-type]
+    covered = [(lo, hi) for lo, hi, _ in fetcher.fetch_range(1000, 1500)]
+
+    assert covered[0][0] == 1000
+    assert covered[-1][1] == 1500
+    for (_, prev_hi), (next_lo, _) in zip(covered, covered[1:], strict=False):
+        assert next_lo == prev_hi + 1, "gap or overlap in coverage"
+
+
+def test_chunk_grows_again_after_sustained_success() -> None:
+    rpc = LimitedRpc(max_span=1_000_000)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=100)  # type: ignore[arg-type]
+    list(fetcher.fetch_range(0, 100_000))
+    assert fetcher.chunk > 100
+
+
+def test_chunk_never_goes_below_the_floor() -> None:
+    rpc = LimitedRpc(max_span=1)
+    fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=64)  # type: ignore[arg-type]
+    with pytest.raises(RpcError):
+        list(fetcher.fetch_range(0, 100))
+    assert fetcher.chunk >= MIN_CHUNK
+
+
+def test_resume_point_of_a_missing_file_is_none(tmp_path: Path) -> None:
+    assert resume_point(tmp_path / "nope.jsonl") is None
+
+
+def test_resume_skips_completed_ranges(tmp_path: Path) -> None:
+    out = tmp_path / "pull.jsonl"
+    rpc = LimitedRpc(max_span=1_000_000, logs_per_block=1)
+
+    fetch_to_jsonl(rpc, "0xpm", [], 0, 499, out, start_chunk=500)  # type: ignore[arg-type]
+    first_pass = list(rpc.requests)
+
+    rpc.requests.clear()
+    fetch_to_jsonl(rpc, "0xpm", [], 0, 999, out, start_chunk=500)  # type: ignore[arg-type]
+
+    assert first_pass, "first pass made no requests"
+    assert all(lo >= 500 for lo, _ in rpc.requests), "resume re-requested completed blocks"
+    assert len(list(iter_logs(out))) == 1000
+
+
+def test_resume_tolerates_a_torn_final_line(tmp_path: Path) -> None:
+    # A process killed mid-write leaves a partial JSON line; everything before it is good.
+    out = tmp_path / "pull.jsonl"
+    out.write_text(
+        json.dumps({"_from": 0, "_to": 99, "logs": [{"blockNumber": "0x1"}]})
+        + "\n"
+        + '{"_from": 100, "_to',
+        encoding="utf-8",
+    )
+    assert resume_point(out) == 99
+    assert len(list(iter_logs(out))) == 1
+
+
+def test_nothing_to_do_when_already_complete(tmp_path: Path) -> None:
+    out = tmp_path / "pull.jsonl"
+    out.write_text(json.dumps({"_from": 0, "_to": 999, "logs": []}) + "\n", encoding="utf-8")
+    rpc = LimitedRpc(max_span=1_000)
+    stats = fetch_to_jsonl(rpc, "0xpm", [], 0, 999, out)  # type: ignore[arg-type]
+    assert stats.chunks == 0
+    assert rpc.requests == []
