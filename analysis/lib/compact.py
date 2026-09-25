@@ -169,5 +169,11 @@ def load_shards(
     frame = pd.concat(parts, ignore_index=True)
     # A pool is initialized once; a fill is identified by (tx, log index). An overlapping
     # resume can replay a chunk, so both are deduplicated on what the chain guarantees.
+    #
+    # When `columns` excludes part of that key the frame cannot be deduplicated, so say so
+    # rather than raise: a caller selecting only `sender` is asking a question where
+    # duplicates do not matter, and crashing would push them toward loading every column.
     key = ["pool_id"] if prefix == SHARD_PREFIX else ["tx_hash", "log_index"]
+    if not set(key).issubset(frame.columns):
+        return frame.reset_index(drop=True)
     return frame.drop_duplicates(subset=key, keep="first").reset_index(drop=True)

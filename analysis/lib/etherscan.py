@@ -25,7 +25,9 @@ API_URL = "https://api.etherscan.io/v2/api"
 CACHE_DIR = "data/cache/etherscan"
 
 # Free tier is 5 calls/second. Stay under it: a 429 costs more than the pause.
-DEFAULT_RATE_PER_SEC = 4.0
+# Etherscan's free tier enforces 3/sec and rejects the burst, not just the average.
+# Pace below it: a 429 costs a retry, and the retry costs more than the pause.
+DEFAULT_RATE_PER_SEC = 2.5
 
 # Etherscan uses a string status field rather than HTTP codes for logical failures.
 STATUS_OK = "1"
@@ -92,17 +94,26 @@ class EtherscanClient:
             time.sleep(wait)
         self._last_call = time.monotonic()
 
-    def _get(self, params: dict[str, Any]) -> Any:
-        self._pace()
-        self.api_calls += 1
-        response = self._client.get(API_URL, params={**params, "apikey": self.api_key})
-        response.raise_for_status()
-        body = response.json()
-        # A rate-limit rejection arrives as a 200 with status "0", so it must be read
-        # from the body rather than the HTTP code.
-        if body.get("status") != STATUS_OK and "rate limit" in str(body.get("result", "")).lower():
-            raise EtherscanError(f"rate limited: {body.get('result')}")
-        return body
+    def _get(self, params: dict[str, Any], *, attempts: int = 4) -> Any:
+        """One request, retrying a rate-limit rejection rather than aborting the sweep.
+
+        Etherscan reports throttling as HTTP 200 with `status: "0"`, so it has to be read
+        from the body. Losing a multi-thousand-hook metadata run to one burst would be a
+        poor trade for a one-second pause.
+        """
+        last = ""
+        for attempt in range(attempts):
+            self._pace()
+            self.api_calls += 1
+            response = self._client.get(API_URL, params={**params, "apikey": self.api_key})
+            response.raise_for_status()
+            body = response.json()
+            result = str(body.get("result", "")).lower()
+            if body.get("status") == STATUS_OK or "rate limit" not in result:
+                return body
+            last = str(body.get("result", ""))
+            time.sleep(self._min_interval * (2 ** (attempt + 1)))
+        raise EtherscanError(f"rate limited after {attempts} attempts: {last}")
 
     def source(self, chain_id: int, address: str, *, use_cache: bool = True) -> ContractInfo:
         """`getsourcecode` for one contract, cached on disk by (chain, address)."""

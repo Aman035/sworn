@@ -1,0 +1,18 @@
+# Swap.sender -> product. See docs/METRICS.md, `frontend_attribution`.
+#
+# `Swap.sender` is the contract that called PoolManager.swap, never the user. Mapping it
+# to a product is how "a toxic hook exists" becomes "this product routed users into it".
+#
+# Every row carries a source and a confidence, and nothing is guessed. Rows marked
+# confidence 1.0 were confirmed by the verified contract name on the block explorer;
+# lower confidence means the identification rests on an address convention or a
+# distinctive prefix rather than on published source. Anything not listed is reported as
+# `unlabeled`, and the unlabeled share is published alongside the table — an attribution
+# table that hides its own coverage is not evidence.
+chain,address,product,contract_name,confidence,source
+base,0x6ff5693b99212da76ad316178a184ab56d299b43,Uniswap,UniversalRouter,1.0,etherscan verified source name
+base,0xfdf682f51fe81aa4898f0ae2163d8a55c127fbc7,Uniswap,UniversalRouter,1.0,etherscan verified source name
+base,0x5cdc0f0fa28e0bb05893a4558c988e2bdce438e1,unknown-aggregator,UniversalUniswapV4Adapter,0.6,etherscan verified source name; operator not established
+base,0x7747f8d2a76bd6345cc29622a946a929647f2359,0x,BaseSettler,1.0,etherscan verified source name (0x Settler)
+base,0x4f6f91599858bf0d19fabcf2c5d591fe13f7c059,0x,BaseSettler,1.0,etherscan verified source name (0x Settler)
+base,0x9982538f41f2ae29ddb9d3d9307010052984fdbb,Doppler,RehypeDopplerHookInitializer,0.8,etherscan verified source name

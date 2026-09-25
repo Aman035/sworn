@@ -1,0 +1,541 @@
+{
+  "meta": {
+    "generated_at": "2026-09-25T21:30:41Z",
+    "script_commit": "1acbece-dirty",
+    "config_version": 1,
+    "pipeline": "d_attribution",
+    "snapshots": [
+      {
+        "name": "census-base",
+        "sha256": "a5379268608d769898a5e9a90b37270978167c233a24381dc307a7b1adfc3205",
+        "block_from": 25350988,
+        "block_to": 51778292,
+        "rows": 15309659,
+        "chain": "base"
+      },
+      {
+        "name": "fills-base",
+        "sha256": "ed5147b030554d384ee07d44370081e78d0d7b32cf0b950da3cfb31dee297df5",
+        "block_from": 50483491,
+        "block_to": 51779491,
+        "rows": 12855496,
+        "chain": "base"
+      }
+    ]
+  },
+  "unlabeled_share": 0.5018818410429282,
+  "products": [
+    {
+      "product": "Uniswap",
+      "chain": "base",
+      "router": "0x6ff5693b99212da76ad316178a184ab56d299b43",
+      "fills_total": 3220269,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.3089015234441595,
+      "confidence": 1.0,
+      "sources": [
+        "etherscan verified source name"
+      ]
+    },
+    {
+      "product": "Uniswap",
+      "chain": "base",
+      "router": "0xfdf682f51fe81aa4898f0ae2163d8a55c127fbc7",
+      "fills_total": 1602197,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.44733450380945666,
+      "confidence": 1.0,
+      "sources": [
+        "etherscan verified source name"
+      ]
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x8f10b468b06c6fd214b65f87778827f7d113f996",
+      "fills_total": 892068,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.6087248954115606,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unknown-aggregator",
+      "chain": "base",
+      "router": "0x5cdc0f0fa28e0bb05893a4558c988e2bdce438e1",
+      "fills_total": 471867,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.07437477085704235,
+      "confidence": 0.6,
+      "sources": [
+        "etherscan verified source name; operator not established"
+      ]
+    },
+    {
+      "product": "0x",
+      "chain": "base",
+      "router": "0x7747f8d2a76bd6345cc29622a946a929647f2359",
+      "fills_total": 458339,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.4534525754954302,
+      "confidence": 1.0,
+      "sources": [
+        "etherscan verified source name (0x Settler)"
+      ]
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x111116053f09d34a7eae8102887004445176ca11",
+      "fills_total": 408744,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.002593310238193099,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x278d858f05b94576c1e6f73285886876ff6ef8d2",
+      "fills_total": 394368,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "0x",
+      "chain": "base",
+      "router": "0x4f6f91599858bf0d19fabcf2c5d591fe13f7c059",
+      "fills_total": 350231,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.4358551927156648,
+      "confidence": 1.0,
+      "sources": [
+        "etherscan verified source name (0x Settler)"
+      ]
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xd8ba9d1a99fc21f0eca24e9b85737c28a194a4e2",
+      "fills_total": 348311,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.9071691677839632,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "Doppler",
+      "chain": "base",
+      "router": "0x9982538f41f2ae29ddb9d3d9307010052984fdbb",
+      "fills_total": 300653,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.9999933478129271,
+      "confidence": 0.8,
+      "sources": [
+        "etherscan verified source name"
+      ]
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x85e36791f02fb9b93ee614eac1becaa9ff529c00",
+      "fills_total": 225924,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.06326021139852339,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xce4da59f7858105418216274415a5a6f10d5bb70",
+      "fills_total": 212249,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.10012768022464182,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x83d55acdc72027ed339d267eebaf9a41e47490d5",
+      "fills_total": 192319,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xfd78ba0f717223bebe555a777b70b86667837ff6",
+      "fills_total": 171888,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.9970562226566136,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x03468a6a40940e4c54d8b9d8433f7abf0481a2bc",
+      "fills_total": 166565,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x5692193a40e908d94bddbc988356cd7f1679eab4",
+      "fills_total": 122702,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.36805431044318754,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xa8a14ce28771ff0e750caa2685d9da636d4808c6",
+      "fills_total": 110974,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.00018022239443473247,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xc8d077444625eb300a427a6dfb2b1dbf9b159040",
+      "fills_total": 103875,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 1.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xc10ee9031f2a0b84766a86b55a8d90f357910fb4",
+      "fills_total": 93003,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.004558992720664925,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x0469a4bd3724dc86c9542f4694c976da13c450c0",
+      "fills_total": 84455,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 1.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x5f9eb5f6726fe88d5e39867967f5b833d2fa3215",
+      "fills_total": 84113,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.999738447089035,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x63d2dfea64b3433f4071a98665bcd7ca14d93496",
+      "fills_total": 82605,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 1.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x8c84f82e10bb371fa840d47024211576c513179d",
+      "fills_total": 82573,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.171932714083296,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x37903bfc76aaaabccb71425bd6767fcd70ad67b1",
+      "fills_total": 79707,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.30333596798273676,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xcdbdc59a5eeb54027f8b45b118e3cd1f675d79c5",
+      "fills_total": 73375,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.34554003407155026,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x8407699e359ae158bd7ec0668600cc19a79f17c3",
+      "fills_total": 69744,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.3864991970635467,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xe6b82c6eccdfb2d6bc55bb11a61bae5ab2c3f807",
+      "fills_total": 63308,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 3.159158400202186e-05,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x7c137a37742437d2212b7bd873ed135b5c4c61da",
+      "fills_total": 61398,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x182b51037a9085a1532b63e5aac63bed0789e49c",
+      "fills_total": 60193,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.36278304786270826,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x399adb74bd93ba9beb8ffd4841128cdf76f759d8",
+      "fills_total": 59625,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.06752201257861636,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x0ce14aeebb7ad6625585979f4c1846946e248e02",
+      "fills_total": 59007,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.24261528293253343,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xae629bf1cf17cbdd1b8e9a462519f678d8b40b3f",
+      "fills_total": 56703,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.08406962594571715,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x2f68417a18da681589f4ea64b9cc9839209acff7",
+      "fills_total": 54588,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xf8a8c0cc9588938a837437177ab56d3d771897d7",
+      "fills_total": 50735,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x1c9637f9103d51e257b38712e514dfcdd4a55812",
+      "fills_total": 50387,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.12269037648599837,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x4c838db6d66d8bcb1ef12e24e4d3a10caf432645",
+      "fills_total": 48795,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.1916999692591454,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x86d23b889d0e303c97a7a3401387e06f1db5023b",
+      "fills_total": 46217,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.30612112426163535,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xa9595ef01554ff0de2ba6b5dc23e05a670c371f3",
+      "fills_total": 46158,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.929199705359851,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x08c61873dc64c5131758ae27cb4d84e773d66d82",
+      "fills_total": 44596,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.15801865638173826,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xbf4195ab0b03e1eb3345dd1e83bed7650b1ed123",
+      "fills_total": 43413,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 1.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xa3d2c627ea20d52052e1d72d134f957b3d2b3c04",
+      "fills_total": 40384,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xbc1d9760bd6ca468ca9fb5ff2cfbeac35d86c973",
+      "fills_total": 40202,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.376424058504552,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xc7827556424769df987a55464f22e0390e70b29a",
+      "fills_total": 39870,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.9223225482819162,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x7cd3372e7e3a5a3e51387980f265db33e5c8f5dd",
+      "fills_total": 39656,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.35535606213435544,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xe992cd3becef37655fb277997511869aa2885967",
+      "fills_total": 38719,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.22805341047031175,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xd61a675f8a0c67a73dc3b54fb7318b4d91409040",
+      "fills_total": 35851,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 1.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0x7cd2ce5e5c82956c743cbe6160f0e173c8d295cd",
+      "fills_total": 32158,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.2341252565458051,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xd24d85e3ed8702c4db166ed21ac9f05a3edf4a7d",
+      "fills_total": 30369,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.042378741479798476,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xb77d7fd7760f4ff5c48e16ff5e4a5c49aedcea55",
+      "fills_total": 28762,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.0,
+      "confidence": 0.0,
+      "sources": []
+    },
+    {
+      "product": "unlabeled",
+      "chain": "base",
+      "router": "0xd6145b2d3f379919e8cdeda7b97e37c4b2ca9c40",
+      "fills_total": 26945,
+      "fills_into_divergent": 0,
+      "share_of_product_v4_volume": 0.28220449062905917,
+      "confidence": 0.0,
+      "sources": []
+    }
+  ]
+}
