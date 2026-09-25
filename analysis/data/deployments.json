@@ -1,0 +1,32 @@
+{
+  "arbitrum": {
+    "pool_manager": "0x360E68faCcca8cA495c1B759Fd9EEe466db9FB32",
+    "deployment_block": 297842872,
+    "code_size": 24009
+  },
+  "base": {
+    "pool_manager": "0x498581fF718922c3f8e6A244956aF099B2652b2b",
+    "deployment_block": 25350988,
+    "code_size": 24009
+  },
+  "bnb": {
+    "pool_manager": "0x28e2Ea090877bF75740558f6BFB36A5ffeE9e9dF",
+    "deployment_block": 45970610,
+    "code_size": 24009
+  },
+  "mainnet": {
+    "pool_manager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+    "deployment_block": 21688329,
+    "code_size": 24009
+  },
+  "polygon": {
+    "pool_manager": "0x67366782805870060151383F4BbFF9daB53e5cD6",
+    "deployment_block": 66980384,
+    "code_size": 24009
+  },
+  "unichain": {
+    "pool_manager": "0x1F98400000000000000000000000000000000004",
+    "deployment_block": 0,
+    "code_size": 24050
+  }
+}
