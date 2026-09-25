@@ -97,11 +97,14 @@ def sample_by_hook(fills: pd.DataFrame, per_hook: int, max_hooks: int, seed: int
     """Take up to `per_hook` fills from each of the busiest `max_hooks` hooks."""
     busiest = fills.groupby("hook").size().sort_values(ascending=False).head(max_hooks).index
     subset = fills[fills.hook.isin(set(busiest))]
-    return (
-        subset.groupby("hook", group_keys=False)
-        .apply(lambda g: g.sample(n=min(per_hook, len(g)), random_state=seed), include_groups=True)
-        .reset_index(drop=True)
-    )
+
+    # Sample per hook by index rather than via `groupby.apply`: the latter is deprecated
+    # for operating on the grouping column, and the warning would otherwise appear in
+    # every pipeline log.
+    picks = []
+    for _, group in subset.groupby("hook", sort=False):
+        picks.append(group.sample(n=min(per_hook, len(group)), random_state=seed))
+    return pd.concat(picks, ignore_index=True) if picks else subset.head(0)
 
 
 def measure(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
