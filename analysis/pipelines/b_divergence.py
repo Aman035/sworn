@@ -127,7 +127,16 @@ def measure(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
     for _, r in sample.iterrows():
         q = by_key.get(result_key(r.tx_hash, int(r.log_index)))
         if q is None or not q.ok or q.expected <= 0:
-            rows.append({"hook": r.hook, "usable": False, "excess_bps": None, "take_bps": None})
+            rows.append(
+                {
+                    "chain": chain,
+                    "hook": r.hook,
+                    "block_time": int(r.block_number),
+                    "usable": False,
+                    "excess_bps": None,
+                    "take_bps": None,
+                }
+            )
             continue
         # `fee_fill` is the fee actually applied to this swap, which for a dynamic-fee
         # pool is the hook's choice at that moment rather than a property of the key.
@@ -135,7 +144,9 @@ def measure(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
         shortfall = (q.expected - r.a1) / q.expected
         rows.append(
             {
+                "chain": chain,
                 "hook": r.hook,
+                "block_time": int(r.block_number),
                 "usable": True,
                 "take_bps": shortfall * 10_000,
                 "excess_bps": excess_take_bps(q.expected, r.a1, nominal_pips),
@@ -209,6 +220,13 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks")
 
     measured = measure(args.chain, sample)
+
+    # Keep the per-fill rows: pipeline C is a time-series view of exactly this data, and
+    # re-quoting for it would be both slow and liable to disagree with these numbers.
+    cache = path_for("results").parent / "cache"
+    cache.mkdir(parents=True, exist_ok=True)
+    measured.to_parquet(cache / "b_divergence_fills.parquet", index=False)
+
     usable = measured[measured.usable]
     print(f"  usable quotes: {len(usable)}/{len(measured)}")
 
