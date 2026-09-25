@@ -123,6 +123,11 @@ abstract contract SwornTestBase is Test, Deployers {
         uint160 saltBits = uint160(salt) << 16;
         hookAddress = address(flags | saltBits);
         deployCodeTo(string.concat("out/RecordingHooks.sol/", name, ".json"), args, hookAddress);
+        // Clear any recording left by a previous run. The recorder writes to a file so
+        // that it survives the probe's revert; files also outlive the test process, so a
+        // stale one would be read as this test's observations.
+        string memory obs = string.concat("out/sworn-obs-", vm.toString(hookAddress), ".txt");
+        if (vm.exists(obs)) vm.removeFile(obs);
         key = initDeepPool(IHooks(hookAddress));
     }
 

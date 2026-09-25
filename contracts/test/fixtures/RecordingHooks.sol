@@ -22,30 +22,46 @@ import {BaseTestHook, SkimmingHook} from "./BaseTestHook.sol";
 abstract contract RecordingHook is SkimmingHook {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    string internal constant OBSERVATIONS = "SWORN_OBSERVATIONS";
+    /// @dev One file per hook instance.
+    ///
+    ///      An earlier version of this used `vm.setEnv`, which is wrong: forge runs test
+    ///      functions in parallel and the env cheatcode mutates process environment,
+    ///      which is not thread-safe. Two tests recording concurrently lost each other's
+    ///      writes and the suite failed a different subset on every run — a flaky test,
+    ///      which is worse than a failing one. Per-path file I/O has no such race.
+    function _path() internal view returns (string memory) {
+        return string.concat("out/sworn-obs-", vm.toString(address(this)), ".txt");
+    }
 
     constructor(
         IPoolManager _pm
-    ) SkimmingHook(_pm) {
-        vm.setEnv(OBSERVATIONS, "");
-    }
+    ) SkimmingHook(_pm) {}
 
     function _record(
         string memory value
     ) internal {
-        string memory prev = vm.envOr(OBSERVATIONS, string(""));
-        vm.setEnv(OBSERVATIONS, string.concat(prev, ",", value));
+        vm.writeLine(_path(), value);
     }
 
     /// @notice Every value recorded across probes and executions, in order.
     function observations() external view returns (string[] memory) {
-        string memory raw = vm.envOr(OBSERVATIONS, string(""));
+        string memory raw;
+        try vm.readFile(_path()) returns (string memory contents) {
+            raw = contents;
+        } catch {
+            return new string[](0);
+        }
         if (bytes(raw).length == 0) return new string[](0);
-        string[] memory parts = vm.split(raw, ",");
-        // The leading empty element from the first concat is not an observation.
-        string[] memory out = new string[](parts.length - 1);
-        for (uint256 i = 1; i < parts.length; i++) {
-            out[i - 1] = parts[i];
+
+        string[] memory parts = vm.split(raw, "\n");
+        // `writeLine` leaves a trailing newline, so the last element is empty.
+        uint256 count = parts.length;
+        while (count > 0 && bytes(parts[count - 1]).length == 0) {
+            count--;
+        }
+        string[] memory out = new string[](count);
+        for (uint256 i = 0; i < count; i++) {
+            out[i] = parts[i];
         }
         return out;
     }
@@ -83,7 +99,7 @@ contract RecordingCallbackSniffHook is RecordingHook {
     ) internal override returns (uint256) {
         // Ask the router something a probe-aware implementation might answer differently.
         (bool ok, bytes memory ret) = sender.staticcall(abi.encodeWithSignature("probing()"));
-        _record(vm.toString(keccak256(abi.encode(ok, ret))));
+        _record(string.concat(ok ? "ok:" : "revert:", vm.toString(ret)));
         return 0;
     }
 }
