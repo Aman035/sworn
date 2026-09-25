@@ -1,0 +1,238 @@
+"""Pipeline A — hook and pool census.
+
+Pulls every `Initialize` log from the chain's `PoolManager` deployment block to a pinned
+end block, decodes it, and writes a snapshot plus per-chain aggregates. This is the
+denominator for everything else: the divergence rate in Phase 3 is meaningless without a
+trustworthy count of what exists.
+
+    python -m sworn_analysis.pipelines.a_census --chain base
+    python -m sworn_analysis.pipelines.a_census --all --confirmations 64
+
+The pull is resumable. Re-running continues from the last completed chunk rather than
+starting over, so an interrupted multi-hour run costs minutes.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+from dotenv import load_dotenv
+
+from ..lib.config import Chain, chains, path_for, repo_root
+from ..lib.deployments import INITIALIZE_TOPIC, load_deployments, pool_manager
+from ..lib.events import DecodeError, InitializeEvent, decode_initialize
+from ..lib.hookflags import bitmap, names, returns_delta, touches_swap
+from ..lib.logs import fetch_to_jsonl, iter_logs
+from ..lib.rpc import RpcClient, redact
+from ..lib.snapshot import snapshot_dir, write_manifest
+
+# Stay this far behind the head so a reorg cannot change what the snapshot contains.
+DEFAULT_CONFIRMATIONS = 64
+
+
+@dataclass
+class CensusResult:
+    chain: str
+    chain_id: int
+    block_from: int
+    block_to: int
+    pools: int
+    hooked_pools: int
+    hooks: int
+    snapshot: str
+    parquet: Path
+
+
+def _progress(chain: str, started: float, span_from: int) -> Any:
+    """Throttled progress line. Percentage is of the *remaining* span, so a resumed run
+    does not claim to start at 0%."""
+    last = [0.0]
+
+    def report(done: int, target: int, stats: Any) -> None:
+        now = time.time()
+        if now - last[0] < 10 and done < target:
+            return
+        last[0] = now
+        span = max(1, target - span_from)
+        pct = 100.0 * min(1.0, max(0.0, (done - span_from) / span))
+        elapsed = now - started
+        rate = (done - span_from) / max(1e-9, elapsed)
+        eta = (target - done) / rate / 60 if rate > 0 else float("inf")
+        print(
+            f"  {chain}: {done:,}/{target:,} ({pct:5.1f}%) "
+            f"{stats.logs:,} logs, chunk<={stats.max_chunk_used:,}, "
+            f"{stats.backoffs} backoffs, {elapsed / 60:.1f}m elapsed, ~{eta:.0f}m left",
+            flush=True,
+        )
+
+    return report
+
+
+def pull_chain(
+    chain: Chain, *, confirmations: int = DEFAULT_CONFIRMATIONS, start_chunk: int = 10_000
+) -> CensusResult:
+    url = os.environ.get(chain.rpc_env)
+    if not url:
+        raise RuntimeError(f"{chain.rpc_env} is not set")
+
+    deployment = load_deployments().get(chain.name)
+    if deployment is None:
+        raise RuntimeError(f"no deployment block for {chain.name}; run scripts/find_deployments.py")
+
+    address = pool_manager(chain.name)
+    snapshot = f"census-{chain.name}"
+    directory = snapshot_dir(snapshot)
+    directory.mkdir(parents=True, exist_ok=True)
+    raw = directory / "initialize.jsonl"
+
+    with RpcClient(url, timeout=90) as rpc:
+        head = rpc.block_number()
+        to_block = head - confirmations
+        from_block = deployment.deployment_block
+
+        print(
+            f"{chain.name}: {from_block:,} -> {to_block:,} "
+            f"({to_block - from_block:,} blocks) via {redact(url)}",
+            flush=True,
+        )
+        started = time.time()
+        stats = fetch_to_jsonl(
+            rpc,
+            address,
+            [INITIALIZE_TOPIC],
+            from_block,
+            to_block,
+            raw,
+            start_chunk=start_chunk,
+            progress=_progress(chain.name, started, from_block),
+        )
+        print(
+            f"  {chain.name}: pulled {stats.logs:,} logs in {(time.time() - started) / 60:.1f}m",
+            flush=True,
+        )
+
+    events: list[InitializeEvent] = []
+    bad = 0
+    for log in iter_logs(raw):
+        try:
+            events.append(decode_initialize(log))
+        except DecodeError:
+            bad += 1
+    if bad:
+        print(f"  {chain.name}: WARNING {bad} undecodable logs", file=sys.stderr)
+
+    frame = pd.DataFrame(
+        [
+            {
+                "pool_id": e.pool_id,
+                "currency0": e.currency0,
+                "currency1": e.currency1,
+                "fee": e.fee,
+                "dynamic_fee": e.dynamic_fee,
+                "tick_spacing": e.tick_spacing,
+                "hook": e.hooks,
+                "hookless": e.hookless,
+                "flags_bitmap": 0 if e.hookless else bitmap(e.hooks),
+                "touches_swap": (not e.hookless) and touches_swap(e.hooks),
+                "returns_delta": (not e.hookless) and returns_delta(e.hooks),
+                "permissions": "|".join(names(e.hooks)) if not e.hookless else "",
+                "block_number": e.block_number,
+                "tx_hash": e.tx_hash,
+                "log_index": e.log_index,
+            }
+            for e in events
+        ]
+    )
+
+    # A pool can only be initialized once, but a reorg near the tail or an overlapping
+    # resume could duplicate a row. Dedupe on the identity the protocol guarantees.
+    before = len(frame)
+    frame = frame.drop_duplicates(subset=["pool_id"], keep="first").reset_index(drop=True)
+    if len(frame) != before:
+        print(f"  {chain.name}: dropped {before - len(frame)} duplicate pool ids", flush=True)
+
+    parquet = directory / "pools.parquet"
+    frame.to_parquet(parquet, index=False)
+
+    hooked = frame[~frame["hookless"]] if len(frame) else frame
+    write_manifest(
+        snapshot,
+        chain=chain.name,
+        chain_id=chain.chain_id,
+        block_from=from_block,
+        block_to=to_block,
+        rpc_provider=redact(url),
+        rows=len(frame),
+        files=[parquet],
+        source=f"eth_getLogs Initialize from {address}",
+        notes=f"{bad} undecodable logs" if bad else "",
+    )
+
+    return CensusResult(
+        chain=chain.name,
+        chain_id=chain.chain_id,
+        block_from=from_block,
+        block_to=to_block,
+        pools=len(frame),
+        hooked_pools=len(hooked),
+        hooks=int(hooked["hook"].nunique()) if len(hooked) else 0,
+        snapshot=snapshot,
+        parquet=parquet,
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--chain", action="append", help="chain to pull (repeatable)")
+    parser.add_argument("--all", action="store_true", help="every configured chain")
+    parser.add_argument("--confirmations", type=int, default=DEFAULT_CONFIRMATIONS)
+    parser.add_argument("--start-chunk", type=int, default=10_000)
+    args = parser.parse_args(argv)
+
+    load_dotenv(repo_root() / ".env")
+    known = chains()
+
+    selected = list(known) if args.all else (args.chain or ["base"])
+    unknown = [c for c in selected if c not in known]
+    if unknown:
+        print(f"unknown chain(s): {unknown}", file=sys.stderr)
+        return 2
+
+    path_for("snapshots").mkdir(parents=True, exist_ok=True)
+
+    results: list[CensusResult] = []
+    failures: list[str] = []
+    for name in sorted(selected, key=lambda n: known[n].priority):
+        try:
+            results.append(
+                pull_chain(
+                    known[name], confirmations=args.confirmations, start_chunk=args.start_chunk
+                )
+            )
+        except Exception as exc:  # noqa: BLE001 — one chain must not take down the run
+            failures.append(f"{name}: {type(exc).__name__}: {exc}")
+            print(f"  {name}: FAILED {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+
+    print("\ncensus pulls complete:")
+    for r in results:
+        print(
+            f"  {r.chain:<9} {r.pools:>8,} pools  {r.hooked_pools:>8,} hooked  "
+            f"{r.hooks:>7,} distinct hooks  (blocks {r.block_from:,}-{r.block_to:,})"
+        )
+    if failures:
+        print("\nfailures:", file=sys.stderr)
+        for f in failures:
+            print(f"  - {f}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
