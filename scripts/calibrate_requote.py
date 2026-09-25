@@ -31,7 +31,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 from lib.compact import SWAP_SHARD_PREFIX, load_shards  # noqa: E402
 from lib.config import load_config  # noqa: E402
-from lib.requote import RequoteInput, excess_take_bps, result_key, run_batch  # noqa: E402
+from lib.requote import RequoteInput, result_key, run_batch  # noqa: E402
 from lib.snapshot import snapshot_dir  # noqa: E402
 
 
@@ -44,7 +44,15 @@ def build_population(chain: str):  # noqa: ANN201
     """
     hookless = load_shards(
         snapshot_dir(f"census-{chain}"),
-        columns=["pool_id", "currency0", "currency1", "fee", "tick_spacing", "hook", "hookless"],
+        columns=[
+            "pool_id",
+            "currency0",
+            "currency1",
+            "fee",
+            "tick_spacing",
+            "hook",
+            "hookless",
+        ],
         where=lambda part: part[part.hookless],
     )
     if hookless.empty:
@@ -118,19 +126,15 @@ def main() -> int:
     for _, r in sample.iterrows():
         q = by_key.get(result_key(r.tx_hash, int(r.log_index)))
         if q is None or not q.ok or q.expected == 0:
-            rows.append(
-                (r.tx_hash, None, r.a1, None, q.error if q else "no result")
-            )
+            rows.append((r.tx_hash, None, r.a1, None, q.error if q else "no result"))
             continue
-        rows.append(
-            (
-                r.tx_hash,
-                q.expected,
-                r.a1,
-                excess_take_bps(q.expected, r.a1, int(r.fee)),
-                "",
-            )
-        )
+        # Calibration measures *disagreement in either direction*, not the published
+        # `excess_take_bps`. Excess is clipped at zero by design — it answers "how much
+        # was taken from the user" — so a quote that comes back far too LOW scores a
+        # perfect 0.000 and hides a broken engine. How far the ratio sits from 1 is the
+        # question that can actually fail.
+        deviation_bps = abs(q.expected - r.a1) / r.a1 * 10_000
+        rows.append((r.tx_hash, q.expected, r.a1, deviation_bps, ""))
 
     usable = [x for x in rows if x[3] is not None]
     unusable = [x for x in rows if x[3] is None]
@@ -140,7 +144,9 @@ def main() -> int:
         if exp is None:
             print(f"    {tx[:14]}… unusable: {err}")
         else:
-            print(f"    {tx[:14]}… ratio={exp / real:.6f}  excess={ex:8.3f} bps")
+            print(
+                f"    {tx[:14]}… expected={exp:<24} realized={real:<24} |dev|={ex:12.1f} bps"
+            )
 
     if not usable:
         print("\n  CALIBRATION FAILED: no usable quotes", file=sys.stderr)

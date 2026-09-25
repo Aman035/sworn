@@ -7,7 +7,9 @@ import {console2 as console} from "forge-std/console2.sol";
 
 import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
 import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
+import {PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {IV4Quoter} from "v4-periphery/src/interfaces/IV4Quoter.sol";
 import {V4Quoter} from "v4-periphery/src/lens/V4Quoter.sol";
@@ -30,6 +32,7 @@ import {V4Quoter} from "v4-periphery/src/lens/V4Quoter.sol";
 /// Output: a JSON array of results, written to `--sig` target path.
 contract RequoteScript is Script {
     using stdJson for string;
+    using PoolIdLibrary for PoolKey;
 
     struct Fill {
         uint256 amountSpecified; // magnitude; direction is `zeroForOne`
@@ -54,7 +57,6 @@ contract RequoteScript is Script {
         string memory outputPath,
         address poolManager
     ) external {
-        console.log("fork starts at block", block.number);
         string memory raw = vm.readFile(inputPath);
         uint256 count = abi.decode(raw.parseRaw(".count"), (uint256));
 
@@ -63,7 +65,8 @@ contract RequoteScript is Script {
             string memory base = string.concat(".fills[", vm.toString(i), "]");
             Fill memory f = _readFill(raw, base);
 
-            (bool ok, uint256 expected, string memory err) = _quoteAt(f, IPoolManager(poolManager));
+            (bool ok, uint256 expected, string memory err, uint256 quotedAt, uint160 sqrtPrice) =
+                _quoteAt(f, IPoolManager(poolManager));
 
             out = string.concat(
                 out,
@@ -76,6 +79,10 @@ contract RequoteScript is Script {
                 ok ? "true" : "false",
                 ',"expected":"',
                 vm.toString(expected),
+                '","quotedAtBlock":',
+                vm.toString(quotedAt),
+                ',"sqrtPriceX96":"',
+                vm.toString(sqrtPrice),
                 '","error":"',
                 err,
                 '"}'
@@ -103,13 +110,15 @@ contract RequoteScript is Script {
     }
 
     /// @dev Rolls to the fill's own transaction and quotes the identical swap there.
+    ///      Also reports the block actually quoted at and the pool's liquidity there:
+    ///      without those, a surprising quote is unfalsifiable — there is no way to tell
+    ///      a hook taking value from a fork that never rolled or a pool that was empty.
     function _quoteAt(
         Fill memory f,
         IPoolManager poolManager
-    ) private returns (bool ok, uint256 expected, string memory err) {
-        uint256 blockBefore = block.number;
+    ) private returns (bool ok, uint256 expected, string memory err, uint256 quotedAt, uint160 sqrtPrice) {
         try vm.rollFork(f.txHash) {
-            console.log("rollFork: block", blockBefore, "->", block.number);
+            quotedAt = block.number;
             // Deploy after rolling: the fork's state is replaced by the roll.
             V4Quoter quoter = new V4Quoter(poolManager);
 
@@ -127,15 +136,16 @@ contract RequoteScript is Script {
             ) returns (
                 uint256 amountOut, uint256
             ) {
-                return (true, amountOut, "");
+                (sqrtPrice,,,) = StateLibrary.getSlot0(poolManager, key.toId());
+                return (true, amountOut, "", quotedAt, sqrtPrice);
             } catch Error(string memory reason) {
-                return (false, 0, reason);
+                return (false, 0, reason, quotedAt, 0);
             } catch {
                 // A hook that reverts for the quoter is itself a finding, not an error.
-                return (false, 0, "quote reverted");
+                return (false, 0, "quote reverted", quotedAt, 0);
             }
         } catch {
-            return (false, 0, "rollFork failed");
+            return (false, 0, "rollFork failed", 0, 0);
         }
     }
 }
