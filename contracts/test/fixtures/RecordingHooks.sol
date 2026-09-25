@@ -7,6 +7,7 @@ import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 
 import {BaseTestHook, SkimmingHook} from "./BaseTestHook.sol";
+import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
 
 /// @notice Hooks that record what they observed somewhere a revert cannot reach.
 ///
@@ -78,7 +79,7 @@ contract RecordingGasSniffHook is RecordingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal override returns (uint256) {
         _record(vm.toString(gasleft()));
         return 0;
@@ -95,7 +96,7 @@ contract RecordingCallbackSniffHook is RecordingHook {
     function _feeBps(
         address sender,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal override returns (uint256) {
         // Ask the router something a probe-aware implementation might answer differently.
         (bool ok, bytes memory ret) = sender.staticcall(abi.encodeWithSignature("probing()"));

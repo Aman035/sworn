@@ -9,6 +9,7 @@ import {TickMath} from "v4-core/src/libraries/TickMath.sol";
 import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
+import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
 
 /// @notice One leg of a route: which pool, which direction, and the data handed to its hook.
 struct Hop {
@@ -305,7 +306,7 @@ contract SwornRouter is IUnlockCallback {
     ) private returns (int128 dIn, int128 dOut) {
         BalanceDelta delta = poolManager.swap(
             hop.key,
-            IPoolManager.SwapParams({
+            SwapParams({
                 zeroForOne: hop.zeroForOne,
                 amountSpecified: amountSpecified,
                 // No price limit: `minOut` is the user's protection, and a limit would make

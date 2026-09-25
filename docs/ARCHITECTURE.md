@@ -11,13 +11,23 @@ Solidity dependencies are git submodules under `contracts/lib/`. `make install` 
 | Dependency | Pin | Why |
 | ---------- | --- | --- |
 | `foundry-rs/forge-std` | `v1.9.7` | test harness, cheatcodes |
-| `Uniswap/v4-core` | `v4.0.0` (`e50237c`) | `PoolManager`, `Hooks`, `PoolKey`, delta accounting |
+| `Uniswap/v4-core` | `59d3ecf` (2025-05-13) | `PoolManager`, `Hooks`, `PoolKey`, delta accounting |
 | `Uniswap/v4-periphery` | `9969eec` (no release tags exist) | `V4Quoter`, `BaseHook`, router base classes |
 | `Uniswap/permit2` | `cc56ad0` (only tag is the deployed address) | `permitTransferFrom` path in `SwornRouter` |
 | `Uniswap/universal-router` | `v1.6.0` — **referenced, not vendored** | read-only reference for the Phase 11 UR-compatible entrypoint |
 
 `v4-core` transitively pins `solmate` and `openzeppelin-contracts`; both are remapped
 through `contracts/lib/v4-core/lib/` so there is exactly one copy of each in the build.
+
+**Why v4-core is not on the `v4.0.0` tag.** It started there, but `v4-periphery` has no
+release tags and its `main` is built against a later v4-core in which `SwapParams` and
+`ModifyLiquidityParams` moved out of `IPoolManager` into `types/PoolOperation.sol`.
+Compiling `V4Quoter` — which Phase 3 needs to re-quote fills — against `v4.0.0` fails
+outright. Keeping both versions is worse than choosing one: the two `IPoolManager` types
+would be distinct to the compiler, so a `PoolKey` built from one could not be passed to a
+quoter built from the other. The whole repo therefore uses `59d3ecf`, the exact commit
+`v4-periphery` pins. This is a source reorganisation, not an ABI change, so it still
+describes the `PoolManager` bytecode deployed on every target chain.
 
 ## Toolchain
 

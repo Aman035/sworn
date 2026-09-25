@@ -11,6 +11,7 @@ import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {Deployers} from "v4-core/test/utils/Deployers.sol";
 
 import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.sol";
+import {ModifyLiquidityParams} from "v4-core/src/types/PoolOperation.sol";
 
 /// @notice Shared setup for every Sworn unit test: a live `PoolManager`, two currencies,
 ///         a hookless reference pool, and helpers for placing hooks at addresses whose
@@ -104,7 +105,7 @@ abstract contract SwornTestBase is Test, Deployers {
         (key,) = initPool(currency0, currency1, hooks, 3000, SQRT_PRICE_1_1);
         modifyLiquidityRouter.modifyLiquidity(
             key,
-            IPoolManager.ModifyLiquidityParams({
+            ModifyLiquidityParams({
                 tickLower: WIDE_LOWER, tickUpper: WIDE_UPPER, liquidityDelta: DEEP_LIQUIDITY, salt: 0
             }),
             ""

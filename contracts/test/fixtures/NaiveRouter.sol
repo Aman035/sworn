@@ -8,6 +8,7 @@ import {TickMath} from "v4-core/src/libraries/TickMath.sol";
 import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
+import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
 
 /// @notice How routing works today: pick the route an off-chain quote liked, execute it,
 ///         and check the result against a slippage bound.
@@ -68,7 +69,7 @@ contract NaiveRouter is IUnlockCallback {
 
         BalanceDelta delta = poolManager.swap(
             r.key,
-            IPoolManager.SwapParams({
+            SwapParams({
                 zeroForOne: r.zeroForOne,
                 amountSpecified: r.amountSpecified,
                 sqrtPriceLimitX96: r.zeroForOne ? TickMath.MIN_SQRT_PRICE + 1 : TickMath.MAX_SQRT_PRICE - 1

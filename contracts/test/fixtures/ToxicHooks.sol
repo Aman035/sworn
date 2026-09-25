@@ -7,6 +7,7 @@ import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "v4-core/src/types/BeforeS
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 
 import {BaseTestHook, SkimmingHook} from "./BaseTestHook.sol";
+import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
 
 // The toxic take every fixture applies when it decides to charge: 18%, matching the
 // median charged fee 0x reported for the Base hook 0x800cef...a5c7.
@@ -25,7 +26,7 @@ contract HonestHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal pure override returns (uint256) {
         return 0;
     }
@@ -45,7 +46,7 @@ contract GaspriceSniffHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal view override returns (uint256) {
         return tx.gasprice == 0 ? 0 : TOXIC_BPS;
     }
@@ -65,7 +66,7 @@ contract OriginSniffHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal view override returns (uint256) {
         if (tx.origin == address(0) || tx.origin == friendlyOrigin) return 0;
         return TOXIC_BPS;
@@ -81,7 +82,7 @@ contract CoinbaseBasefeeSniffHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal view override returns (uint256) {
         if (block.coinbase == address(0) || block.basefee == 0) return 0;
         return TOXIC_BPS;
@@ -103,7 +104,7 @@ contract GasSniffHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal override returns (uint256) {
         uint256 g = gasleft();
         if (observations == 0) firstGasSeen = g;
@@ -127,7 +128,7 @@ contract DiceRollBlockHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal view override returns (uint256) {
         return (block.prevrandao % 2 == 0) ? 0 : TOXIC_BPS;
     }
@@ -146,7 +147,7 @@ contract DiceRollCounterHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal override returns (uint256) {
         uint256 current = counter++;
         return (current % 2 == 1) ? TOXIC_BPS : 0;
@@ -188,7 +189,7 @@ contract OwnerSwitchHook is SkimmingHook {
     function _feeBps(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal view override returns (uint256) {
         return feeBps;
     }
@@ -220,7 +221,7 @@ contract RouterWhitelistHook is SkimmingHook {
     function _feeBps(
         address sender,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal view override returns (uint256) {
         return sender == knownRouter ? 0 : TOXIC_BPS;
     }
@@ -242,7 +243,7 @@ contract CallbackSniffHook is SkimmingHook {
     function _feeBps(
         address sender,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata
+        SwapParams calldata
     ) internal override returns (uint256) {
         // Ask the router anything at all; what matters is whether the answer differs
         // between the probe and the execution.
@@ -274,7 +275,7 @@ contract RevertGriefHook is BaseTestHook {
     function beforeSwap(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata,
+        SwapParams calldata,
         bytes calldata
     ) external view override onlyPoolManager returns (bytes4, BeforeSwapDelta, uint24) {
         if (tx.gasprice != 0) revert Griefed();
@@ -293,7 +294,7 @@ contract GasBurnHook is BaseTestHook {
     function beforeSwap(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata,
+        SwapParams calldata,
         bytes calldata
     ) external view override onlyPoolManager returns (bytes4, BeforeSwapDelta, uint24) {
         uint256 burned = 0;

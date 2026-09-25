@@ -7,6 +7,7 @@ import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "v4-core/src/types/BeforeSwapDelta.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
+import {ModifyLiquidityParams, SwapParams} from "v4-core/src/types/PoolOperation.sol";
 
 /// @notice Minimal `IHooks` implementation for test fixtures.
 /// @dev Every callback reverts unless a fixture overrides it, so a fixture cannot
@@ -48,7 +49,7 @@ abstract contract BaseTestHook is IHooks {
     function beforeAddLiquidity(
         address,
         PoolKey calldata,
-        IPoolManager.ModifyLiquidityParams calldata,
+        ModifyLiquidityParams calldata,
         bytes calldata
     ) external virtual returns (bytes4) {
         revert NotImplemented();
@@ -57,7 +58,7 @@ abstract contract BaseTestHook is IHooks {
     function afterAddLiquidity(
         address,
         PoolKey calldata,
-        IPoolManager.ModifyLiquidityParams calldata,
+        ModifyLiquidityParams calldata,
         BalanceDelta,
         BalanceDelta,
         bytes calldata
@@ -68,7 +69,7 @@ abstract contract BaseTestHook is IHooks {
     function beforeRemoveLiquidity(
         address,
         PoolKey calldata,
-        IPoolManager.ModifyLiquidityParams calldata,
+        ModifyLiquidityParams calldata,
         bytes calldata
     ) external virtual returns (bytes4) {
         revert NotImplemented();
@@ -77,7 +78,7 @@ abstract contract BaseTestHook is IHooks {
     function afterRemoveLiquidity(
         address,
         PoolKey calldata,
-        IPoolManager.ModifyLiquidityParams calldata,
+        ModifyLiquidityParams calldata,
         BalanceDelta,
         BalanceDelta,
         bytes calldata
@@ -88,7 +89,7 @@ abstract contract BaseTestHook is IHooks {
     function beforeSwap(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata,
+        SwapParams calldata,
         bytes calldata
     ) external virtual returns (bytes4, BeforeSwapDelta, uint24) {
         revert NotImplemented();
@@ -97,7 +98,7 @@ abstract contract BaseTestHook is IHooks {
     function afterSwap(
         address,
         PoolKey calldata,
-        IPoolManager.SwapParams calldata,
+        SwapParams calldata,
         BalanceDelta,
         bytes calldata
     ) external virtual returns (bytes4, int128) {
@@ -146,13 +147,13 @@ abstract contract SkimmingHook is BaseTestHook {
     function _feeBps(
         address sender,
         PoolKey calldata key,
-        IPoolManager.SwapParams calldata params
+        SwapParams calldata params
     ) internal virtual returns (uint256);
 
     function beforeSwap(
         address sender,
         PoolKey calldata key,
-        IPoolManager.SwapParams calldata params,
+        SwapParams calldata params,
         bytes calldata
     ) external virtual override onlyPoolManager returns (bytes4, BeforeSwapDelta, uint24) {
         uint256 bps = _feeBps(sender, key, params);
