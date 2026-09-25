@@ -39,7 +39,9 @@ SOURCES_MD = DOCS / "SOURCES.md"
 Errors = list[str]
 
 SECTION_RE = re.compile(r"^### `([a-z0-9_]+)`\s*$", re.MULTILINE)
-BOLD_FIELD_RE = re.compile(r"^\*\*(Definition|Parameters|Result fields)\.\*\*", re.MULTILINE)
+BOLD_FIELD_RE = re.compile(
+    r"^\*\*(Definition|Parameters|Result fields)\.\*\*", re.MULTILINE
+)
 BACKTICK_RE = re.compile(r"`([^`]+)`")
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
@@ -77,8 +79,14 @@ def check_metrics() -> Errors:
 
     missing_doc = configured - set(sections)
     missing_cfg = set(sections) - configured
-    errors += [f"METRICS.md: no section for configured metric `{m}`" for m in sorted(missing_doc)]
-    errors += [f"config.yaml: no `metrics.{m}` for documented metric" for m in sorted(missing_cfg)]
+    errors += [
+        f"METRICS.md: no section for configured metric `{m}`"
+        for m in sorted(missing_doc)
+    ]
+    errors += [
+        f"config.yaml: no `metrics.{m}` for documented metric"
+        for m in sorted(missing_cfg)
+    ]
 
     for name, body in sections.items():
         labels = set(BOLD_FIELD_RE.findall(body))
@@ -99,12 +107,16 @@ def check_metrics() -> Errors:
             for ref in refs:
                 if label == "Parameters":
                     if not resolve_config_path(ref):
-                        errors.append(f"METRICS.md `{name}`: `{ref}` not found in {what}")
+                        errors.append(
+                            f"METRICS.md `{name}`: `{ref}` not found in {what}"
+                        )
                 else:
                     try:
                         resolve_field(ref)
                     except KeyError as exc:
-                        errors.append(f"METRICS.md `{name}`: `{ref}` not in {what} ({exc})")
+                        errors.append(
+                            f"METRICS.md `{name}`: `{ref}` not in {what} ({exc})"
+                        )
     return errors
 
 
@@ -126,7 +138,9 @@ def check_result_files_are_documented() -> Errors:
         for p in [*sorted(DOCS.rglob("*.md")), ROOT / "SWORN_PLAN.md"]
         if p.is_file()
     )
-    return [f"no doc mentions result file {f}" for f in result_files() if f not in corpus]
+    return [
+        f"no doc mentions result file {f}" for f in result_files() if f not in corpus
+    ]
 
 
 def check_story() -> Errors:
@@ -143,9 +157,13 @@ def check_story() -> Errors:
     expected = ["claim", "source", "our artifact", "phase"]
     cols = [c.strip().lower() for c in header.strip().strip("|").split("|")]
     if cols[: len(expected)] != expected:
-        errors.append(f"STORY.md: claim table header is {cols}, expected {expected} first")
+        errors.append(
+            f"STORY.md: claim table header is {cols}, expected {expected} first"
+        )
     if len(body) != 5:
-        errors.append(f"STORY.md: claim table has {len(body)} rows, expected 5 (the five claims)")
+        errors.append(
+            f"STORY.md: claim table has {len(body)} rows, expected 5 (the five claims)"
+        )
     for i, row in enumerate(body, start=1):
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
         for j, cell in enumerate(cells):
@@ -175,10 +193,14 @@ def check_mermaid() -> Errors:
     errors: Errors = []
     blocks: list[tuple[Path, str]] = []
     for md in sorted(DOCS.rglob("*.md")):
-        for m in re.finditer(r"```mermaid\n(.*?)```", md.read_text(encoding="utf-8"), re.S):
+        for m in re.finditer(
+            r"```mermaid\n(.*?)```", md.read_text(encoding="utf-8"), re.S
+        ):
             blocks.append((md, m.group(1)))
     if not blocks:
-        return ["docs/: no mermaid diagram found (ARCHITECTURE.md needs a data-flow diagram)"]
+        return [
+            "docs/: no mermaid diagram found (ARCHITECTURE.md needs a data-flow diagram)"
+        ]
 
     mmdc = shutil.which("mmdc")
     for md, src in blocks:
@@ -193,27 +215,47 @@ def check_mermaid() -> Errors:
                     text=True,
                 )
                 if proc.returncode != 0:
-                    errors.append(f"{where}: mermaid render failed: {proc.stderr.strip()[:200]}")
+                    errors.append(
+                        f"{where}: mermaid render failed: {proc.stderr.strip()[:200]}"
+                    )
         else:
             errors += structural_mermaid_check(where, src)
     if not mmdc:
-        print("  note: mmdc not installed; used the structural mermaid check", file=sys.stderr)
+        print(
+            "  note: mmdc not installed; used the structural mermaid check",
+            file=sys.stderr,
+        )
     return errors
 
 
 def structural_mermaid_check(where: Path, src: str) -> Errors:
     """Cheap stand-in for a real render: diagram type, balanced brackets, some edges."""
     errors: Errors = []
-    lines = [ln.strip() for ln in src.splitlines() if ln.strip() and not ln.strip().startswith("%%")]
+    lines = [
+        ln.strip()
+        for ln in src.splitlines()
+        if ln.strip() and not ln.strip().startswith("%%")
+    ]
     if not lines:
         return [f"{where}: empty mermaid block"]
-    kinds = ("graph", "flowchart", "sequenceDiagram", "classDiagram", "stateDiagram", "erDiagram")
+    kinds = (
+        "graph",
+        "flowchart",
+        "sequenceDiagram",
+        "classDiagram",
+        "stateDiagram",
+        "erDiagram",
+    )
     if not lines[0].startswith(kinds):
-        errors.append(f"{where}: mermaid block starts with {lines[0]!r}, not a diagram type")
+        errors.append(
+            f"{where}: mermaid block starts with {lines[0]!r}, not a diagram type"
+        )
     for ch_open, ch_close in (("[", "]"), ("(", ")"), ("{", "}")):
         if src.count(ch_open) != src.count(ch_close):
             errors.append(f"{where}: unbalanced {ch_open}{ch_close} in mermaid block")
-    if lines[0].startswith(("graph", "flowchart")) and not any("-->" in ln or "---" in ln for ln in lines):
+    if lines[0].startswith(("graph", "flowchart")) and not any(
+        "-->" in ln or "---" in ln for ln in lines
+    ):
         errors.append(f"{where}: flowchart has no edges")
     return errors
 

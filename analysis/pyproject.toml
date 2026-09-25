@@ -20,6 +20,7 @@ dependencies = [
   "tqdm==4.67.1",
   "eth-utils==5.1.0",
   "eth-abi==5.1.0",
+  "eth-hash[pycryptodome]==0.7.0",
 ]
 
 [project.optional-dependencies]
