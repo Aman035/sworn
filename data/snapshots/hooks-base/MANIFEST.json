@@ -1,0 +1,21 @@
+{
+  "name": "hooks-base",
+  "chain": "base",
+  "chain_id": 8453,
+  "block_from": 0,
+  "block_to": 0,
+  "rpc_provider": "rough-silent-surf.base-mainnet.quiknode.pro/\u202697f4",
+  "script_commit": "f6bad01",
+  "created_at": "2026-09-25T14:23:19Z",
+  "rows": 200,
+  "source": "eth_getCode + EIP-1967 slots + etherscan getsourcecode",
+  "notes": "",
+  "files": [
+    {
+      "path": "hooks.parquet",
+      "sha256": "9e239d2937ac11ac3cdc9a6dd4ad4c26cb8ba1c36fdd0f926d333d2784e98025",
+      "bytes": 35023,
+      "rows": null
+    }
+  ]
+}
