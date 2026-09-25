@@ -30,6 +30,7 @@ CACHE_SUBDIR = "data/cache/requote"
 @dataclass(frozen=True)
 class RequoteInput:
     tx_hash: str
+    log_index: int
     currency0: str
     currency1: str
     fee: int
@@ -42,6 +43,9 @@ class RequoteInput:
     def to_json(self) -> dict[str, Any]:
         return {
             "txHash": self.tx_hash,
+            # A fill is (tx, log index), never tx alone: 37.8% of Base fills share a
+            # transaction with another fill.
+            "logIndex": self.log_index,
             "currency0": self.currency0,
             "currency1": self.currency1,
             "fee": self.fee,
@@ -57,6 +61,7 @@ class RequoteInput:
 @dataclass(frozen=True)
 class RequoteResult:
     tx_hash: str
+    log_index: int
     ok: bool
     expected: int
     error: str
@@ -130,12 +135,18 @@ def run_batch(
     return [
         RequoteResult(
             tx_hash=r["txHash"],
+            log_index=int(r["logIndex"]),
             ok=bool(r["ok"]),
             expected=int(r["expected"]),
             error=str(r.get("error", "")),
         )
         for r in raw
     ]
+
+
+def result_key(tx_hash: str, log_index: int) -> tuple[str, int]:
+    """The identity of a fill. Used everywhere results are matched back to inputs."""
+    return (tx_hash.lower(), int(log_index))
 
 
 def excess_take_bps(expected: int, realized: int, nominal_fee_pips: int) -> float:

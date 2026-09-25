@@ -104,3 +104,31 @@ contract RecordingCallbackSniffHook is RecordingHook {
         return 0;
     }
 }
+
+/// @notice A hook that *actually* defeats the probe, to prove the safety net fires.
+///
+/// @dev Every other fixture in this repo loses to Sworn, because the EVM gives a hook no
+///      way to distinguish a probe from an execution. This one cheats: it keeps its
+///      invocation count host-side, where the probe's revert cannot reach it, so it can
+///      quote free and then charge.
+///
+///      No deployed hook can do this — it requires cheatcodes. That is the point. The
+///      `Divergence` assertion exists for the case where the reasoning in
+///      docs/THREAT_MODEL.md is *wrong*, and this fixture manufactures exactly that case
+///      so the last line of defence is tested rather than merely argued for.
+contract CheatingDivergentHook is RecordingHook {
+    constructor(
+        IPoolManager _pm
+    ) RecordingHook(_pm) {}
+
+    function _feeBps(
+        address,
+        PoolKey calldata,
+        SwapParams calldata
+    ) internal override returns (uint256) {
+        uint256 seen = this.observations().length;
+        _record(vm.toString(seen + 1));
+        // First call (the probe) is free; every later call charges.
+        return seen == 0 ? 0 : 1_800;
+    }
+}

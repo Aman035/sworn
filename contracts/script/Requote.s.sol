@@ -38,6 +38,11 @@ contract RequoteScript is Script {
         uint24 fee;
         bytes hookData;
         IHooks hooks;
+        /// @dev A transaction can contain many Swap events — up to 126 observed on Base,
+        ///      and 37.8% of fills live in multi-fill transactions. The log index is
+        ///      therefore part of a fill's identity; keying results by txHash alone
+        ///      silently matches one quote against another fill's realized amount.
+        uint256 logIndex;
         int24 tickSpacing;
         bytes32 txHash;
         bool zeroForOne;
@@ -65,7 +70,9 @@ contract RequoteScript is Script {
                 i == 0 ? "" : ",",
                 '{"txHash":"',
                 vm.toString(f.txHash),
-                '","ok":',
+                '","logIndex":',
+                vm.toString(f.logIndex),
+                ',"ok":',
                 ok ? "true" : "false",
                 ',"expected":"',
                 vm.toString(expected),
@@ -92,6 +99,7 @@ contract RequoteScript is Script {
         f.zeroForOne = abi.decode(raw.parseRaw(string.concat(base, ".zeroForOne")), (bool));
         f.amountSpecified = abi.decode(raw.parseRaw(string.concat(base, ".amountSpecified")), (uint256));
         f.hookData = abi.decode(raw.parseRaw(string.concat(base, ".hookData")), (bytes));
+        f.logIndex = abi.decode(raw.parseRaw(string.concat(base, ".logIndex")), (uint256));
     }
 
     /// @dev Rolls to the fill's own transaction and quotes the identical swap there.
