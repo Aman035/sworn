@@ -28,12 +28,15 @@ venv/
 .env.*
 !.env.sample
 
-# data (snapshots are large; manifests + results are tracked)
-data/snapshots/**/*.parquet
-data/snapshots/**/*.csv
-data/snapshots/**/*.jsonl
-data/snapshots/**/*.json
+# data (snapshots are large; only manifests are tracked)
+# Ignore everything under a snapshot directory, then re-admit the manifests. Listing
+# extensions individually kept missing new ones: `*.jsonl` did not cover `initialize.jsonl.gz`,
+# and a 181 MB raw pull reached a commit because of it.
+data/snapshots/**
+!data/snapshots/
+!data/snapshots/*/
 !data/snapshots/**/MANIFEST.json
+!data/snapshots/README.md
 data/cache/
 
 # os / editors
