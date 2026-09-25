@@ -32,6 +32,8 @@ venv/
 data/snapshots/**/*.parquet
 data/snapshots/**/*.csv
 data/snapshots/**/*.jsonl
+data/snapshots/**/*.json
+!data/snapshots/**/MANIFEST.json
 data/cache/
 
 # os / editors

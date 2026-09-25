@@ -1,0 +1,21 @@
+{
+  "name": "hooklist",
+  "chain": "multi",
+  "chain_id": 0,
+  "block_from": 0,
+  "block_to": 0,
+  "rpc_provider": "raw.githubusercontent.com/Uniswap/hooklist",
+  "script_commit": "3b1ec1c-dirty",
+  "created_at": "2026-09-25T13:40:21Z",
+  "rows": 4961,
+  "source": "https://raw.githubusercontent.com/Uniswap/hooklist/main/hooklist.json",
+  "notes": "21 chains represented",
+  "files": [
+    {
+      "path": "hooklist.json",
+      "sha256": "35a505bc32b62e818cfbed29a8428af0a2449b7481684f6fc680536f73dc8c6c",
+      "bytes": 6255199,
+      "rows": null
+    }
+  ]
+}
