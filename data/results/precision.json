@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "generated_at": "2026-09-25T22:29:59Z",
+    "script_commit": "9534b2e-dirty",
+    "config_version": 1,
+    "pipeline": "f_precision",
+    "snapshots": [
+      {
+        "name": "census-base",
+        "sha256": "a5379268608d769898a5e9a90b37270978167c233a24381dc307a7b1adfc3205",
+        "block_from": 25350988,
+        "block_to": 51778292,
+        "rows": 15309659,
+        "chain": "base"
+      },
+      {
+        "name": "fills-base",
+        "sha256": "ed5147b030554d384ee07d44370081e78d0d7b32cf0b950da3cfb31dee297df5",
+        "block_from": 50483491,
+        "block_to": 51779491,
+        "rows": 12855496,
+        "chain": "base"
+      }
+    ]
+  },
+  "ground_truth": "phase-3 divergent (settled trades)",
+  "methods": [
+    {
+      "method": "static",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "method": "dynamic",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "method": "trace",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "method": "union",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "method": "settled_trade",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "notes": "ground truth; perfect by construction, and only available after a user was hurt"
+    }
+  ]
+}

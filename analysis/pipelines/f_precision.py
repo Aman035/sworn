@@ -150,6 +150,16 @@ def main(argv: list[str] | None = None) -> int:
     s = summary[0]
     print(f"  hooks scored (probed AND measured)  {s['hooks_scored']}")
     print(f"  divergent among them                {s['divergent']}")
+
+    if s["divergent"] == 0:
+        # With no positives, precision and recall are undefined rather than zero, and a
+        # table of 0.00s reads like "every detector failed". Say what is actually true:
+        # the labelled set contains nothing to detect.
+        print(
+            "\n  NOTE: no hook in the scored set is labelled divergent, so precision and\n"
+            "  recall are undefined, not zero. The matrix below is reported for\n"
+            "  completeness and carries no information about detector quality."
+        )
     print("\n  method          tp  fp  fn  tn   precision  recall")
     for m in methods:
         print(

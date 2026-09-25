@@ -1,0 +1,406 @@
+{
+  "meta": {
+    "generated_at": "2026-09-25T22:29:14Z",
+    "script_commit": "9534b2e-dirty",
+    "config_version": 1,
+    "pipeline": "b_divergence",
+    "snapshots": [
+      {
+        "name": "census-base",
+        "sha256": "a5379268608d769898a5e9a90b37270978167c233a24381dc307a7b1adfc3205",
+        "block_from": 25350988,
+        "block_to": 51778292,
+        "rows": 15309659,
+        "chain": "base"
+      },
+      {
+        "name": "fills-base",
+        "sha256": "ed5147b030554d384ee07d44370081e78d0d7b32cf0b950da3cfb31dee297df5",
+        "block_from": 50483491,
+        "block_to": 51779491,
+        "rows": 12855496,
+        "chain": "base"
+      }
+    ]
+  },
+  "params": {
+    "charged_threshold_bps": 5.0,
+    "min_fills": 20,
+    "min_charged_rate": 0.05,
+    "min_median_charged_excess_bps": 100.0,
+    "expected_output_method": "exact"
+  },
+  "totals": {
+    "fills": 92,
+    "charged_fills": 1,
+    "hooks": 24,
+    "divergent_hooks": 0
+  },
+  "hooks": [
+    {
+      "chain": "base",
+      "address": "0x9ce0e33e68c7bfc035b31961e4f1ddc55f0c0145",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 1,
+      "charged_rate": 0.25,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": 0.0,
+      "median_charged_excess_bps": 126.2311519665297,
+      "p90_charged_excess_bps": 126.2311519665297,
+      "max_charged_excess_bps": 126.2311519665297
+    },
+    {
+      "chain": "base",
+      "address": "0x03d2434d5a9ab7fb46bd3c7956a7c62e0cd46044",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -101.010101010101
+    },
+    {
+      "chain": "base",
+      "address": "0x0469a4bd3724dc86c9542f4694c976da13c450c0",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0x0d5d83c5a1d27654d12670bb07461971a5aba8cc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -100.98423838789007
+    },
+    {
+      "chain": "base",
+      "address": "0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -100.71789155604347
+    },
+    {
+      "chain": "base",
+      "address": "0x3b2b979df21036cee51b8debb13100e2cb8deacc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -100.99553372791155
+    },
+    {
+      "chain": "base",
+      "address": "0x47ec48c74f3069e9ae69406197821996d80200cc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -308.9432257222232
+    },
+    {
+      "chain": "base",
+      "address": "0x7c672f3850afadcb8f83478e0a2a90d109fa6044",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -272.3464424020513
+    },
+    {
+      "chain": "base",
+      "address": "0x7ee62731ef799f653e520a26f9428b419ecbd000",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0x985c14baa2a18316ffda0aefb3a632fadfca2acc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -100.9926258434622
+    },
+    {
+      "chain": "base",
+      "address": "0x9d11f9505ca92f4b6983c1285d1ac0aaff7ec0c0",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xa2d523d2da40f34c5bb58f528218e9cb7f4a40c4",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xa5c4a1be2d59af03c8578609f2621c91ad5a4145",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xab60e33e7af5f369607a94626c3718abbcc95000",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xb7b501ae3ef7f0b0933b8bd7d18b4125202440cc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xbb7784a4d481184283ed89619a3e3ed143e1adc0",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xbbecf9319f341deaec5f8454e74dbccf63409040",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xbeff407b7062e2fe15928960a58aec93b0c76044",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -101.01010101010095
+    },
+    {
+      "chain": "base",
+      "address": "0xcd256a2f4574cb6aca4837313ad225d2fe1de5cf",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -0.3506191533895475
+    },
+    {
+      "chain": "base",
+      "address": "0xd92f6bf39ceaa6f7665bf49f958ea8a39a6fc145",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xf54473f4c554baa8411c0a7dac7df735f34d00c4",
+      "hook_data_unknown_share": 1.0,
+      "fills": 4,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": 0.0
+    },
+    {
+      "chain": "base",
+      "address": "0xbdf938149ac6a781f94faa0ed45e6a0e984c6544",
+      "hook_data_unknown_share": 1.0,
+      "fills": 3,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": -101.01010101010081
+    },
+    {
+      "chain": "base",
+      "address": "0xc90eddf51569270e06270ea98f7efff828dde0cc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 3,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": false,
+      "median_take_bps": -309.2686284226916
+    },
+    {
+      "chain": "base",
+      "address": "0xb429d62f8f3bffb98cdb9569533ea23bf0ba28cc",
+      "hook_data_unknown_share": 1.0,
+      "fills": 2,
+      "charged_fills": 0,
+      "charged_rate": 0.0,
+      "divergent": false,
+      "coverage": "sampled",
+      "dynamic_fee": true,
+      "median_take_bps": -9.999888970250415
+    }
+  ],
+  "sensitivity": [
+    {
+      "charged_threshold_bps": 2.0,
+      "min_fills": 10,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 2.0,
+      "min_fills": 20,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 2.0,
+      "min_fills": 50,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 5.0,
+      "min_fills": 10,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 5.0,
+      "min_fills": 20,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 5.0,
+      "min_fills": 50,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 10.0,
+      "min_fills": 10,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 10.0,
+      "min_fills": 20,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 10.0,
+      "min_fills": 50,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 25.0,
+      "min_fills": 10,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 25.0,
+      "min_fills": 20,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    },
+    {
+      "charged_threshold_bps": 25.0,
+      "min_fills": 50,
+      "divergent_hooks": 0,
+      "charged_fills": 1
+    }
+  ]
+}

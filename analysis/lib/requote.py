@@ -144,6 +144,31 @@ def run_batch(
     ]
 
 
+def load_cached_batch(name: str) -> list[RequoteResult]:
+    """Read a previously written quote batch.
+
+    Quotes are a pure function of (fill, chain state at that block), so re-running a batch
+    produces identical numbers at roughly 30 seconds per fill. Being able to re-aggregate
+    from cache is what makes the threshold sensitivity sweep affordable.
+    """
+    path = cache_dir() / f"{name}-out.json"
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"no cached quote batch at {path}; run without --reuse-quotes first"
+        )
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        RequoteResult(
+            tx_hash=r["txHash"],
+            log_index=int(r["logIndex"]),
+            ok=bool(r["ok"]),
+            expected=int(r["expected"]),
+            error=str(r.get("error", "")),
+        )
+        for r in raw
+    ]
+
+
 def result_key(tx_hash: str, log_index: int) -> tuple[str, int]:
     """The identity of a fill. Used everywhere results are matched back to inputs."""
     return (tx_hash.lower(), int(log_index))

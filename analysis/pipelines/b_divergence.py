@@ -33,7 +33,13 @@ from dotenv import load_dotenv
 
 from ..lib.compact import SWAP_SHARD_PREFIX, load_shards
 from ..lib.config import load_config, path_for, repo_root
-from ..lib.requote import RequoteInput, excess_take_bps, result_key, run_batch
+from ..lib.requote import (
+    RequoteInput,
+    excess_take_bps,
+    load_cached_batch,
+    result_key,
+    run_batch,
+)
 from ..lib.schema import validate_result
 from ..lib.snapshot import script_commit, snapshot_dir, snapshot_ref
 
@@ -107,7 +113,7 @@ def sample_by_hook(fills: pd.DataFrame, per_hook: int, max_hooks: int, seed: int
     return pd.concat(picks, ignore_index=True) if picks else subset.head(0)
 
 
-def measure(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
+def measure(chain: str, sample: pd.DataFrame, *, reuse_quotes: bool = False) -> pd.DataFrame:
     inputs = [
         RequoteInput(
             tx_hash=r.tx_hash,
@@ -122,8 +128,16 @@ def measure(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
         )
         for _, r in sample.iterrows()
     ]
-    print(f"  re-quoting {len(inputs)} hooked fills ...", flush=True)
-    results = run_batch(chain, inputs, name=f"divergence-{chain}", timeout=7200)
+    if reuse_quotes:
+        # Re-aggregating with different thresholds must not cost another hour of forked
+        # state fetches. The quotes are a pure function of (fill, chain state), so a
+        # cached batch is as good as a fresh one — and re-running would produce identical
+        # numbers at 30s per fill.
+        results = load_cached_batch(f"divergence-{chain}")
+        print(f"  reusing {len(results)} cached quotes", flush=True)
+    else:
+        print(f"  re-quoting {len(inputs)} hooked fills ...", flush=True)
+        results = run_batch(chain, inputs, name=f"divergence-{chain}", timeout=7200)
     by_key = {result_key(r.tx_hash, r.log_index): r for r in results}
 
     rows = []
@@ -180,6 +194,13 @@ def aggregate(
         row: dict[str, Any] = {
             "chain": params["chain"],
             "address": hook,
+            # Every hooked re-quote is made with empty `hookData`, because recovering what
+            # the router actually passed needs a per-router calldata decoder. A hook that
+            # prices differently on `hookData` is therefore measured against a call it
+            # never received. This is not a footnote: a systematic ~-101 bps median take
+            # was observed across hooks with unrelated fee tiers, including fee-0 pools,
+            # which is the signature of exactly this problem rather than of generosity.
+            "hook_data_unknown_share": 1.0,
             "fills": int(len(usable)),
             "charged_fills": int(len(charged)),
             "charged_rate": rate,
@@ -202,6 +223,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--per-hook", type=int, default=8)
     parser.add_argument("--max-hooks", type=int, default=40)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--reuse-quotes",
+        action="store_true",
+        help="aggregate from the cached quote batch instead of re-quoting",
+    )
     args = parser.parse_args(argv)
 
     load_dotenv(repo_root() / ".env")
@@ -222,7 +248,7 @@ def main(argv: list[str] | None = None) -> int:
     sample = sample_by_hook(fills, args.per_hook, args.max_hooks, args.seed)
     print(f"  sampling {len(sample):,} fills from {sample.hook.nunique():,} hooks")
 
-    measured = measure(args.chain, sample)
+    measured = measure(args.chain, sample, reuse_quotes=args.reuse_quotes)
 
     # Keep the per-fill rows: pipeline C is a time-series view of exactly this data, and
     # re-quoting for it would be both slow and liable to disagree with these numbers.

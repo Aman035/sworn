@@ -77,7 +77,7 @@ def build(chain: str) -> list[dict[str, Any]]:
         raise SystemExit(f"no usable measurements for {chain}")
 
     frame["hour"] = pd.to_datetime(
-        frame.block_number.map(_block_to_epoch(chain)), unit="s", utc=True
+        frame.block_time.map(_block_to_epoch(chain)), unit="s", utc=True
     ).dt.floor("h")
     frame["charged"] = frame.excess_bps > threshold
 
