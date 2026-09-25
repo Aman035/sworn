@@ -29,7 +29,7 @@ from ..lib.config import Chain, chains, path_for, repo_root
 from ..lib.deployments import INITIALIZE_TOPIC, load_deployments, pool_manager
 from ..lib.events import DecodeError, InitializeEvent, decode_initialize
 from ..lib.hookflags import bitmap, names, returns_delta, touches_swap
-from ..lib.logs import fetch_to_jsonl, iter_logs
+from ..lib.logs import fetch_to_jsonl, iter_logs, resume_point
 from ..lib.rpc import RpcClient, redact
 from ..lib.snapshot import snapshot_dir, write_manifest
 
@@ -50,7 +50,7 @@ class CensusResult:
     parquet: Path
 
 
-def _progress(chain: str, started: float, span_from: int) -> Any:
+def _progress(chain: str, started: float, span_from: int, chain_start: int) -> Any:
     """Throttled progress line. Percentage is of the *remaining* span, so a resumed run
     does not claim to start at 0%."""
     last = [0.0]
@@ -60,9 +60,10 @@ def _progress(chain: str, started: float, span_from: int) -> Any:
         if now - last[0] < 10 and done < target:
             return
         last[0] = now
-        span = max(1, target - span_from)
-        pct = 100.0 * min(1.0, max(0.0, (done - span_from) / span))
+        span = max(1, target - chain_start)
+        pct = 100.0 * min(1.0, max(0.0, (done - chain_start) / span))
         elapsed = now - started
+        # Rate is this run's only; percentage is of the whole chain.
         rate = (done - span_from) / max(1e-9, elapsed)
         eta = (target - done) / rate / 60 if rate > 0 else float("inf")
         print(
@@ -110,6 +111,18 @@ def pull_chain(
             flush=True,
         )
         started = time.time()
+        # Throughput must be measured from where *this* run actually started, not from
+        # the deployment block: a resumed run would otherwise credit itself with the
+        # previous run's blocks and report an ETA several times too optimistic.
+        already = resume_point(raw)
+        run_start = from_block if already is None else already + 1
+        if already is not None:
+            covered = 100.0 * (already - from_block) / max(1, to_block - from_block)
+            print(
+                f"  {chain.name}: resuming at {run_start:,} ({covered:.1f}% already pulled)",
+                flush=True,
+            )
+
         stats = fetch_to_jsonl(
             rpc,
             address,
@@ -118,7 +131,7 @@ def pull_chain(
             to_block,
             raw,
             start_chunk=start_chunk,
-            progress=_progress(chain.name, started, from_block),
+            progress=_progress(chain.name, started, run_start, from_block),
         )
         print(
             f"  {chain.name}: pulled {stats.logs:,} logs in {(time.time() - started) / 60:.1f}m",
