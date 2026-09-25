@@ -1,0 +1,49 @@
+==> HookBook tests
+No files changed, compilation skipped
+
+Ran 19 tests for test/unit/HookBook.t.sol:HookBookTest
+[PASS] testFuzz_scoreRoundTrips(uint8,uint32,uint64) (runs: 512, μ: 74428, ~: 74339)
+[PASS] test_attestorCountTracksTheSet() (gas: 37796)
+[PASS] test_batchLengthMismatchReverts() (gas: 15814)
+[PASS] test_batchWrite() (gas: 119132)
+[PASS] test_malleableSignatureIsRejected() (gas: 18220)
+[PASS] test_newerUpdateReplacesTheOlder() (gas: 75465)
+[PASS] test_onlyAttestorCanWrite() (gas: 16400)
+[PASS] test_onlyOwnerCanManageAttestors() (gas: 13441)
+[PASS] test_proofCarriesTheSnapshotHash() (gas: 66938)
+[PASS] test_relayedSignedScoreIsAccepted() (gas: 78006)
+[PASS] test_replayedSignatureIsRejectedByMonotonicity() (gas: 76947)
+[PASS] test_revokedAttestorCannotWrite() (gas: 23761)
+[PASS] test_scoreAboveMaxIsRejected() (gas: 17026)
+[PASS] test_scoreWithAgeReportsStaleness() (gas: 66984)
+[PASS] test_scoredCleanHookIsDistinguishableFromUnscored() (gas: 68547)
+[PASS] test_signatureFromANonAttestorIsRejected() (gas: 20607)
+[PASS] test_staleUpdateIsRejected() (gas: 71640)
+[PASS] test_tamperedSignedScoreIsRejected() (gas: 23216)
+[PASS] test_unscoredHookReadsAsInsufficientData() (gas: 20634)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 15.61ms (18.20ms CPU time)
+
+Ran 1 test suite in 127.69ms (15.61ms CPU time): 19 tests passed, 0 failed, 0 skipped (19 total tests)
+  ok  auth, freshness, signatures and replay protection
+==> flag bits agree across Solidity, config and docs
+.....                                                                    [100%]
+  ok  bit positions frozen and consistent
+==> scoring reproduces the documented worked example
+...............                                                          [100%]
+  ok  score, decay and every contribution match METRICS.md
+==> scores.json
+    69,242 hooks: 0 scored, 69,242 insufficient data
+  ok  every score carries the snapshot it can be re-derived from
+==> attestor refuses unprovenanced or unmeasured scores
+  ok  skips unscored hooks rather than writing them as zero
+==> attestor dry-run against the real scores file
+  base: 69242 hooks in document, 0 publishable
+  snapshot 0xa5379268608d769898a5e9a90b37270978167c233a24381dc307a7b1adfc3205
+  0 batch(es) of up to 100
+  nothing scored yet — nothing to publish
+
+base: 0/69242 published in 0 batch(es) (dry run)
+  ok  attestor runs end to end
+==> HookBook is deployed
+    0x8A4470f7DDa8525b484527b21B19c3bc876A04c3: 5140 bytes, 1 attestor(s), unscored reads INSUFFICIENT_DATA
+  ok  deployed, authorised, and absence reads as absence

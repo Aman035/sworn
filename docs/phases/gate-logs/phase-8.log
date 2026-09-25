@@ -1,0 +1,32 @@
+==> typecheck
+  ok  strict typecheck passes
+==> sdk tests
+
+> sworn-sdk@0.0.0 test /Users/amangupta/Desktop/Personal_Projects/sworn/sdk
+> vitest run --passWithNoTests
+
+
+ RUN  v2.1.8 /Users/amangupta/Desktop/Personal_Projects/sworn/sdk
+
+ ✓ test/chains.test.ts (2 tests) 1ms
+ ✓ test/hookbook.test.ts (10 tests) 3ms
+ ✓ test/action.test.ts (10 tests) 8ms
+ ✓ test/buildCall.test.ts (17 tests) 11ms
+
+ Test Files  4 passed (4)
+      Tests  39 passed (39)
+   Start at  07:10:46
+   Duration  629ms (transform 93ms, setup 0ms, collect 534ms, tests 23ms, environment 0ms, prepare 184ms)
+
+  ok  calldata, validation, scores and policy
+==> sdk builds a publishable package
+
+> sworn-sdk@0.0.0 build /Users/amangupta/Desktop/Personal_Projects/sworn/sdk
+> tsc -p tsconfig.build.json
+
+  ok  dist and type declarations emitted
+==> calldata matches the router ABI
+    SwornParams has 11 fields, all present in the SDK ABI
+  ok  SDK ABI matches the compiled SwornRouter
+==> agent quickstart compiles
+  ok  agent quickstart typechecks against a real viem client
