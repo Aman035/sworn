@@ -1,0 +1,16 @@
+{
+  "name": "sworn-attestor",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Scheduled scoring job that writes HookBook attestations.",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3",
+    "vitest": "2.1.8"
+  }
+}

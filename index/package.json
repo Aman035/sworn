@@ -1,0 +1,16 @@
+{
+  "name": "sworn-index",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Ponder indexer: v4 pool census, swaps, Sworn executions.",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3",
+    "vitest": "2.1.8"
+  }
+}
