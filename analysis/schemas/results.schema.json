@@ -1,0 +1,491 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sworn.xyz/schemas/results.schema.json",
+  "title": "Sworn result files",
+  "description": "Every number in the README, the dashboard and HookBook comes from one of these files. x-files maps a filename in data/results/ to the definition it must validate against.",
+  "x-files": {
+    "census.json": "#/$defs/census",
+    "divergence.json": "#/$defs/divergence",
+    "intermittency.json": "#/$defs/intermittency",
+    "attribution.json": "#/$defs/attribution",
+    "probe.json": "#/$defs/probe",
+    "precision.json": "#/$defs/precision",
+    "replay.json": "#/$defs/replay",
+    "gas.json": "#/$defs/gas",
+    "scores.json": "#/$defs/scores"
+  },
+  "$defs": {
+    "chainName": {
+      "type": "string",
+      "enum": ["base", "bnb", "arbitrum", "unichain", "mainnet", "polygon"]
+    },
+    "address": { "type": "string", "pattern": "^0x[0-9a-f]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "bps": { "type": "number" },
+    "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+
+    "meta": {
+      "type": "object",
+      "description": "Provenance. A result file without a resolvable snapshot is not publishable.",
+      "required": ["generated_at", "script_commit", "config_version", "snapshots"],
+      "additionalProperties": false,
+      "properties": {
+        "generated_at": { "type": "string", "format": "date-time" },
+        "script_commit": { "type": "string", "minLength": 7 },
+        "config_version": { "type": "integer" },
+        "pipeline": { "type": "string" },
+        "snapshots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "sha256"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "sha256": { "$ref": "#/$defs/sha256" },
+              "chain": { "$ref": "#/$defs/chainName" },
+              "block_from": { "type": "integer" },
+              "block_to": { "type": "integer" },
+              "rows": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+
+    "census": {
+      "type": "object",
+      "required": ["meta", "chains", "top_hooks"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "chains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["chain", "hooks_total", "pools_total", "block_from", "block_to"],
+            "additionalProperties": false,
+            "properties": {
+              "chain": { "$ref": "#/$defs/chainName" },
+              "hooks_total": { "type": "integer", "minimum": 0 },
+              "pools_total": { "type": "integer", "minimum": 0 },
+              "hooked_pools": { "type": "integer", "minimum": 0 },
+              "block_from": { "type": "integer" },
+              "block_to": { "type": "integer" },
+              "with_returns_delta": { "type": "integer", "minimum": 0 },
+              "dynamic_fee_pools": { "type": "integer", "minimum": 0 },
+              "upgradeable": { "type": "integer", "minimum": 0 },
+              "verified": { "type": "integer", "minimum": 0 },
+              "allowlisted": { "type": "integer", "minimum": 0 },
+              "by_flag_combination": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["flags_bitmap", "hooks"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "flags_bitmap": { "type": "integer", "minimum": 0 },
+                    "hooks": { "type": "integer", "minimum": 0 },
+                    "names": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              },
+              "independent_count": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Hook count from the raw eth_getLogs reconciliation script; must agree within 5%."
+              }
+            }
+          }
+        },
+        "top_hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["chain", "address", "pool_count"],
+            "additionalProperties": false,
+            "properties": {
+              "chain": { "$ref": "#/$defs/chainName" },
+              "address": { "$ref": "#/$defs/address" },
+              "pool_count": { "type": "integer", "minimum": 0 },
+              "flags_bitmap": { "type": "integer", "minimum": 0 },
+              "volume_usd_30d": { "type": ["number", "null"] },
+              "price_confidence": { "$ref": "#/$defs/rate" },
+              "dynamic_fee": { "type": "boolean" },
+              "returns_delta": { "type": "boolean" },
+              "upgradeable": { "type": "boolean" },
+              "verified": { "type": "boolean" },
+              "allowlisted": { "type": "boolean" },
+              "bytecode_sha256": { "$ref": "#/$defs/sha256" },
+              "first_seen_block": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+
+    "divergence": {
+      "type": "object",
+      "required": ["meta", "params", "hooks", "sensitivity"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "params": {
+          "type": "object",
+          "description": "The config values this run used, copied in so a result is self-describing.",
+          "required": ["charged_threshold_bps", "min_fills", "min_charged_rate"],
+          "additionalProperties": true,
+          "properties": {
+            "charged_threshold_bps": { "$ref": "#/$defs/bps" },
+            "min_fills": { "type": "integer" },
+            "min_charged_rate": { "$ref": "#/$defs/rate" },
+            "min_median_charged_excess_bps": { "$ref": "#/$defs/bps" },
+            "expected_output_method": { "type": "string", "enum": ["exact", "approx", "mixed"] }
+          }
+        },
+        "totals": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fills": { "type": "integer" },
+            "charged_fills": { "type": "integer" },
+            "hooks": { "type": "integer" },
+            "divergent_hooks": { "type": "integer" },
+            "excess_usd_total": { "type": ["number", "null"] }
+          }
+        },
+        "hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["chain", "address", "fills", "charged_fills", "charged_rate", "divergent"],
+            "additionalProperties": false,
+            "properties": {
+              "chain": { "$ref": "#/$defs/chainName" },
+              "address": { "$ref": "#/$defs/address" },
+              "fills": { "type": "integer", "minimum": 0 },
+              "charged_fills": { "type": "integer", "minimum": 0 },
+              "charged_rate": { "$ref": "#/$defs/rate" },
+              "median_charged_excess_bps": { "$ref": "#/$defs/bps" },
+              "p90_charged_excess_bps": { "$ref": "#/$defs/bps" },
+              "max_charged_excess_bps": { "$ref": "#/$defs/bps" },
+              "median_take_bps": { "$ref": "#/$defs/bps" },
+              "median_shortfall": { "type": "number" },
+              "nominal_fee_bps_median": { "$ref": "#/$defs/bps" },
+              "excess_usd_total": { "type": ["number", "null"] },
+              "divergent": { "type": "boolean" },
+              "dynamic_fee": { "type": "boolean" },
+              "excess_vs_static_tier_bps": {
+                "$ref": "#/$defs/bps",
+                "description": "Dynamic-fee second view: excess measured against the nearest static tier."
+              },
+              "approx_share": { "$ref": "#/$defs/rate" },
+              "hook_data_unknown_share": { "$ref": "#/$defs/rate" },
+              "coverage": { "type": "string", "enum": ["full", "sampled"] }
+            }
+          }
+        },
+        "sensitivity": {
+          "type": "array",
+          "description": "Divergent-hook count at every (threshold, min_fills) pair in config.",
+          "items": {
+            "type": "object",
+            "required": ["charged_threshold_bps", "min_fills", "divergent_hooks"],
+            "additionalProperties": false,
+            "properties": {
+              "charged_threshold_bps": { "$ref": "#/$defs/bps" },
+              "min_fills": { "type": "integer" },
+              "divergent_hooks": { "type": "integer" },
+              "charged_fills": { "type": "integer" }
+            }
+          }
+        },
+        "calibration": {
+          "type": "object",
+          "description": "Hookless pools must show ~zero excess take; if they do not, the engine is wrong.",
+          "additionalProperties": false,
+          "properties": {
+            "hookless_sample": { "type": "integer" },
+            "hookless_median_excess_bps": { "$ref": "#/$defs/bps" },
+            "method_agreement_rate": { "$ref": "#/$defs/rate" },
+            "passed": { "type": "boolean" }
+          }
+        }
+      }
+    },
+
+    "intermittency": {
+      "type": "object",
+      "required": ["meta", "hooks"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["chain", "address", "window_days", "crossings", "intermittent"],
+            "additionalProperties": false,
+            "properties": {
+              "chain": { "$ref": "#/$defs/chainName" },
+              "address": { "$ref": "#/$defs/address" },
+              "window_days": { "type": "integer" },
+              "crossings": { "type": "integer", "minimum": 0 },
+              "toxic_hour_share": { "$ref": "#/$defs/rate" },
+              "intermittent": { "type": "boolean" },
+              "owner_switch_txs": { "type": "integer", "minimum": 0 },
+              "owner_switch_correlated": { "type": "boolean" },
+              "hourly": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["ts", "fills", "charged_fills"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "ts": { "type": "string", "format": "date-time" },
+                    "fills": { "type": "integer", "minimum": 0 },
+                    "charged_fills": { "type": "integer", "minimum": 0 },
+                    "charged_rate": { "$ref": "#/$defs/rate" },
+                    "median_excess_bps": { "$ref": "#/$defs/bps" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "attribution": {
+      "type": "object",
+      "required": ["meta", "products"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "unlabeled_share": { "$ref": "#/$defs/rate" },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["product", "chain", "fills_into_divergent", "confidence"],
+            "additionalProperties": false,
+            "properties": {
+              "product": { "type": "string" },
+              "chain": { "$ref": "#/$defs/chainName" },
+              "router": { "$ref": "#/$defs/address" },
+              "fills_into_divergent": { "type": "integer", "minimum": 0 },
+              "fills_total": { "type": "integer", "minimum": 0 },
+              "excess_usd": { "type": ["number", "null"] },
+              "share_of_product_v4_volume": { "$ref": "#/$defs/rate" },
+              "confidence": { "$ref": "#/$defs/rate" },
+              "sources": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+
+    "probe": {
+      "type": "object",
+      "required": ["meta", "hooks"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["chain", "address", "env_sensitive"],
+            "additionalProperties": false,
+            "properties": {
+              "chain": { "$ref": "#/$defs/chainName" },
+              "address": { "$ref": "#/$defs/address" },
+              "env_sensitive": { "type": "boolean" },
+              "max_disagreement_bps": { "$ref": "#/$defs/bps" },
+              "signals": { "type": "array", "items": { "type": "string" } },
+              "static": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "env_opcodes_present": { "type": "array", "items": { "type": "string" } },
+                  "proxy": { "type": "boolean" },
+                  "selfdestruct": { "type": "boolean" },
+                  "owner_gated_setters": { "type": "array", "items": { "type": "string" } },
+                  "calls_sender": { "type": "boolean" },
+                  "tx_origin_acl": { "type": "boolean" }
+                }
+              },
+              "dynamic": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permutations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "gas_price_wei": { "type": "integer" },
+                        "from_kind": { "type": "string", "enum": ["eoa", "contract"] },
+                        "gas": { "type": "integer" },
+                        "output": { "type": ["string", "null"] },
+                        "reverted": { "type": "boolean" }
+                      }
+                    }
+                  }
+                }
+              },
+              "trace": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "env_opcodes_on_swap_path": { "type": "array", "items": { "type": "string" } },
+                  "available": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "precision": {
+      "type": "object",
+      "required": ["meta", "methods"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "ground_truth": {
+          "type": "string",
+          "description": "Which label set the matrix is scored against (Phase 3 `divergent`)."
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["method", "tp", "fp", "fn", "tn"],
+            "additionalProperties": false,
+            "properties": {
+              "method": { "type": "string", "enum": ["static", "dynamic", "trace", "union", "settled_trade"] },
+              "tp": { "type": "integer", "minimum": 0 },
+              "fp": { "type": "integer", "minimum": 0 },
+              "fn": { "type": "integer", "minimum": 0 },
+              "tn": { "type": "integer", "minimum": 0 },
+              "precision": { "$ref": "#/$defs/rate" },
+              "recall": { "$ref": "#/$defs/rate" },
+              "f1": { "$ref": "#/$defs/rate" },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "replay": {
+      "type": "object",
+      "required": ["meta", "totals"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "totals": {
+          "type": "object",
+          "required": ["fills_protected", "protected_usd"],
+          "additionalProperties": false,
+          "properties": {
+            "fills_considered": { "type": "integer", "minimum": 0 },
+            "fills_protected": { "type": "integer", "minimum": 0 },
+            "protected_usd": { "type": ["number", "null"] },
+            "median_protection_bps": { "$ref": "#/$defs/bps" },
+            "gas_overhead_p50": { "type": "integer" },
+            "gas_overhead_p90": { "type": "integer" },
+            "price_confidence": { "$ref": "#/$defs/rate" }
+          }
+        },
+        "by_chain": { "type": "array", "items": { "type": "object" } },
+        "by_product": { "type": "array", "items": { "type": "object" } },
+        "by_hook": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+
+    "gas": {
+      "type": "object",
+      "required": ["meta", "benchmarks"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "baseline_swap_gas": {
+          "type": "integer",
+          "description": "A plain single-hop v4 swap through the same router, for comparison."
+        },
+        "benchmarks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["chain", "candidates", "gas"],
+            "additionalProperties": false,
+            "properties": {
+              "chain": { "$ref": "#/$defs/chainName" },
+              "candidates": { "type": "integer", "minimum": 1 },
+              "gas": { "type": "integer", "minimum": 0 },
+              "overhead_gas": { "type": "integer" },
+              "base_fee_gwei": { "type": "number" },
+              "native_price_usd": { "type": "number" },
+              "usd": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+
+    "scores": {
+      "type": "object",
+      "required": ["meta", "hooks"],
+      "additionalProperties": false,
+      "properties": {
+        "meta": { "$ref": "#/$defs/meta" },
+        "weights": { "type": "object", "additionalProperties": { "type": "number" } },
+        "hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["chain", "address", "score", "flags_bitmap", "as_of_block"],
+            "additionalProperties": false,
+            "properties": {
+              "chain": { "$ref": "#/$defs/chainName" },
+              "address": { "$ref": "#/$defs/address" },
+              "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
+              "flags_bitmap": { "type": "integer", "minimum": 0 },
+              "flags": { "type": "array", "items": { "type": "string" } },
+              "as_of_block": { "type": "integer" },
+              "insufficient_data": { "type": "boolean" },
+              "inputs": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "charged_rate": { "$ref": "#/$defs/rate" },
+                  "median_excess_bps": { "$ref": "#/$defs/bps" },
+                  "intermittency_crossings": { "type": "integer" },
+                  "env_sensitive": { "type": "boolean" },
+                  "owner_switches": { "type": "integer" },
+                  "upgradeable": { "type": "boolean" },
+                  "revert_asymmetry": { "$ref": "#/$defs/rate" },
+                  "decay": { "$ref": "#/$defs/rate" }
+                }
+              },
+              "proof": {
+                "type": "object",
+                "required": ["snapshot_sha256"],
+                "additionalProperties": false,
+                "properties": {
+                  "snapshot_sha256": { "$ref": "#/$defs/sha256" },
+                  "results_sha256": { "$ref": "#/$defs/sha256" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

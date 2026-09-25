@@ -1,8 +1,11 @@
 # Sworn analysis parameters.
-# Every threshold that appears in a result file or in the README is defined here,
-# never inline in a pipeline. docs/METRICS.md defines what each one means.
+#
+# Every threshold that appears in a result file, the dashboard or the README is defined
+# here, never inline in a pipeline. `docs/METRICS.md` defines what each one means and
+# `analysis/schemas/results.schema.json` names the field it lands in. The Phase 1 gate
+# (`make phase-1`) checks that those three stay in sync.
 
-version: 0
+version: 1
 
 chains:
   base:
@@ -34,3 +37,127 @@ paths:
   snapshots: data/snapshots
   results: data/results
   schema: analysis/schemas/results.schema.json
+
+metrics:
+  # --- expected output: what the swap should have returned at the pre-fill state ---
+  expected_output:
+    # "exact" = Foundry vm.rollFork(txHash) + V4Quoter (state after all prior txs in the
+    # block). "approx" = eth_call at the end of block N-1; cheaper, wrong when an earlier
+    # tx in the same block moved the pool. Pipelines record which one produced each row.
+    method: exact
+    approx_fallback: true
+    # Agreement between the two methods is measured, not assumed (Phase 3 calibration).
+    method_agreement_tolerance_bps: 1.0
+    # Hookless pools must come out at ~0 excess take. Anything above this means the
+    # engine is wrong, not that the pool is toxic.
+    calibration_max_abs_excess_bps: 1.0
+    calibration_min_pass_rate: 0.95
+    calibration_sample_size: 2000
+
+  realized_output:
+    # Realized amounts come from the Swap event deltas, not from token transfers: a hook
+    # can move tokens around the router and transfers would double-count.
+    source: swap_event_delta
+
+  shortfall:
+    # shortfall = (expected - realized) / expected, unitless.
+    clip_negative: false
+
+  take_bps:
+    # take = shortfall * 10_000. Positive means the user received less than quoted.
+    scale: 10000
+
+  nominal_fee:
+    # Static-fee pools: the pool's LP fee. Dynamic-fee pools (fee == 0x800000): the fee
+    # emitted on the Swap event, which is itself the hook's choice.
+    dynamic_fee_sentinel: 8388608 # 0x800000
+    dynamic_fee_source: swap_event_fee
+    # Secondary view for dynamic-fee pools: compare against the nearest static tier so a
+    # hook cannot hide a take by declaring it as its own "nominal" fee.
+    static_tier_reference_bps: [1, 5, 30, 100]
+
+  excess_take_bps:
+    # excess = max(0, take - nominal_fee). This is what is attributed to hook behaviour.
+    clip_at_zero: true
+
+  charged_fill:
+    # A fill where the hook took materially more than its stated fee.
+    threshold_bps: 5.0
+    # Phase 3 reruns the whole pipeline at each of these and reports how the divergent
+    # hook count moves, so the headline cannot be an artefact of one threshold.
+    sensitivity_threshold_bps: [2.0, 5.0, 10.0, 25.0]
+
+  divergent_hook:
+    # Either arm qualifies a hook as divergent.
+    min_fills: 20
+    min_charged_rate: 0.05
+    min_median_charged_excess_bps: 100.0
+    sensitivity_min_fills: [10, 20, 50]
+
+  env_sensitive:
+    # Differential probes disagree beyond this, or a trace shows an env opcode executing
+    # on the swap path (presence in bytecode alone is not enough).
+    probe_disagreement_bps: 1.0
+    gas_price_permutations_wei: [0, 1000000000, 100000000000]
+    require_opcode_on_swap_path: true
+    env_opcodes: [GASPRICE, ORIGIN, COINBASE, BASEFEE, PREVRANDAO, GASLIMIT, GAS]
+
+  intermittent:
+    # Hourly charged-rate series crossing the charged threshold this many times.
+    window_days: 30
+    bucket: hour
+    min_crossings: 3
+    # An hour needs this many fills before it can count as a crossing, otherwise a single
+    # fill flips the regime.
+    min_fills_per_bucket: 3
+
+  frontend_attribution:
+    # Swap.sender -> product, hand-curated with a source per row.
+    router_map: analysis/data/routers.csv
+    unlabeled_bucket: unlabeled
+    min_confidence: 0.5
+
+  protected_value:
+    # max(0, fallbackOutput - realized) - probe gas priced in the output token.
+    probe_gas_per_candidate: 120000
+    default_candidates: 2
+    # USD figures are only published where the price source is trustworthy; counts are
+    # published everywhere.
+    min_price_confidence: 0.8
+
+  divergence_score:
+    # 0-100. Weights sum to 1.0; each input is normalised to [0,1] by its `full_at`.
+    # docs/METRICS.md carries the worked example.
+    min_fills_for_score: 20
+    weights:
+      charged_rate: 0.30
+      median_excess: 0.25
+      intermittency: 0.15
+      env_sensitive: 0.15
+      owner_switches: 0.05
+      upgradeable: 0.05
+      revert_gated: 0.05
+    full_at:
+      charged_rate: 0.50
+      median_excess_bps: 1000.0
+      intermittency_crossings: 10
+      owner_switches: 5
+      revert_asymmetry: 0.25
+    # Evidence ages out: a hook that stopped charging 30 days ago should not score the
+    # same as one charging today.
+    half_life_days: 14
+
+flags:
+  # Bit positions for the uint32 flags word. HookBook stores this verbatim, so the
+  # order is frozen: append new flags, never renumber.
+  DIVERGENT: 0
+  ENV_SENSITIVE: 1
+  INTERMITTENT: 2
+  UPGRADEABLE: 3
+  OWNER_SWITCHED: 4
+  REVERT_GATED: 5
+  DYNAMIC_FEE: 6
+  RETURNS_DELTA: 7
+  ALLOWLISTED: 8
+  VERIFIED: 9
+  INSUFFICIENT_DATA: 10

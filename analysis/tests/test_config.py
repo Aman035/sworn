@@ -12,8 +12,34 @@ EXPECTED_PRIORITY = ["base", "bnb", "arbitrum", "unichain", "mainnet", "polygon"
 
 def test_config_loads() -> None:
     cfg = load_config()
-    assert cfg["version"] == 0
-    assert set(cfg) >= {"chains", "paths"}
+    assert cfg["version"] >= 1
+    assert set(cfg) >= {"chains", "paths", "metrics", "flags"}
+
+
+def test_score_weights_sum_to_one() -> None:
+    weights = load_config()["metrics"]["divergence_score"]["weights"]
+    assert abs(sum(weights.values()) - 1.0) < 1e-9
+
+
+def test_flag_bits_are_unique_and_fit_a_uint32() -> None:
+    # HookBook stores this word verbatim, so the bit positions are frozen.
+    bits = load_config()["flags"]
+    assert len(set(bits.values())) == len(bits)
+    assert max(bits.values()) < 32
+    assert bits["DIVERGENT"] == 0
+
+
+def test_charged_threshold_is_in_its_own_sensitivity_sweep() -> None:
+    # The headline threshold must be one of the swept values, otherwise the
+    # sensitivity table does not actually bracket the published number.
+    metrics = load_config()["metrics"]
+    assert (
+        metrics["charged_fill"]["threshold_bps"]
+        in metrics["charged_fill"]["sensitivity_threshold_bps"]
+    )
+    assert (
+        metrics["divergent_hook"]["min_fills"] in metrics["divergent_hook"]["sensitivity_min_fills"]
+    )
 
 
 def test_chain_priority_order() -> None:
