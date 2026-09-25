@@ -28,16 +28,16 @@ contract SwornGasTest is SwornTestBase {
     }
 
     function _approveNaive() private {
-        (bool a,) = Currency.unwrap(currency0).call(
-            abi.encodeWithSignature("approve(address,uint256)", address(naive), type(uint256).max)
-        );
-        (bool b,) = Currency.unwrap(currency1).call(
-            abi.encodeWithSignature("approve(address,uint256)", address(naive), type(uint256).max)
-        );
+        (bool a,) = Currency.unwrap(currency0)
+            .call(abi.encodeWithSignature("approve(address,uint256)", address(naive), type(uint256).max));
+        (bool b,) = Currency.unwrap(currency1)
+            .call(abi.encodeWithSignature("approve(address,uint256)", address(naive), type(uint256).max));
         require(a && b, "approve failed");
     }
 
-    function _candidates(uint256 n) internal view returns (Candidate[] memory out) {
+    function _candidates(
+        uint256 n
+    ) internal view returns (Candidate[] memory out) {
         PoolKey[3] memory keys = [hooklessKey, honestA, honestB];
         out = new Candidate[](n);
         for (uint256 i = 0; i < n; i++) {
