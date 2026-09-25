@@ -1,14 +1,20 @@
 import { hookBookAbi } from './abi.js';
 import { HOOK_FLAGS, type Address, type HookFlagName } from './types.js';
 
-/** The minimum a caller needs to read a score: any viem-compatible public client. */
+/**
+ * Any viem-compatible public client.
+ *
+ * Typed loosely on purpose. viem declares `readContract` with a generic constrained to
+ * the ABI and the function name, so a narrow structural interface cannot be satisfied by
+ * a real `PublicClient` — the `functionName: string` widens and the call fails to
+ * typecheck at the consumer, which is exactly backwards.
+ *
+ * The looseness is contained: this package owns the ABI, the function names and the
+ * decoding, and every value read here is validated before use.
+ */
 export interface ReadClient {
-  readContract: (args: {
-    address: Address;
-    abi: typeof hookBookAbi;
-    functionName: string;
-    args: readonly unknown[];
-  }) => Promise<unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readContract: (args: any) => Promise<any>;
 }
 
 export interface HookScore {
