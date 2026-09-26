@@ -61,6 +61,18 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Avoids the single-word last line that kept appearing at the end of body copy and
+   under two-line headings. Ignored by browsers that do not support it. */
+h1,
+h2,
+h3,
+p,
+li,
+dd,
+.k {
+  text-wrap: pretty;
+}
+
 body {
   margin: 0;
   background: var(--paper);
@@ -98,12 +110,17 @@ body {
   color: var(--ink);
 }
 
+/* Sized and placed so it always runs off the right edge and is clipped by the masthead.
+   Fitting entirely on screen made it read as an accidental duplicate of the wordmark
+   rather than as a watermark behind it. Hidden below 900px, where it would instead
+   collide with the real one. */
 .wordmark::after {
   content: 'SWORN';
+  display: none;
   position: absolute;
-  top: 26px;
-  left: 44%;
-  font-size: var(--t-hero);
+  top: 22px;
+  left: 66%;
+  font-size: calc(var(--t-hero) * 1.15);
   font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 0.86;
@@ -113,6 +130,12 @@ body {
   user-select: none;
   white-space: nowrap;
   z-index: 0;
+}
+
+@media (min-width: 900px) {
+  .wordmark::after {
+    display: block;
+  }
 }
 
 .standfirst {
@@ -538,10 +561,6 @@ main {
 @media (max-width: 720px) {
   :root {
     --gutter: 18px;
-  }
-
-  .wordmark::after {
-    display: none;
   }
 
   .standfirst {

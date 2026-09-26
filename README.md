@@ -185,7 +185,7 @@ got — net of probe gas, charged at the price that fill actually paid.
 - **65.16 bps** median protection on those
 - **$0.0045** median cost to probe one trade
 
-![The value panel on the dashboard](docs/assets/dashboard-value.png)
+![What the guarantee is worth, on the dashboard](docs/assets/dashboard-value.png)
 
 ### The break-even is the honest headline
 
