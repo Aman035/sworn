@@ -22,8 +22,14 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+ROOT_FOR_IMPORT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT_FOR_IMPORT / "analysis"))
+
+from sworn_analysis.lib.snapshot import script_commit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "data" / "results"
@@ -202,7 +208,22 @@ def main() -> int:
         print("no scored hooks yet — run the scoring pipeline first", file=sys.stderr)
         return 1
 
-    PROPOSAL_JSON.write_text(json.dumps(entries, indent=2) + "\n", encoding="utf-8")
+    scores_meta = load("scores.json")["meta"]
+    document = {
+        # Carries provenance like every other result file: this is a claim about mainnet
+        # hooks, and a claim with no snapshot behind it is the thing this repo refuses to
+        # publish. The gate sweeps `data/results/` and would reject a bare list.
+        "meta": {
+            "generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "script_commit": script_commit(),
+            "config_version": scores_meta["config_version"],
+            "pipeline": "hooklist_proposal",
+            "snapshots": scores_meta["snapshots"],
+        },
+        "fields": [{"name": n, "type": t, "why": w} for n, t, w in FIELDS],
+        "hooks": entries,
+    }
+    PROPOSAL_JSON.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
     write_doc(entries)
     print(
         f"  {len(entries)} measured hooks written to {PROPOSAL_JSON.relative_to(ROOT)}"

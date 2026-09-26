@@ -1,9 +1,9 @@
 ==> python tests
-........................................................................ [ 28%]
-........................................................................ [ 56%]
-........................................................................ [ 84%]
-........................................                                 [100%]
-256 passed in 2.42s
+........................................................................ [ 25%]
+........................................................................ [ 51%]
+........................................................................ [ 77%]
+.............................................................            [100%]
+277 passed in 2.79s
   ok  pipeline tests pass
 ==> hookless calibration
   eligible hookless fills: 3,815,363
@@ -36,13 +36,14 @@
     intermittency.json ok
     precision.json ok
     probe.json ok
+    replay.json ok
     scores.json ok
   ok  every result file validates
 ==> sensitivity sweep is present
     swept thresholds [2.0, 5.0, 10.0, 25.0], published 5.0
   ok  divergent-hook count reported across thresholds
 ==> divergence discloses its hookData coverage
-    hookData unknown for up to 100% of fills per hook (disclosed)
+    hookData unknown for up to 0% of fills per hook (disclosed)
   ok  hookData coverage is reported alongside every hook
 ==> attribution publishes its own coverage
     unlabeled share 50.2%
