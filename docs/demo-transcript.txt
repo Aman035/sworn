@@ -3,41 +3,18 @@
  SWORN  a hook can quote one price and charge another
 ════════════════════════════════════════════════════════════════════════════
 
-  WHAT THIS IS
-  Uniswap v4 lets anyone attach code to a pool. That code runs inside the
-  swap, and it can tell a price quote apart from a real trade, because
-  tx.gasprice is 0 under eth_call and non-zero in a transaction. So a hook
-  can promise one number to every quoting engine on the market and pay out
-  a smaller one to the person actually trading.
+  A v4 hook is code inside the swap, and it can tell a quote from a trade:
+  tx.gasprice is 0 under eth_call, non-zero in a transaction. So it can
+  promise one number and pay out a smaller one.
 
-  Sworn is a router that closes that. It re-quotes every candidate route
-  inside the transaction that settles, takes the best, and reverts if what
-  executed differs from what it probed.
+  Sworn re-quotes every route inside the transaction that settles, and
+  reverts if what executed differs from what it probed.
 
-  WHAT THIS DEMO PROVES, IN THREE PARTS
+  PART 1  Can a hook do this at all?             fixture, local EVM
+  PART 2  Does it happen for real on Base?       live hook, forked
+  PART 3  How often, and who is exposed?         the measurement
 
-  PART 1  Can a hook do this at all?
-          A fixture hook, deployed locally, that quotes honestly to a
-          simulator and then charges a real transaction.
-          you will see:  the quote, the payout, and the gap between them
-          runs on:       a bare local EVM, no network, ~20 seconds
-
-  PART 2  Does it happen for real, and can it be stopped?
-          A hook that is live on Base right now, at a pinned block, sent
-          the identical swap from two different callers.
-          you will see:  two different payouts for the same trade, and
-                         Sworn settling elsewhere for more
-          runs on:       Base, forked locally, ~60 seconds
-
-  PART 3  How often, and who is exposed?
-          The measurement the first two parts rest on.
-          you will see:  how many hooks charge more than they quote, out
-                         of those with enough fills to judge, and how many
-                         swaps went into them
-          runs on:       committed result files, rendered statically
-
-  Nothing below is typed in. Every figure is produced during this run, and
-  the gate greps the source to prove no console.log string contains one.
+  Every figure below is produced during this run, not typed in.
 
    Starting.
 
@@ -46,17 +23,10 @@
                                                     local EVM, nothing forked
 ────────────────────────────────────────────────────────────────────────────
 
-  A v4 hook is arbitrary code running inside PoolManager.swap, and it can
-  read its environment. tx.gasprice is 0 under eth_call and non-zero in a
-  real transaction, so one modifier is enough to answer a quote honestly
-  and a trade dishonestly.
-
   Two pools, same pair. Pool A is hookless. Pool B carries a hook that
-  branches on tx.gasprice. Both are deployed into a bare chain seconds
-  before the swap, so there is nothing else in play.
+  branches on tx.gasprice. Both deployed into a bare chain seconds ago.
 
-  The test prints its own ACT 1 to ACT 5 as it goes. Those are its five
-  steps, not the three parts of this script.
+  The test prints its own ACT 1 to ACT 5. Those are its steps, not these parts.
 
   watch for: what pool B quotes, what it delivers, and what Sworn gets instead
 
@@ -99,9 +69,9 @@ Logs:
   The quote was a lie. The probe was not, because it was the trade.
   --------------------------------------------------------------
 
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.25ms (1.31ms CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.27ms (1.27ms CPU time)
 
-Ran 1 test suite in 126.97ms (3.25ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
+Ran 1 test suite in 126.77ms (3.27ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
 
   ── PART 1 ANSWERED ───────────────────────────────────────────────────────
   Yes, a hook can quote one price and charge another.
@@ -109,38 +79,37 @@ Ran 1 test suite in 126.97ms (3.25ms CPU time): 1 tests passed, 0 failed, 0 skip
     quoted to a simulator   996,999,005,991,991
     delivered to a trade    817,539,331,628,894
   
-  1799 bps taken that were never quoted. Every off-chain quoting engine in
-  existence would have reported the first number and been right to.
+  1799 bps taken that were never quoted. Every off-chain quoting engine
+  would have reported the first number.
   
-  Sworn probed both pools inside the transaction that settles, saw the real
-  offer rather than the promised one, and routed around it: 2195 bps recovered.
+  Sworn probed both pools inside the settling transaction and routed around
+  it: 2195 bps recovered.
 
   ok  a hook can lie, and Sworn routes around it
 
 ────────────────────────────────────────────────────────────────────────────
- PART 2 of 3  Does it happen for real, and can it be stopped?
-                                               Base, forked at a pinned block
+ PART 2 of 3  Does it happen for real on Base, and can it be stopped?
+                                                               forked mainnet
 ────────────────────────────────────────────────────────────────────────────
 
-  Part 1 used a hook written for the occasion, so the fair objection is
-  that the fixture was built to lose. This part uses code nobody in this
-  repo wrote, at pinned Base blocks.
+  This hook, live on Base, not written by anyone here:
 
-  Forking Base locally first. Anvil is a proxy in front of an archive
-  node, so the pools, the balances and the hook bytecode are all really
-  Base's, at the block we pin.
+    0xf54473f4c554baa8411c0a7dac7df735f34d00c4
+      https://basescan.org/address/0xf54473f4c554baa8411c0a7dac7df735f34d00c4
+      pinned at block 51,247,545
+
+  Anvil proxies an archive node, so the pool, the balances and the hook
+  bytecode are all really Base's at that block.
 
    Forking Base.
   ok  anvil forked Base at block 51700000
 
-  One pool on Base, one block, one swap size. Two callers send the
-  identical trade. Neither is known to the hook; both were deployed
-  seconds earlier inside the test.
+  Two callers send the identical trade. Neither is known to the hook;
+  both were deployed seconds earlier inside the test.
 
   watch for: the two amounts received, and the gap between them
 
    Sending the same swap twice, from two different callers.
-Error: Address already in use (os error 48)
 No files changed, compilation skipped
 
 Ran 2 tests for test/fork/ProtectedSwap.fork.t.sol:ProtectedSwapForkTest
@@ -158,9 +127,9 @@ Logs:
     caller B (SwornRouter) receives 16340546
     the hook charged caller B more, by bps 706
 
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.20ms (2.72ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 40.05ms (2.76ms CPU time)
 
-Ran 1 test suite in 125.57ms (7.20ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)
+Ran 1 test suite in 125.81ms (40.05ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)
 
   ── PART 2 ANSWERED ───────────────────────────────────────────────────────
   Yes it happens for real, and yes Sworn stops it.
@@ -170,12 +139,10 @@ Ran 1 test suite in 125.57ms (7.20ms CPU time): 2 tests passed, 0 failed, 0 skip
   
   Same pool, same block, same amount in. 707 bps apart.
   
-  Sworn does not need to know why it is being charged. It probed, saw the
-  real offer, probed the hookless pool beside it, and settled there instead:
-  17,438,404, 672 bps recovered.
+  Sworn probed, saw the real offer, and settled on the hookless pool beside
+  it instead: 17,438,404, 672 bps recovered.
   
-  Worth sitting with: the offline pipeline in this repo did not flag that
-  hook. A re-quote of 10,000 fills missed what one probe caught immediately.
+  The offline pipeline in this repo never flagged that hook.
 
   ok  charged 707 bps more than another caller; Sworn recovered 672 bps by routing away
 
@@ -194,9 +161,9 @@ Logs:
 
 [PASS] test_completesThroughADynamicFeeHook() (gas: 270417)
 [PASS] test_soleCandidateStillPassesTheDivergenceCheck() (gas: 153609)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 6.98ms (2.16ms CPU time)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 40.52ms (2.64ms CPU time)
 
-Ran 1 test suite in 126.87ms (6.98ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
+Ran 1 test suite in 126.83ms (40.52ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
 
   ── and one more check ────────────────────────────────────────────────────
   It still trades.
@@ -211,20 +178,14 @@ Ran 1 test suite in 126.87ms (6.98ms CPU time): 3 tests passed, 0 failed, 0 skip
                                            measured, then rendered statically
 ────────────────────────────────────────────────────────────────────────────
 
-  Parts 1 and 2 are the mechanism. This is the measurement behind it:
-  every v4 pool on four chains, indexed from Initialize logs, and a
-  uniform random sample of Base fills each re-quoted against the state
-  immediately before it.
+  Every v4 pool on four chains, and a uniform random sample of Base fills
+  re-quoted against the state immediately before each one.
 
-  The dashboard is a static export that reads the same data/results/*.json
-  the README is generated from, so the two cannot disagree.
+  The dashboard reads the same data/results/*.json the README is generated
+  from, so the two cannot disagree.
 
    Building the dashboard.
 
-  ── PART 3 ANSWERED ───────────────────────────────────────────────────────
-  4 of the 25 hooks with enough fills to classify charge more than they quote,
-  and 849,451 swaps on Base went into them.
-  
     the argument    http://127.0.0.1:4321
     the evidence    http://127.0.0.1:4321/evidence/
 

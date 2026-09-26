@@ -89,9 +89,10 @@ const SHELL = `<!doctype html><meta charset="utf-8"><style>
   const t = document.getElementById('t');
   function cls(line) {
     if (/^\\$ /.test(line)) return 'cmd';
-    if (/^==> /.test(line)) return 'step';
+    if (/── PART \\d ANSWERED/.test(line)) return 'ok';
     if (/^  ok /.test(line)) return 'ok';
-    if (/^-- /.test(line)) return 'beat';
+    if (/── /.test(line)) return 'beat';
+    if (/^ {3}\\S/.test(line)) return 'beat';
     if (/\\b(bps|score|hasScore|INSUFFICIENT_DATA)\\b/.test(line)) return 'sig';
     if (/^\\s*(Ran|Suite|No files|\\[PASS\\]|Logs:)/.test(line)) return 'dim';
     return '';
@@ -139,11 +140,20 @@ function transcript() {
     .map((l) => l.replace(/\x1b\[[0-9;]*m/g, '').trimEnd());
 }
 
-/** The slice of the transcript between two markers, noise removed. */
+/**
+ * The slice of the transcript between two markers, noise removed.
+ *
+ * The end marker is included: every scene ends on the green `ok` line, which is the
+ * beat the narration lands on. A missing marker is a hard error rather than an empty
+ * scene, because the demo script's wording changes and a silently blank scene in a
+ * three-minute video is the kind of thing nobody notices until it is published.
+ */
 function slice(lines, from, to) {
   const a = lines.findIndex((l) => l.includes(from));
-  const b = to ? lines.findIndex((l, i) => i > a && l.includes(to)) : lines.length;
-  return lines.slice(a, b < 0 ? lines.length : b).filter((l) => !NOISE.test(l));
+  if (a < 0) throw new Error(`transcript has no line matching "${from}"`);
+  const b = lines.findIndex((l, i) => i > a && l.includes(to));
+  if (b < 0) throw new Error(`transcript has no line matching "${to}" after "${from}"`);
+  return lines.slice(a, b + 1).filter((l) => !NOISE.test(l));
 }
 
 /**
@@ -299,10 +309,10 @@ async function main() {
   await page.evaluate(() => window.__cursor(true));
   await sleep(700);
   await page.evaluate(() => window.__cursor(false));
-  await type(page, slice(lines, '-- Act 1.', '-- Act 2.'), {
-    perLine: 820,
-    onNumber: 700,
-    hold: 7000,
+  await type(page, slice(lines, 'Running DemoTest.', 'ok  a hook can lie'), {
+    perLine: 620,
+    onNumber: 550,
+    hold: 6500,
   });
 
   await card(
@@ -314,10 +324,10 @@ async function main() {
     5200,
   );
   await page.evaluate(() => window.__clear());
-  await type(page, slice(lines, '-- Act 3.', '-- Act 4.'), {
-    perLine: 1000,
-    onNumber: 900,
-    hold: 9000,
+  await type(page, slice(lines, 'Sending the same swap twice', 'ok  charged'), {
+    perLine: 780,
+    onNumber: 700,
+    hold: 8500,
   });
 
   // ---- 7. close (7s)

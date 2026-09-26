@@ -119,59 +119,31 @@ blank; heavy
 printf ' %sSWORN%s  a hook can quote one price and charge another\n' "$C_YELLOW" "$C_OFF"
 heavy; blank
 
-printf '  %sWHAT THIS IS%s\n' "$C_YELLOW" "$C_OFF"
-say "Uniswap v4 lets anyone attach code to a pool. That code runs inside the"
-say "swap, and it can tell a price quote apart from a real trade, because"
-say "tx.gasprice is 0 under eth_call and non-zero in a transaction. So a hook"
-say "can promise one number to every quoting engine on the market and pay out"
-say "a smaller one to the person actually trading."
+say "A v4 hook is code inside the swap, and it can tell a quote from a trade:"
+say "tx.gasprice is 0 under eth_call, non-zero in a transaction. So it can"
+say "promise one number and pay out a smaller one."
 blank
-say "Sworn is a router that closes that. It re-quotes every candidate route"
-say "inside the transaction that settles, takes the best, and reverts if what"
-say "executed differs from what it probed."
+say "Sworn re-quotes every route inside the transaction that settles, and"
+say "reverts if what executed differs from what it probed."
 blank
-
-printf '  %sWHAT THIS DEMO PROVES, IN THREE PARTS%s\n' "$C_YELLOW" "$C_OFF"
+printf '  %sPART 1%s  Can a hook do this at all?             %sfixture, local EVM%s\n' \
+  "$C_YELLOW" "$C_OFF" "$C_DIM" "$C_OFF"
+printf '  %sPART 2%s  Does it happen for real on Base?       %slive hook, forked%s\n' \
+  "$C_YELLOW" "$C_OFF" "$C_DIM" "$C_OFF"
+printf '  %sPART 3%s  How often, and who is exposed?         %sthe measurement%s\n' \
+  "$C_YELLOW" "$C_OFF" "$C_DIM" "$C_OFF"
 blank
-printf '  %sPART 1%s  Can a hook do this at all?\n' "$C_YELLOW" "$C_OFF"
-say "        A fixture hook, deployed locally, that quotes honestly to a"
-say "        simulator and then charges a real transaction."
-say "        you will see:  the quote, the payout, and the gap between them"
-say "        runs on:       a bare local EVM, no network, ~20 seconds"
-blank
-printf '  %sPART 2%s  Does it happen for real, and can it be stopped?\n' "$C_YELLOW" "$C_OFF"
-say "        A hook that is live on Base right now, at a pinned block, sent"
-say "        the identical swap from two different callers."
-say "        you will see:  two different payouts for the same trade, and"
-say "                       Sworn settling elsewhere for more"
-say "        runs on:       Base, forked locally, ~60 seconds"
-blank
-printf '  %sPART 3%s  How often, and who is exposed?\n' "$C_YELLOW" "$C_OFF"
-say "        The measurement the first two parts rest on."
-say "        you will see:  how many hooks charge more than they quote, out"
-say "                       of those with enough fills to judge, and how many"
-say "                       swaps went into them"
-say "        runs on:       committed result files, rendered statically"
-blank
-say "Nothing below is typed in. Every figure is produced during this run, and"
-say "the gate greps the source to prove no console.log string contains one."
+say "Every figure below is produced during this run, not typed in."
 beat "Starting."
 
 # -------------------------------------------------------------------------------- part 1
 
 if wanted 1; then
   part 1 "Can a hook quote one price and charge another?" "local EVM, nothing forked"
-  say "A v4 hook is arbitrary code running inside PoolManager.swap, and it can"
-  say "read its environment. tx.gasprice is 0 under eth_call and non-zero in a"
-  say "real transaction, so one modifier is enough to answer a quote honestly"
-  say "and a trade dishonestly."
-  blank
   say "Two pools, same pair. Pool A is hookless. Pool B carries a hook that"
-  say "branches on tx.gasprice. Both are deployed into a bare chain seconds"
-  say "before the swap, so there is nothing else in play."
+  say "branches on tx.gasprice. Both deployed into a bare chain seconds ago."
   blank
-  say "The test prints its own ACT 1 to ACT 5 as it goes. Those are its five"
-  say "steps, not the three parts of this script."
+  say "The test prints its own ACT 1 to ACT 5. Those are its steps, not these parts."
   blank
   watch "what pool B quotes, what it delivers, and what Sworn gets instead"
   beat "Running DemoTest."
@@ -192,11 +164,11 @@ if wanted 1; then
     "  quoted to a simulator   $(group "$quoted")" \
     "  delivered to a trade    $(group "$delivered")" \
     "" \
-    "${taken} bps taken that were never quoted. Every off-chain quoting engine in" \
-    "existence would have reported the first number and been right to." \
+    "${taken} bps taken that were never quoted. Every off-chain quoting engine" \
+    "would have reported the first number." \
     "" \
-    "Sworn probed both pools inside the transaction that settles, saw the real" \
-    "offer rather than the promised one, and routed around it: ${regained} bps recovered."
+    "Sworn probed both pools inside the settling transaction and routed around" \
+    "it: ${regained} bps recovered."
   ok "a hook can lie, and Sworn routes around it"
 fi
 
@@ -208,14 +180,20 @@ if wanted 2; then
     warn "BASE_RPC_ARCHIVE not set, so part 2 is skipped."
     say "Set it in .env to run it. Parts 1 and 3 need no network."
   else
-    part 2 "Does it happen for real, and can it be stopped?" "Base, forked at a pinned block"
-    say "Part 1 used a hook written for the occasion, so the fair objection is"
-    say "that the fixture was built to lose. This part uses code nobody in this"
-    say "repo wrote, at pinned Base blocks."
+    part 2 "Does it happen for real on Base, and can it be stopped?" "forked mainnet"
+
+    read -r hook blk <<<"$("$(venv_python)" -c 'import json
+w = json.load(open("data/results/caught.json"))["where"]
+print(w["hook"], w["block"])')"
+
+    say "This hook, live on Base, not written by anyone here:"
     blank
-    say "Forking Base locally first. Anvil is a proxy in front of an archive"
-    say "node, so the pools, the balances and the hook bytecode are all really"
-    say "Base's, at the block we pin."
+    printf '    %s%s%s\n' "$C_YELLOW" "$hook" "$C_OFF"
+    say "    https://basescan.org/address/$hook"
+    say "    pinned at block $(group "$blk")"
+    blank
+    say "Anvil proxies an archive node, so the pool, the balances and the hook"
+    say "bytecode are all really Base's at that block."
     beat "Forking Base."
 
     anvil --fork-url "$BASE_RPC_ARCHIVE" --fork-block-number 51700000 \
@@ -233,9 +211,8 @@ if wanted 2; then
     ok "anvil forked Base at block $(cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT")"
 
     blank
-    say "One pool on Base, one block, one swap size. Two callers send the"
-    say "identical trade. Neither is known to the hook; both were deployed"
-    say "seconds earlier inside the test."
+    say "Two callers send the identical trade. Neither is known to the hook;"
+    say "both were deployed seconds earlier inside the test."
     blank
     watch "the two amounts received, and the gap between them"
     beat "Sending the same swap twice, from two different callers."
@@ -260,12 +237,10 @@ print(o["charged_extra_bps"], o["recovered_bps"],
       "" \
       "Same pool, same block, same amount in. ${c_bps} bps apart." \
       "" \
-      "Sworn does not need to know why it is being charged. It probed, saw the" \
-      "real offer, probed the hookless pool beside it, and settled there instead:" \
-      "$(group "$c_s"), ${r_bps} bps recovered." \
+      "Sworn probed, saw the real offer, and settled on the hookless pool beside" \
+      "it instead: $(group "$c_s"), ${r_bps} bps recovered." \
       "" \
-      "Worth sitting with: the offline pipeline in this repo did not flag that" \
-      "hook. A re-quote of 10,000 fills missed what one probe caught immediately."
+      "The offline pipeline in this repo never flagged that hook."
     ok "charged ${c_bps} bps more than another caller; Sworn recovered ${r_bps} bps by routing away"
 
     # The obvious next objection: a router that reverts on everything would also never
@@ -293,13 +268,11 @@ fi
 
 if wanted 3; then
   part 3 "How often, and who is exposed?" "measured, then rendered statically"
-  say "Parts 1 and 2 are the mechanism. This is the measurement behind it:"
-  say "every v4 pool on four chains, indexed from Initialize logs, and a"
-  say "uniform random sample of Base fills each re-quoted against the state"
-  say "immediately before it."
+  say "Every v4 pool on four chains, and a uniform random sample of Base fills"
+  say "re-quoted against the state immediately before each one."
   blank
-  say "The dashboard is a static export that reads the same data/results/*.json"
-  say "the README is generated from, so the two cannot disagree."
+  say "The dashboard reads the same data/results/*.json the README is generated"
+  say "from, so the two cannot disagree."
   beat "Building the dashboard."
 
   if [ -d app/node_modules ]; then
@@ -310,18 +283,10 @@ if wanted 3; then
     code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:4321/" || echo 000)
     [ "$code" = "200" ] || fail "dashboard did not serve (HTTP $code)"
 
-    read -r n_div n_elig n_into <<<"$("$(venv_python)" -c 'import json
-d = json.load(open("data/results/divergence.json"))["totals"]
-a = json.load(open("data/results/attribution.json"))["products"]
-print(d["divergent_hooks"], d["eligible_hooks"],
-      sum(int(p["fills_into_divergent"]) for p in a))')"
-
-    answered 3 \
-      "${n_div} of the ${n_elig} hooks with enough fills to classify charge more than they quote," \
-      "and $(group "$n_into") swaps on Base went into them." \
-      "" \
-      "  the argument    http://127.0.0.1:4321" \
-      "  the evidence    http://127.0.0.1:4321/evidence/"
+    blank
+    say "  the argument    http://127.0.0.1:4321"
+    say "  the evidence    http://127.0.0.1:4321/evidence/"
+    blank
     ok "dashboard serving on http://127.0.0.1:4321"
   else
     warn "app/node_modules missing. Run 'cd app && npm install' to include the dashboard"
