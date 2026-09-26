@@ -17,14 +17,7 @@
   "$defs": {
     "chainName": {
       "type": "string",
-      "enum": [
-        "base",
-        "bnb",
-        "arbitrum",
-        "unichain",
-        "mainnet",
-        "polygon"
-      ]
+      "enum": ["base", "bnb", "arbitrum", "unichain", "mainnet", "polygon"]
     },
     "address": {
       "type": "string",
@@ -45,12 +38,7 @@
     "meta": {
       "type": "object",
       "description": "Provenance. A result file without a resolvable snapshot is not publishable.",
-      "required": [
-        "generated_at",
-        "script_commit",
-        "config_version",
-        "snapshots"
-      ],
+      "required": ["generated_at", "script_commit", "config_version", "snapshots"],
       "additionalProperties": false,
       "properties": {
         "generated_at": {
@@ -72,10 +60,7 @@
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": [
-              "name",
-              "sha256"
-            ],
+            "required": ["name", "sha256"],
             "additionalProperties": false,
             "properties": {
               "name": {
@@ -103,11 +88,7 @@
     },
     "census": {
       "type": "object",
-      "required": [
-        "meta",
-        "chains",
-        "top_hooks"
-      ],
+      "required": ["meta", "chains", "top_hooks"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -117,13 +98,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "chain",
-              "hooks_total",
-              "pools_total",
-              "block_from",
-              "block_to"
-            ],
+            "required": ["chain", "hooks_total", "pools_total", "block_from", "block_to"],
             "additionalProperties": false,
             "properties": {
               "chain": {
@@ -171,10 +146,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": [
-                    "flags_bitmap",
-                    "hooks"
-                  ],
+                  "required": ["flags_bitmap", "hooks"],
                   "additionalProperties": false,
                   "properties": {
                     "flags_bitmap": {
@@ -211,11 +183,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "chain",
-              "address",
-              "pool_count"
-            ],
+            "required": ["chain", "address", "pool_count"],
             "additionalProperties": false,
             "properties": {
               "chain": {
@@ -233,10 +201,7 @@
                 "minimum": 0
               },
               "volume_usd_30d": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "price_confidence": {
                 "$ref": "#/$defs/rate"
@@ -269,12 +234,7 @@
     },
     "divergence": {
       "type": "object",
-      "required": [
-        "meta",
-        "params",
-        "hooks",
-        "sensitivity"
-      ],
+      "required": ["meta", "params", "hooks", "sensitivity"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -283,11 +243,7 @@
         "params": {
           "type": "object",
           "description": "The config values this run used, copied in so a result is self-describing.",
-          "required": [
-            "charged_threshold_bps",
-            "min_fills",
-            "min_charged_rate"
-          ],
+          "required": ["charged_threshold_bps", "min_fills", "min_charged_rate"],
           "additionalProperties": true,
           "properties": {
             "charged_threshold_bps": {
@@ -304,11 +260,7 @@
             },
             "expected_output_method": {
               "type": "string",
-              "enum": [
-                "exact",
-                "approx",
-                "mixed"
-              ]
+              "enum": ["exact", "approx", "mixed"]
             },
             "hook_data_source": {
               "type": "string",
@@ -320,10 +272,7 @@
             },
             "sampling": {
               "type": "string",
-              "enum": [
-                "by-hook",
-                "uniform"
-              ],
+              "enum": ["by-hook", "uniform"],
               "description": "by-hook covers hooks evenly; uniform gives a population rate."
             }
           }
@@ -345,10 +294,7 @@
               "type": "integer"
             },
             "excess_usd_total": {
-              "type": [
-                "number",
-                "null"
-              ]
+              "type": ["number", "null"]
             },
             "eligible_hooks": {
               "type": "integer",
@@ -360,14 +306,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "chain",
-              "address",
-              "fills",
-              "charged_fills",
-              "charged_rate",
-              "divergent"
-            ],
+            "required": ["chain", "address", "fills", "charged_fills", "charged_rate", "divergent"],
             "additionalProperties": false,
             "properties": {
               "chain": {
@@ -406,10 +345,7 @@
                 "$ref": "#/$defs/bps"
               },
               "excess_usd_total": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "divergent": {
                 "type": "boolean"
@@ -429,10 +365,7 @@
               },
               "coverage": {
                 "type": "string",
-                "enum": [
-                  "full",
-                  "sampled"
-                ]
+                "enum": ["full", "sampled"]
               },
               "hook_data_nonempty_fills": {
                 "type": "integer",
@@ -458,11 +391,7 @@
           "description": "Divergent-hook count at every (threshold, min_fills) pair in config.",
           "items": {
             "type": "object",
-            "required": [
-              "charged_threshold_bps",
-              "min_fills",
-              "divergent_hooks"
-            ],
+            "required": ["charged_threshold_bps", "min_fills", "divergent_hooks"],
             "additionalProperties": false,
             "properties": {
               "charged_threshold_bps": {
@@ -505,11 +434,7 @@
         "trace_confirmation": {
           "type": "object",
           "description": "Every sampled fill is checked against its own transaction trace; the event only locates candidates.",
-          "required": [
-            "sampled",
-            "confirmed",
-            "dropped"
-          ],
+          "required": ["sampled", "confirmed", "dropped"],
           "additionalProperties": false,
           "properties": {
             "sampled": {
@@ -529,10 +454,7 @@
         "noise_floor": {
           "type": "object",
           "description": "The measurement's own false-positive estimate, from fills that came out better than quoted.",
-          "required": [
-            "overdelivered_fills",
-            "estimated_false_positive_share"
-          ],
+          "required": ["overdelivered_fills", "estimated_false_positive_share"],
           "additionalProperties": true,
           "properties": {
             "method": {
@@ -559,10 +481,7 @@
     },
     "intermittency": {
       "type": "object",
-      "required": [
-        "meta",
-        "hooks"
-      ],
+      "required": ["meta", "hooks"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -572,13 +491,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "chain",
-              "address",
-              "window_days",
-              "crossings",
-              "intermittent"
-            ],
+            "required": ["chain", "address", "window_days", "crossings", "intermittent"],
             "additionalProperties": false,
             "properties": {
               "chain": {
@@ -611,11 +524,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": [
-                    "ts",
-                    "fills",
-                    "charged_fills"
-                  ],
+                  "required": ["ts", "fills", "charged_fills"],
                   "additionalProperties": false,
                   "properties": {
                     "ts": {
@@ -646,10 +555,7 @@
     },
     "attribution": {
       "type": "object",
-      "required": [
-        "meta",
-        "products"
-      ],
+      "required": ["meta", "products"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -662,12 +568,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "product",
-              "chain",
-              "fills_into_divergent",
-              "confidence"
-            ],
+            "required": ["product", "chain", "fills_into_divergent", "confidence"],
             "additionalProperties": false,
             "properties": {
               "product": {
@@ -688,10 +589,7 @@
                 "minimum": 0
               },
               "excess_usd": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "share_of_product_v4_volume": {
                 "$ref": "#/$defs/rate"
@@ -712,10 +610,7 @@
     },
     "probe": {
       "type": "object",
-      "required": [
-        "meta",
-        "hooks"
-      ],
+      "required": ["meta", "hooks"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -725,11 +620,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "chain",
-              "address",
-              "env_sensitive"
-            ],
+            "required": ["chain", "address", "env_sensitive"],
             "additionalProperties": false,
             "properties": {
               "chain": {
@@ -795,19 +686,13 @@
                         },
                         "from_kind": {
                           "type": "string",
-                          "enum": [
-                            "eoa",
-                            "contract"
-                          ]
+                          "enum": ["eoa", "contract"]
                         },
                         "gas": {
                           "type": "integer"
                         },
                         "output": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "reverted": {
                           "type": "boolean"
@@ -839,10 +724,7 @@
     },
     "precision": {
       "type": "object",
-      "required": [
-        "meta",
-        "methods"
-      ],
+      "required": ["meta", "methods"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -856,24 +738,12 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "method",
-              "tp",
-              "fp",
-              "fn",
-              "tn"
-            ],
+            "required": ["method", "tp", "fp", "fn", "tn"],
             "additionalProperties": false,
             "properties": {
               "method": {
                 "type": "string",
-                "enum": [
-                  "static",
-                  "dynamic",
-                  "trace",
-                  "union",
-                  "settled_trade"
-                ]
+                "enum": ["static", "dynamic", "trace", "union", "settled_trade"]
               },
               "tp": {
                 "type": "integer",
@@ -910,10 +780,7 @@
     },
     "replay": {
       "type": "object",
-      "required": [
-        "meta",
-        "totals"
-      ],
+      "required": ["meta", "totals"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -921,10 +788,7 @@
         },
         "totals": {
           "type": "object",
-          "required": [
-            "fills_protected",
-            "protected_usd"
-          ],
+          "required": ["fills_protected", "protected_usd"],
           "additionalProperties": false,
           "properties": {
             "fills_considered": {
@@ -936,10 +800,7 @@
               "minimum": 0
             },
             "protected_usd": {
-              "type": [
-                "number",
-                "null"
-              ]
+              "type": ["number", "null"]
             },
             "median_protection_bps": {
               "$ref": "#/$defs/bps"
@@ -977,10 +838,7 @@
     },
     "gas": {
       "type": "object",
-      "required": [
-        "meta",
-        "benchmarks"
-      ],
+      "required": ["meta", "benchmarks"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -994,11 +852,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "chain",
-              "candidates",
-              "gas"
-            ],
+            "required": ["chain", "candidates", "gas"],
             "additionalProperties": false,
             "properties": {
               "chain": {
@@ -1031,10 +885,7 @@
     },
     "scores": {
       "type": "object",
-      "required": [
-        "meta",
-        "hooks"
-      ],
+      "required": ["meta", "hooks"],
       "additionalProperties": false,
       "properties": {
         "meta": {
@@ -1050,13 +901,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "chain",
-              "address",
-              "score",
-              "flags_bitmap",
-              "as_of_block"
-            ],
+            "required": ["chain", "address", "score", "flags_bitmap", "as_of_block"],
             "additionalProperties": false,
             "properties": {
               "chain": {
@@ -1066,10 +911,7 @@
                 "$ref": "#/$defs/address"
               },
               "score": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
+                "type": ["integer", "null"],
                 "minimum": 0,
                 "maximum": 100
               },
@@ -1121,9 +963,7 @@
               },
               "proof": {
                 "type": "object",
-                "required": [
-                  "snapshot_sha256"
-                ],
+                "required": ["snapshot_sha256"],
                 "additionalProperties": false,
                 "properties": {
                   "snapshot_sha256": {

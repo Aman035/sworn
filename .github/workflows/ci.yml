@@ -52,6 +52,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm -r --if-present typecheck
+      # The dashboard's tests assert against its built static export, so the build has to
+      # happen first. That is also the point: they catch a result file changing shape and
+      # every figure rendering as `undefined` while the layout still looks correct.
+      - name: build dashboard
+        run: pnpm --filter sworn-app build
       - run: pnpm -r --if-present test
 
   python:
