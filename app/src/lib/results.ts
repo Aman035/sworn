@@ -112,6 +112,22 @@ export const divergence = () =>
 export const probe = () => load<{ meta: Meta; hooks: ProbeHook[] }>('probe.json');
 export const attribution = () =>
   load<{ meta: Meta; unlabeled_share: number; products: Product[] }>('attribution.json');
+export const replay = () =>
+  load<{
+    meta: Meta;
+    totals: {
+      fills_considered: number;
+      fills_with_alternatives?: number;
+      fills_protected: number;
+      implausible_fills?: number;
+      median_protection_bps?: number;
+      probe_gas_usd_median?: number;
+      breakeven_notional_usd?: number;
+      protection_hit_rate?: number;
+      price_confidence?: number;
+    };
+  }>('replay.json');
+
 export const precision = () =>
   load<{ meta: Meta; ground_truth: string; methods: Record<string, number | string>[] }>(
     'precision.json',

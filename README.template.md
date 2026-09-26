@@ -184,6 +184,8 @@ got — net of probe gas, charged at the price that fill actually paid.
 - **{{result:replay.json:totals.median_protection_bps|f2}} bps** median protection on those
 - **${{result:replay.json:totals.probe_gas_usd_median|f4}}** median cost to probe one trade
 
+![The value panel on the dashboard](docs/assets/dashboard-value.png)
+
 ### The break-even is the honest headline
 
 Probing costs a **fixed** amount of gas and saves a **proportion** of the trade, so it pays

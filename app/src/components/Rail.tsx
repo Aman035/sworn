@@ -18,11 +18,25 @@ export function Rail({
   meta: Meta | null;
   extra?: [string, string][] | undefined;
 }) {
+  // A band with no snapshot is not necessarily a band with no provenance: the lead figure
+  // comes from a contract test, which has a source worth naming. Discarding `extra` here
+  // made a sourced panel read as an empty one.
   if (!meta) {
     return (
       <dl className="rail">
-        <dt>Source</dt>
-        <dd>not yet computed</dd>
+        {extra?.length ? (
+          extra.map(([k, v]) => (
+            <div key={k}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))
+        ) : (
+          <div>
+            <dt>Source</dt>
+            <dd>not yet computed</dd>
+          </div>
+        )}
       </dl>
     );
   }

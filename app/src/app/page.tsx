@@ -1,11 +1,12 @@
 import { Band } from '@/components/Band';
-import { attribution, census, divergence, fmt, pct, probe } from '@/lib/results';
+import { attribution, census, divergence, fmt, pct, probe, replay } from '@/lib/results';
 
 export default function Overview() {
   const c = census();
   const d = divergence();
   const p = probe();
   const a = attribution();
+  const r = replay();
 
   const base = c?.chains.find((x) => x.chain === 'base');
   const hookedShare = base ? base.hooked_pools / base.pools_total : null;
@@ -54,6 +55,47 @@ export default function Overview() {
           executed amount equals the probed one. There is no separate quote for a hook to lie to.
         </p>
       </Band>
+
+      {r ? (
+        <Band meta={r.meta}>
+          <h2>What the guarantee is worth, and what it costs</h2>
+          <p>
+            For every measured fill, every other pool that could have filled the same trade was
+            quoted against the same pre-fill state. Probing costs a fixed amount of gas and saves a
+            proportion of the trade, so it pays above a trade size and not below it.
+          </p>
+
+          <div className="figures">
+            <div className="figure">
+              <div className="n">${(r.totals.breakeven_notional_usd ?? 0).toFixed(2)}</div>
+              <div className="k">break-even trade size</div>
+              <div className="note">below this, probe gas exceeds the expected saving</div>
+            </div>
+            <div className="figure">
+              <div className="n">{(r.totals.median_protection_bps ?? 0).toFixed(0)} bps</div>
+              <div className="k">median protection when a better route existed</div>
+            </div>
+            <div className="figure">
+              <div className="n grey">{pct(r.totals.protection_hit_rate)}</div>
+              <div className="k">of fills with an alternative had a better one</div>
+              <div className="note">{fmt(r.totals.fills_protected)} of {fmt(r.totals.fills_with_alternatives)}</div>
+            </div>
+            <div className="figure">
+              <div className="n grey">${(r.totals.probe_gas_usd_median ?? 0).toFixed(4)}</div>
+              <div className="k">median cost to protect one trade</div>
+            </div>
+          </div>
+
+          <div className="caveat">
+            <p>
+              Only {pct(r.totals.price_confidence)} of these fills pay out in a token this repo can
+              value from the chain, and {fmt(r.totals.implausible_fills)} candidate routes quoting
+              implausible multiples were excluded as mispriced dust rather than counted as recovered
+              value. Both are published so the dollar figures can be discounted accordingly.
+            </p>
+          </div>
+        </Band>
+      ) : null}
 
       <Band meta={c?.meta ?? null}>
         <h2>What is out there</h2>
