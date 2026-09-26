@@ -306,6 +306,21 @@ else's. A score is retrospective and lossy. The probe is neither.
 
 ## Also verified against live hooks
 
+One catch could be a fluke. These pin real deployed code at real blocks and assert the
+rest of the claim:
+
+| Fork test | What it settles |
+| --------- | --------------- |
+| [`RealSwap.fork.t.sol`](contracts/test/fork/RealSwap.fork.t.sol) | A swap through a live Base hook **completes**, pays out, and passes the divergence check. The guarantee is not a well-defended way of refusing to trade |
+| [`NamedHooks.fork.t.sol`](contracts/test/fork/NamedHooks.fork.t.sol) | The ETH/NVDAc hook 0x named is live at the pinned block, and Sworn picks between real candidates around it |
+| [`BnbNamedHook.fork.t.sol`](contracts/test/fork/BnbNamedHook.fork.t.sol) | The second hook 0x named, on BNB Smart Chain, is live with permission bits `0x0880`. It can override the fee and nothing else: no returns-delta at all |
+
+That last row is the one to take away if you are building a scanner. The obvious heuristic,
+*flag the hooks that can return a delta*, scores that hook clean.
+
+These need an archive RPC and skip rather than fail without one, so plain `forge test`
+stays runnable offline. `make test-fork` runs the set.
+
 ## What the guarantee costs
 
 ![What the guarantee is worth](docs/assets/landing-value.png)
