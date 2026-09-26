@@ -104,10 +104,11 @@ describe('static export', () => {
 
   it('the attribution page publishes its unlabeled share', () => {
     const attribution = result('attribution.json') as { unlabeled_share: number };
-    // The number matters less than its presence: a coverage figure that can be dropped
-    // silently is a coverage figure nobody will notice missing.
     expect(attribution.unlabeled_share).toBeGreaterThan(0);
-    expect(page('attribution')).toMatch(/unattributed|unlabel/i);
+    // Assert the figure, not the wording. A coverage gap that can be dropped silently is
+    // one nobody will notice missing, but the sentence around it is free to change.
+    const shown = `${(attribution.unlabeled_share * 100).toFixed(1)}%`;
+    expect(page('attribution'), `attribution page does not show ${shown}`).toContain(shown);
   });
 
   it('no page claims a hook is clean without a measurement', () => {

@@ -1403,3 +1403,29 @@ html.js .reveal.in {
   color: var(--faint);
   max-width: 30ch;
 }
+
+/* A single figure that a section exists to deliver. Bigger than the figure grid, because
+   a page with one point should look like it has one point. */
+.bignum {
+  margin: 34px 0 8px;
+}
+
+.bignum-n {
+  font-size: clamp(46px, 7vw, 84px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bignum-n.bad {
+  color: var(--signal);
+}
+
+.bignum-k {
+  margin-top: 14px;
+  font-size: var(--t-m);
+  line-height: 1.4;
+  color: var(--ink-2);
+  max-width: 44ch;
+}
