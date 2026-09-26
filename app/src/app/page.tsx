@@ -80,6 +80,17 @@ export default function Landing() {
                   <b>19.4%</b> safe
                 </li>
               </ul>
+              <p className="origin-named">
+                They named one:{' '}
+                <a
+                  href="https://basescan.org/address/0x800cef53c3fd41109dffec62e5251bdd7acba5c7"
+                  rel="noreferrer noopener"
+                >
+                  <code>0x800cef53…</code>
+                </a>{' '}
+                on Base, an ETH/NVDAc pool — a median fee of <b>18%</b> when it charged, and{' '}
+                <b className="bad">$143,037</b> taken.
+              </p>
               <p className="fineprint">
                 Their analysis, their numbers — cited, not reproduced here.
               </p>

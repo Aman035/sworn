@@ -1281,3 +1281,22 @@ html.js .reveal.in {
 .grid a:visited {
   color: inherit;
 }
+
+.origin-named {
+  margin: 26px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  font-size: var(--t-s);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 44ch;
+}
+
+.origin-named b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.origin-named b.bad {
+  color: var(--signal);
+}

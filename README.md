@@ -17,6 +17,11 @@
 [*"Uniswap v4 hooks were a mistake"*](https://0x.org/post/uniswap-v4-hooks-were-a-mistake).**
 They analysed 84,163 hooks across six chains and reported **54.2% malicious, 19.4% safe**, with some hooks delivering *"as much as 50% less at execution than the amount quoted"*.
 
+They named one. [`0x800cef53…`](https://basescan.org/address/0x800cef53c3fd41109dffec62e5251bdd7acba5c7)
+on Base, an ETH/NVDAc pool: a median fee of 18% when it charged, and
+**$143,037** taken. That pool is still live — this repo forks Base at it in
+`NamedHooks.fork.t.sol`.
+
 **Hayden Adams [replied](https://x.com/haydenzadams/status/2099711270115013085):**
 *"Skill issue, don't route to bad hooks"* — and pointed integrators at the Uniswap API,
 which *"avoids malicious hooks"*.
