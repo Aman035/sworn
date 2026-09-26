@@ -1,10 +1,10 @@
 ==> README renders from the template
-    rendered 17 measurement(s) into README.md
+    rendered 29 measurement(s) into README.md
   ok  every placeholder resolved against data/results
 ==> no placeholder sits inside a markdown table
   ok  placeholders live in prose and lists only
 ==> no number in the README was typed by hand
-      17 measured value(s) via placeholders
+      29 measured value(s) via placeholders
       README.md is current and every number resolves from data/results
   ok  README.md is current and fully sourced
 ==> the rendered README is committed
