@@ -326,7 +326,7 @@ digit in this file that did not come from a result.
 6. **Document the required compiler settings.** `optimizer_runs = 800` cannot compile
    `PoolManager`, and the error names a Yul internal.
 
-# Limits
+# Threat model and limits
 
 - **The divergence sample is small.** {{result:divergence.json:totals.eligible_hooks|int}} hooks clear `min_fills`, out of
   {{result:census.json:chains[chain=base].hooks_total|int}} on Base. It establishes that the measurement works and that
