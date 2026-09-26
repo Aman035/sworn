@@ -254,16 +254,20 @@ async function main() {
   const shot = process.env.HAYDEN_SHOT || resolve(OUT, 'hayden-reply.png');
   if (existsSync(shot)) {
     const b64 = readFileSync(shot).toString('base64');
+    // The screenshot is portrait (~1304x1606) and the frame is 16:9, so shown whole it
+    // would be ~525px wide here and the text unreadable. `cover` anchored to the top
+    // fills a landscape box with the upper part of the post: all of Hayden's own words,
+    // cropping only the 0x card quoted underneath, which is its own scene already.
     await page.setContent(
       `<!doctype html><meta charset="utf-8">
        <style>html,body{margin:0;height:100%;background:#0d1014;display:flex;
        align-items:center;justify-content:center}
-       img{max-width:78%;max-height:80%;border-radius:14px;
-       box-shadow:0 24px 70px rgba(0,0,0,.55)}</style>
+       img{width:1000px;height:720px;object-fit:cover;object-position:top center;
+       border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55)}</style>
        <img src="data:image/png;base64,${b64}">`,
       { waitUntil: 'load' },
     );
-    await sleep(8000);
+    await sleep(9000);
   } else {
     await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
     await settle(page);
