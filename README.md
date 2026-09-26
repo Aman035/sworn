@@ -10,21 +10,22 @@
 [*"Uniswap v4 hooks were a mistake"*](https://0x.org/post/uniswap-v4-hooks-were-a-mistake).**
 They analysed 84,163 hooks across six chains and reported **54.2% malicious, 19.4% safe**, with some hooks delivering *"as much as 50% less at execution than the amount quoted"*.
 
-**The next day, Hayden Adams replied `"skill issue"`** — and, more substantively, that
-malicious contracts have existed in every version of Uniswap, and that
-**the Uniswap API only integrates hooks that have been reviewed**, so users going through
-official interfaces are shielded.
-([Crypto Briefing](https://cryptobriefing.com/0x-criticizes-uniswap-v4-hooks-malicious/),
-[Coin Edition](https://coinedition.com/uniswap-founder-defends-v4-upgrade-over-fud-and-misunderstanding/))
+**Hayden Adams [replied](https://x.com/haydenzadams/status/2099711270115013085):**
+*"Skill issue, don't route to bad hooks"* — and pointed integrators at the Uniswap API,
+which *"avoids malicious hooks"*.
 
-**This repo takes 0x's finding as given** and asks the three narrower questions their post
-leaves open, with tooling anyone can run.
+He is right. *Don't route to bad hooks* is exactly the correct advice, and this repo is
+an attempt to make it executable — because the question it leaves open is the one an
+integrator actually faces: **how do you know which ones are bad, at the moment you
+route?**
 
-## 1. Does review protect you?
+Three questions, answered with tooling anyone can run.
+
+## 1. Is the allowlist enough?
 
 No. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **on Uniswap's official hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
 
-Review is a check on identity at a point in time. This is behaviour, now — and
+An allowlist is a check on identity at a point in time. This is behaviour, now — and
 10,430 hooks on Base sit behind a proxy, so the code that was reviewed is not
 necessarily the code that runs.
 

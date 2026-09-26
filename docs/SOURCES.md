@@ -38,31 +38,35 @@ next to theirs and do **not** tune parameters to match.
 
 ### Hayden Adams' response
 
-- **Date.** 15 September 2026, on X; reported by
+- **URL.** <https://x.com/haydenzadams/status/2099711270115013085> — a reply to 0x's
+  15 September post.
+- **Status.** Verified (primary source, read 26 September 2026). Also covered by
   [Crypto Briefing](https://cryptobriefing.com/0x-criticizes-uniswap-v4-hooks-malicious/)
   and [Coin Edition](https://coinedition.com/uniswap-founder-defends-v4-upgrade-over-fud-and-misunderstanding/).
-- **Status.** Verified via secondary reporting (fetched 26 September 2026). The original
-  post is cited through those outlets rather than quoted directly.
 
-Three arguments, as reported:
+It opens `"Skill issue, don't route to bad hooks"`, and directs integrators to
+`developers.uniswap.org` for an API that, among other things, **"avoids malicious
+hooks"**.
 
-1. `"skill issue"`.
-2. Malicious contracts have existed in every version of Uniswap; malicious hooks no more
-   indict the hook architecture than scam tokens indict ERC-20.
-3. **The Uniswap API only integrates hooks that have been reviewed**, so users going
-   through official interfaces are shielded from the worst actors.
+**Why this repo exists.** Both halves of that are testable, and this repo tests them
+rather than arguing with them.
 
-**Why this repo exists.** Argument 3 is a claim about the world, and it is testable. This
-repo tests it: `divergence.json` measures hooks on the official hooklist alongside
-everything else, and reports
-[`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) —
-allowlisted, source-verified — taking a median 400 bps above its stated fee on 11% of its
-fills.
+_"Don't route to bad hooks"_ is correct advice. The question it leaves open is the one an
+integrator actually faces: **how do you know which ones are bad, at the moment you
+route?** Three findings here say the available answers are not sufficient:
 
-Sworn takes no position on arguments 1 and 2. On argument 3 it takes the only position a
-measurement can: here is the hook, here is the block range, here is the script, go and
-check. And separately from who is right, the gap is **closable at execution time**, which
-is what `SwornRouter` does.
+1. The official hooklist is not a sufficient filter.
+   [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc)
+   is on it, with verified source, and takes a median 400 bps above its stated fee on 11%
+   of its fills.
+2. You cannot compute a hook's take from logs at all, because `Swap` is emitted before
+   `afterSwap`. Any list built from event data under-reports the worst hooks.
+3. Static, differential and trace detection all scored **zero recall** against settled
+   trades in the overlap this repo could measure.
+
+Sworn's answer is to stop needing the list: verify inside the transaction, where a hook
+has no separate quote left to lie to. That is compatible with the advice, not opposed to
+it — it is what makes the advice executable.
 
 ---
 
