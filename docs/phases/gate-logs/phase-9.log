@@ -9,5 +9,8 @@
     no console.log string literal contains a figure
     spoof 1799 bps taken, 2195 bps recovered by routing around it
   ok  the guarantee is demonstrated, not asserted
+==> the demo includes the mainnet catch
+    one caller charged 707 bps more; Sworn recovered 672 bps
+  ok  a real Base hook priced two callers differently and Sworn routed away
 ==> the demo does not overclaim
   ok  limits stated alongside the walkthrough
