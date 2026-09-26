@@ -54,6 +54,13 @@ done
 
 wanted() { [ -z "$ONLY" ] || [ "$ONLY" = "$1" ]; }
 
+# Is anything already listening here? lsof on macOS and most Linux; if it is missing we
+# say no rather than blocking the run, and the liveness checks still catch the failure.
+port_taken() {
+  command -v lsof >/dev/null 2>&1 || return 1
+  lsof -nP -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1
+}
+
 # ------------------------------------------------------------------ presentation helpers
 
 WIDTH=76
@@ -196,6 +203,14 @@ print(w["hook"], w["block"])')"
     say "bytecode are all really Base's at that block."
     beat "Forking Base."
 
+    # Refuse to start on an occupied port. Without this the demo silently runs against
+    # whatever is already listening: anvil prints "Address already in use" and exits,
+    # the readiness check below then succeeds against the *stale* node, and every test
+    # passes at the wrong fork block. A demo that lies about which chain it ran on is
+    # worse than one that fails.
+    port_taken "$ANVIL_PORT" \
+      && fail "port $ANVIL_PORT is in use. Stop what is listening, or set ANVIL_PORT."
+
     anvil --fork-url "$BASE_RPC_ARCHIVE" --fork-block-number 51700000 \
           --port "$ANVIL_PORT" --silent &
     ANVIL_PID=$!
@@ -203,9 +218,11 @@ print(w["hook"], w["block"])')"
     # Wait for the fork to be serving rather than sleeping a guessed number of seconds:
     # forking mainnet state takes as long as the upstream node takes.
     for _ in $(seq 1 60); do
+      kill -0 "$ANVIL_PID" 2>/dev/null || fail "anvil exited while starting up"
       cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" >/dev/null 2>&1 && break
       sleep 1
     done
+    kill -0 "$ANVIL_PID" 2>/dev/null || fail "anvil exited while starting up"
     cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" >/dev/null 2>&1 \
       || fail "anvil did not come up on port $ANVIL_PORT"
     ok "anvil forked Base at block $(cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT")"
@@ -277,6 +294,7 @@ if wanted 3; then
 
   if [ -d app/node_modules ]; then
     (cd app && npm run build >/dev/null) || fail "dashboard build failed"
+    port_taken 4321 && fail "port 4321 is in use. Stop what is listening on it."
     npx --yes serve app/out -l 4321 >/dev/null 2>&1 &
     SERVE_PID=$!
     sleep 3

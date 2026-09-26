@@ -69,9 +69,9 @@ Logs:
   The quote was a lie. The probe was not, because it was the trade.
   --------------------------------------------------------------
 
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.27ms (1.27ms CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 12.13ms (4.48ms CPU time)
 
-Ran 1 test suite in 126.77ms (3.27ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
+Ran 1 test suite in 141.16ms (12.13ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
 
   ── PART 1 ANSWERED ───────────────────────────────────────────────────────
   Yes, a hook can quote one price and charge another.
@@ -127,9 +127,9 @@ Logs:
     caller B (SwornRouter) receives 16340546
     the hook charged caller B more, by bps 706
 
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 40.05ms (2.76ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 34.00ms (2.76ms CPU time)
 
-Ran 1 test suite in 125.81ms (40.05ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)
+Ran 1 test suite in 127.18ms (34.00ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)
 
   ── PART 2 ANSWERED ───────────────────────────────────────────────────────
   Yes it happens for real, and yes Sworn stops it.
@@ -161,9 +161,9 @@ Logs:
 
 [PASS] test_completesThroughADynamicFeeHook() (gas: 270417)
 [PASS] test_soleCandidateStillPassesTheDivergenceCheck() (gas: 153609)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 40.52ms (2.64ms CPU time)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 34.22ms (2.29ms CPU time)
 
-Ran 1 test suite in 126.83ms (40.52ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
+Ran 1 test suite in 128.88ms (34.22ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
 
   ── and one more check ────────────────────────────────────────────────────
   It still trades.
