@@ -18,8 +18,12 @@ env:
 jobs:
   fork:
     name: fork tests (base, bnb)
-    # On PRs, only run when someone asks for it with the `run-fork-tests` label.
-    if: github.event_name != 'pull_request' || github.event.label.name == 'run-fork-tests'
+    # Two gates. `FORK_TESTS_ENABLED` is set once the archive RPC secrets exist, so a repo
+    # without them skips cleanly instead of showing a permanent red X for a job that was
+    # never able to run. On PRs, only run when someone asks with the `run-fork-tests` label.
+    if: >-
+      vars.FORK_TESTS_ENABLED == 'true' &&
+      (github.event_name != 'pull_request' || github.event.label.name == 'run-fork-tests')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,13 +32,16 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      # Still fails loudly if the flag is on but the secrets are missing: a fork suite that
+      # silently skips is worse than one that is switched off, because `forge test` passes
+      # when every test calls `vm.skip`.
       - name: check secrets are configured
         env:
           BASE_RPC_ARCHIVE: ${{ secrets.BASE_RPC_ARCHIVE }}
           BNB_RPC_ARCHIVE: ${{ secrets.BNB_RPC_ARCHIVE }}
         run: |
           if [ -z "$BASE_RPC_ARCHIVE" ] || [ -z "$BNB_RPC_ARCHIVE" ]; then
-            echo "::error::BASE_RPC_ARCHIVE and BNB_RPC_ARCHIVE repository secrets are required"
+            echo "::error::FORK_TESTS_ENABLED is true but the archive RPC secrets are not set"
             exit 1
           fi
       - name: forge test (fork)
