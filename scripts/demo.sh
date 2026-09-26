@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The demo, start to finish, with no manual steps. Storyboard in docs/DEMO.md.
+# The demo, start to finish. Storyboard in docs/DEMO.md.
 #
 # Four acts, in increasing order of how hard they are to fake:
 #   1. a spoofing hook and Sworn, on a local chain, with a fixture that provably lies;
@@ -7,6 +7,11 @@
 #   3. a real hook on Base charging one caller more than another, and Sworn routing
 #      away from it;
 #   4. the dashboard, rendered from the same result files the README uses.
+#
+# Usage:
+#   ./scripts/demo.sh              pause between acts when a terminal is attached
+#   ./scripts/demo.sh --no-pause   run straight through, for CI and unattended runs
+#   ./scripts/demo.sh --pause      force the pauses on even through a pipe
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 cd "$REPO_ROOT"
@@ -14,6 +19,32 @@ cd "$REPO_ROOT"
 ANVIL_PORT="${ANVIL_PORT:-8546}"
 ANVIL_PID=""
 SERVE_PID=""
+
+# Narration pauses. Recording a walkthrough needs room to talk between acts, but this
+# script also has to run unattended, so they are on only when someone is plainly
+# watching: stdin and stdout both attached to a terminal. SWORN_DEMO_PAUSE=0 or
+# --no-pause turns them off; --pause forces them on when output is piped to a recorder.
+PAUSE=1
+{ [ -t 0 ] && [ -t 1 ]; } || PAUSE=0
+[ "${SWORN_DEMO_PAUSE:-1}" = "0" ] && PAUSE=0
+for arg in "$@"; do
+  case "$arg" in
+    --no-pause) PAUSE=0 ;;
+    --pause)    PAUSE=1 ;;
+    -h|--help)  awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"; exit 0 ;;
+    *)          fail "unknown option: $arg" ;;
+  esac
+done
+
+# Announce what is about to happen, then wait. The cue is printed either way, so the
+# transcript reads the same whether or not anyone was there to press a key.
+beat() {
+  printf '\n%s-- %s%s\n' "$C_DIM" "$*" "$C_OFF"
+  [ "$PAUSE" = "1" ] || return 0
+  printf '%s   press enter%s' "$C_DIM" "$C_OFF"
+  read -r _ < /dev/tty || true
+  printf '\n'
+}
 
 cleanup() {
   [ -n "$ANVIL_PID" ] && kill "$ANVIL_PID" 2>/dev/null || true
@@ -25,6 +56,7 @@ need forge
 [ -f .env ] && set -a && . ./.env && set +a
 
 # ---------------------------------------------------------------------------- act 1
+beat "Act 1. A hook that quotes honestly under eth_call and charges under a real gas price, on a local chain."
 step "act 1: a hook that quotes one price and charges another"
 (cd contracts && forge test --match-contract DemoTest -vv) \
   || fail "the narrated demo failed; the story is no longer true"
@@ -34,6 +66,7 @@ ok "spoof shown, probed, and routed around"
 if [ -z "${BASE_RPC_ARCHIVE:-}" ]; then
   warn "BASE_RPC_ARCHIVE not set. Skipping the mainnet act"
 else
+  beat "Act 2. The same router against real Base hooks, on anvil forked from mainnet."
   step "act 2: the same router against real Base hooks, on anvil"
   anvil --fork-url "$BASE_RPC_ARCHIVE" --fork-block-number 51700000 \
         --port "$ANVIL_PORT" --silent &
@@ -56,6 +89,7 @@ else
     || fail "real-hook swap failed against the forked chain"
   ok "ETH -> USDC completed through live Base hooks, probe and execution agreed"
 
+  beat "Act 3. The catch: a live Base hook that prices two callers differently for the identical swap."
   step "act 3: a hook on Base charging one caller more than another"
   # The only act that is not a fixture and not a happy path: a pool that prices two
   # callers differently at the same block, and Sworn routing away from it.
@@ -66,6 +100,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------- act 4
+beat "Act 4. The dashboard, built from the same result files the README is generated from."
 step "act 4: the dashboard, from the same result files"
 if [ -d app/node_modules ]; then
   (cd app && npm run build >/dev/null) || fail "dashboard build failed"
@@ -82,3 +117,7 @@ fi
 
 step "done"
 ok "every number above was produced by the run, not typed into it"
+
+if [ -n "$SERVE_PID" ] || [ -n "$ANVIL_PID" ]; then
+  beat "The dashboard and the forked chain are still up. Press enter to shut them down."
+fi

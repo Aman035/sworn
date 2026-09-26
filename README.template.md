@@ -279,9 +279,13 @@ the fork tests and the replay.
 ./scripts/demo.sh
 ```
 
-Four acts, ordered by how hard each is to fake. No manual steps, and every figure is
-produced by the EVM during the run: the gate greps the source to prove no `console.log`
-string contains a number.
+Four acts, ordered by how hard each is to fake. Every figure is produced by the EVM
+during the run: the gate greps the source to prove no `console.log` string contains a
+number.
+
+Run from a terminal it pauses between acts, so there is room to narrate a walkthrough.
+`./scripts/demo.sh --no-pause` runs straight through, and it does that automatically when
+output is not a terminal.
 
 | Act | What runs | What it shows |
 | --- | --------- | ------------- |

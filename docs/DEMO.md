@@ -4,13 +4,29 @@
 ./scripts/demo.sh
 ```
 
-No manual steps, no pre-recorded output. Every figure the script prints is produced by the
+No pre-recorded output. Every figure the script prints is produced by the
 EVM during the run. There is no narration string in
 [`Demo.t.sol`](../contracts/test/unit/Demo.t.sol) that contains a number, because a demo
 whose numbers are typed in is a slideshow.
 
 The demo is written as a **test**, so it cannot rot. If the story stops being true, CI
 fails.
+
+## Narrating it
+
+Run from a terminal, the script pauses before each act and prints what is about to
+happen, so there is room to explain it. Press enter to continue. It holds at the end too,
+while the dashboard and the forked chain are still up, and tears them down when you press
+enter again; without that the `EXIT` trap would kill both the moment the script finished.
+
+```bash
+./scripts/demo.sh                # pauses between acts
+./scripts/demo.sh --no-pause     # straight through, for CI and unattended runs
+./scripts/demo.sh --pause        # force pauses on when piping to a recorder
+```
+
+Pauses turn themselves off when stdin or stdout is not a terminal, so nothing hangs in
+CI. `SWORN_DEMO_PAUSE=0` does the same thing as `--no-pause`.
 
 ## The four acts
 
