@@ -170,13 +170,15 @@ export const DISTINGUISHING = [
   'GASLIMIT',
 ];
 
+// A missing measurement says so. Rendering it as a blank or a zero would make an
+// unmeasured hook look clean, which is the one mistake this whole site exists to avoid.
 export function fmt(n: number | null | undefined): string {
-  if (n === null || n === undefined) return '. ';
+  if (n === null || n === undefined) return 'n/a';
   return n.toLocaleString('en-US');
 }
 
 export function pct(n: number | null | undefined, digits = 1): string {
-  if (n === null || n === undefined) return '. ';
+  if (n === null || n === undefined) return 'n/a';
   return `${(n * 100).toFixed(digits)}%`;
 }
 

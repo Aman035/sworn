@@ -140,13 +140,13 @@ def table_divergent_hooks() -> str:
         key=lambda h: -h.get("median_charged_excess_bps", 0),
     ):
         flags = scores.get(h["address"], {}).get("flags", [])
-        listed = " ✓ hooklist" if "ALLOWLISTED" in flags else ""
+        listed = " ✓ registry" if "ALLOWLISTED" in flags else ""
         rows.append(
             f"| {_scan('https://basescan.org', h['address'])}{listed} "
             f"| {h['fills']:,} | {h['charged_fills']:,} | {h['overdelivered_fills']:,} "
             f"| {h['net_charged_rate'] * 100:.0f}% "
             f"| {h.get('median_charged_excess_bps', 0):,.0f} bps "
-            f"| {scores.get(h['address'], {}).get('score', '. ')} |"
+            f"| {scores.get(h['address'], {}).get('score', 'n/a')} |"
         )
     return "\n".join(rows)
 
@@ -154,9 +154,12 @@ def table_divergent_hooks() -> str:
 def table_detection() -> str:
     """Precision and recall per detection method, against settled trades."""
     doc = _load("precision.json")
+    # A bare 0.00 recall invites the question it does not answer: out of how many? The
+    # found/missed counts are the denominator, and they are small enough that hiding them
+    # would be the dishonest choice.
     rows = [
-        "| Method | What it looks at | Precision | Recall |",
-        "| ------ | ---------------- | --------: | -----: |",
+        "| Method | What it looks at | Found | Missed | False alarms | Recall |",
+        "| ------ | ---------------- | ----: | -----: | -----------: | -----: |",
     ]
     looks_at = {
         "static": "bytecode contains an environment opcode",
@@ -169,7 +172,8 @@ def table_detection() -> str:
         name = str(m["method"])
         rows.append(
             f"| `{name}` | {looks_at.get(name, '')} "
-            f"| {float(m['precision']):.2f} | {float(m['recall']):.2f} |"
+            f"| {int(m['tp'])} | {int(m['fn'])} | {int(m['fp'])} "
+            f"| {float(m['recall']):.2f} |"
         )
     return "\n".join(rows)
 

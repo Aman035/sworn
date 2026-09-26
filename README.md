@@ -125,12 +125,12 @@ state immediately before it and compared with what the swapper actually received
 
 | Hook (Base) | Fills | Charged | Over-delivered | Net rate | Median excess | Score |
 | ----------- | ----: | ------: | -------------: | -------: | ------------: | ----: |
-| [`0x1f91c998…e02acc`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) ✓ hooklist | 782 | 183 | 99 | 11% | 400 bps | 24 |
-| [`0x985c14ba…ca2acc`](https://basescan.org/address/0x985c14baa2a18316ffda0aefb3a632fadfca2acc) ✓ hooklist | 751 | 126 | 105 | 3% | 142 bps | 14 |
+| [`0x1f91c998…e02acc`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) ✓ registry | 782 | 183 | 99 | 11% | 400 bps | 24 |
+| [`0x985c14ba…ca2acc`](https://basescan.org/address/0x985c14baa2a18316ffda0aefb3a632fadfca2acc) ✓ registry | 751 | 126 | 105 | 3% | 142 bps | 14 |
 | [`0xa5c4a1be…5a4145`](https://basescan.org/address/0xa5c4a1be2d59af03c8578609f2621c91ad5a4145) | 36 | 11 | 3 | 22% | 99 bps | 21 |
 | [`0x0d5d83c5…aba8cc`](https://basescan.org/address/0x0d5d83c5a1d27654d12670bb07461971a5aba8cc) | 41 | 9 | 2 | 17% | 45 bps | 14 |
 
-`✓ hooklist` means the hook is in Uniswap's public registry with verified source, which
+`✓ registry` means the hook is in Uniswap's public hooklist with verified source, which
 says nothing about how it behaves.
 **The worst offender is one of them**: [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc)
 is listed, source-verified, and takes a median **400 bps above its stated
@@ -178,19 +178,26 @@ So every fill here is confirmed against its own transaction trace. `amountSpecif
 Four ways to flag a spoofing hook, each scored against what hooks actually did to settled
 trades:
 
-| Method | What it looks at | Precision | Recall |
-| ------ | ---------------- | --------: | -----: |
-| `static` | bytecode contains an environment opcode | 0.00 | 0.00 |
-| `dynamic` | quotes disagree under permuted `eth_call` | 0.00 | 0.00 |
-| `trace` | an environment opcode *executes* while pricing | 0.00 | 0.00 |
-| `union` | any of the above | 0.00 | 0.00 |
-| `settled_trade` | re-quoting real fills against real prior state | 1.00 | 1.00 |
+| Method | What it looks at | Found | Missed | False alarms | Recall |
+| ------ | ---------------- | ----: | -----: | -----------: | -----: |
+| `static` | bytecode contains an environment opcode | 0 | 2 | 3 | 0.00 |
+| `dynamic` | quotes disagree under permuted `eth_call` | 0 | 2 | 0 | 0.00 |
+| `trace` | an environment opcode *executes* while pricing | 0 | 2 | 0 | 0.00 |
+| `union` | any of the above | 0 | 2 | 3 | 0.00 |
+| `settled_trade` | re-quoting real fills against real prior state | 2 | 0 | 0 | 1.00 |
 
 ![Precision and recall of each hook detection method](docs/assets/precision.svg)
 
 **No static, differential or trace detector caught either divergent hook** among those both
 probed and measured. Only re-quoting settled trades did, and that is retrospective by
 construction: it works after someone has already been paid less than they were quoted.
+
+The ground truth is small: it is the overlap between the hooks this repo probed and the
+hooks it measured from settled trades, and `Found` plus `Missed` is the whole of it. Too
+small to claim a detection *rate*, which is why the counts sit in the table instead of
+hiding behind a ratio. What it does show is that every check an integrator could run
+before a trade found none of the hooks that were demonstrably charging, while the bytecode
+scan raised alarms on hooks that were not.
 
 A score tells you what a hook did last week. It cannot tell you what it is doing to your
 transaction right now.

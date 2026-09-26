@@ -125,7 +125,7 @@ state immediately before it and compared with what the swapper actually received
 
 {{table:divergent_hooks}}
 
-`✓ hooklist` means the hook is in Uniswap's public registry with verified source, which
+`✓ registry` means the hook is in Uniswap's public hooklist with verified source, which
 says nothing about how it behaves.
 **The worst offender is one of them**: [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc)
 is listed, source-verified, and takes a median **{{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].median_charged_excess_bps|bps}} above its stated
@@ -180,6 +180,13 @@ trades:
 **No static, differential or trace detector caught either divergent hook** among those both
 probed and measured. Only re-quoting settled trades did, and that is retrospective by
 construction: it works after someone has already been paid less than they were quoted.
+
+The ground truth is small: it is the overlap between the hooks this repo probed and the
+hooks it measured from settled trades, and `Found` plus `Missed` is the whole of it. Too
+small to claim a detection *rate*, which is why the counts sit in the table instead of
+hiding behind a ratio. What it does show is that every check an integrator could run
+before a trade found none of the hooks that were demonstrably charging, while the bytecode
+scan raised alarms on hooks that were not.
 
 A score tells you what a hook did last week. It cannot tell you what it is doing to your
 transaction right now.
