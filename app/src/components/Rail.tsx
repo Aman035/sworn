@@ -1,15 +1,19 @@
 import type { Meta } from '@/lib/results';
 
 /**
- * The provenance rail.
+ * Where the numbers above came from, in a sentence.
  *
- * Every figure on this page came from a pipeline reading a hashed snapshot. Putting that
- * origin beside the numbers, rather than in a footnote, is the point: a reader can fetch
- * the same snapshot and re-derive the figure instead of taking it on trust.
+ * Every figure on this site is computed by a pipeline in the repo from a snapshot with a
+ * recorded sha256, and saying so is the point of the whole project. Saying so by printing
+ * four hashes, two block ranges and a git sha above the content was not: a reader met a
+ * wall of hex before they met the argument.
+ *
+ * So the claim is now one plain line underneath the section, and the hashes anyone would
+ * actually verify against live behind a disclosure.
  */
-/** Snapshots shown before the rail summarises the rest. Beyond this the rail grows taller
- *  than the figures it annotates, which inverts the hierarchy it exists to support. */
-const SHOWN = 2;
+function group(n: number): string {
+  return n.toLocaleString('en-US');
+}
 
 export function Rail({
   meta,
@@ -18,77 +22,49 @@ export function Rail({
   meta: Meta | null;
   extra?: [string, string][] | undefined;
 }) {
-  // A band with no snapshot is not necessarily a band with no provenance: the lead figure
-  // comes from a contract test, which has a source worth naming. Discarding `extra` here
-  // made a sourced panel read as an empty one.
   if (!meta) {
-    return (
-      <dl className="rail">
-        {extra?.length ? (
-          extra.map(([k, v]) => (
-            <div key={k}>
-              <dt>{k}</dt>
-              <dd>{v}</dd>
-            </div>
-          ))
-        ) : (
-          <div>
-            <dt>Source</dt>
-            <dd>not yet computed</dd>
-          </div>
-        )}
-      </dl>
-    );
+    if (!extra?.length) return null;
+    return <p className="source">{extra.map(([k, v]) => `${k}: ${v}`).join(' · ')}</p>;
   }
 
+  const snaps = meta.snapshots ?? [];
+  const ranged = snaps.filter((s) => s.block_from && s.block_to);
+  const from = ranged.length ? Math.min(...ranged.map((s) => s.block_from as number)) : null;
+  const to = ranged.length ? Math.max(...ranged.map((s) => s.block_to as number)) : null;
+  const rows = snaps.reduce((n, s) => n + (s.rows ?? 0), 0);
+
   return (
-    <dl className="rail">
-      {meta.snapshots.slice(0, SHOWN).map((s) => (
-        <div key={s.name}>
-          <dt>{s.name}</dt>
-          <dd>
-            <span className="hash">{s.sha256.slice(0, 16)}…</span>
-            {s.block_from !== undefined && s.block_to !== undefined && s.block_to > 0 ? (
-              <>
-                <br />
-                <span className="range">
-                  blocks {s.block_from.toLocaleString('en-US')}&ndash;
-                  {s.block_to.toLocaleString('en-US')}
-                </span>
-              </>
-            ) : null}
-            {s.rows ? (
-              <>
-                <br />
-                {s.rows.toLocaleString('en-US')} rows
-              </>
-            ) : null}
-          </dd>
-        </div>
-      ))}
-      {meta.snapshots.length > SHOWN ? (
+    <details className="source">
+      <summary>
+        Measured from
+        {from && to ? ` Base blocks ${group(from)} to ${group(to)}` : ' a pinned snapshot'}
+        {rows ? `, ${group(rows)} indexed rows` : ''}. Computed in this repo, from data you can
+        re-derive.
+      </summary>
+      <dl>
+        {snaps.map((s) => (
+          <div key={s.name}>
+            <dt>{s.name}</dt>
+            <dd>
+              <span className="hash">{s.sha256.slice(0, 16)}…</span>
+              {s.rows ? ` · ${group(s.rows)} rows` : ''}
+              {s.block_from && s.block_to
+                ? ` · blocks ${group(s.block_from)}–${group(s.block_to)}`
+                : ''}
+            </dd>
+          </div>
+        ))}
         <div>
-          <dt>and {meta.snapshots.length - SHOWN} more</dt>
-          {/* A comma list of names, not a hash: `.hash` is nowrap so a hex string stays
-              intact, and reusing it here pushed the page 16px wide at 375px. */}
-          <dd className="more">
-            {meta.snapshots
-              .slice(SHOWN)
-              .map((s) => s.name)
-              .join(', ')}
-          </dd>
+          <dt>built at</dt>
+          <dd>{meta.script_commit}</dd>
         </div>
-      ) : null}
-      <div>
-        <dt>Built at</dt>
-        <dd>{meta.script_commit}</dd>
-      </div>
-      {extra?.map(([k, v]) => (
-        <div key={k}>
-          <dt>{k}</dt>
-          <dd>{v}</dd>
-        </div>
-      ))}
-    </dl>
+        {extra?.map(([k, v]) => (
+          <div key={k}>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </details>
   );
 }

@@ -12,8 +12,10 @@ export function Band({
 }) {
   return (
     <section className="band">
-      <Rail meta={meta} extra={extra} />
+      {/* Content first. The provenance line is a citation, and a citation goes after the
+          thing it supports. */}
       <div className="body">{children}</div>
+      <Rail meta={meta} extra={extra} />
     </section>
   );
 }

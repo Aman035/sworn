@@ -283,53 +283,65 @@ main:has(.pagehead) .sheet {
   color: var(--ink-2);
 }
 
-/* The receipt. A horizontal strip under the heading rather than a margin column: a
-   rail tall enough to out-measure its own section was inverting the hierarchy it
-   existed to support, and leaving a column of dead space when it did not. */
-.rail {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 30px;
-  margin: 0 0 22px;
-  padding: 0 0 12px;
-  border-bottom: 1px solid var(--rule);
-  font-family: var(--mono);
-  font-size: var(--t-xs);
-  line-height: 1.5;
+/* The provenance line. Quiet, after the content, and closed by default: the claim that
+   every number is re-derivable matters, but it is a citation, not a headline. */
+.source {
+  margin: 38px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  font-size: var(--t-s);
   color: var(--faint);
 }
 
-.rail > div {
+.source summary {
+  cursor: pointer;
+  max-width: 76ch;
+  list-style: none;
+}
+
+.source summary::-webkit-details-marker {
+  display: none;
+}
+
+.source summary::after {
+  content: ' — show the hashes';
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--rule-hard);
+}
+
+.source[open] summary::after {
+  content: ' — hide';
+}
+
+.source summary:hover,
+.source summary:focus-visible {
+  color: var(--ink-2);
+}
+
+.source dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px 32px;
+  margin: 18px 0 0;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+}
+
+.source dl > div {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  /* A flex item will not shrink below its content's min-content width without this, and
-     the snapshot list ("census-bnb, census-arbitrum, census-mainnet") then pushed the
-     whole page 16px wide at 375px. */
+  gap: 10px;
   min-width: 0;
 }
 
-.rail dt {
-  font-weight: 500;
+.source dt {
   color: var(--ink-2);
   white-space: nowrap;
 }
 
-.rail dd {
+.source dd {
   margin: 0;
   min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-/* A hash and a block range are single tokens: breaking them mid-string makes them
-   unreadable, so they stay whole and the rail wraps around them instead. */
-.rail .hash,
-.rail .range {
-  white-space: nowrap;
-}
-
-/* A list of snapshot names is prose, and wraps like prose. */
-.rail .more {
   overflow-wrap: anywhere;
 }
 
