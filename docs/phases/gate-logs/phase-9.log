@@ -1,7 +1,7 @@
 ==> dashboard typechecks and builds
   ok  static export produced
 ==> every page renders real measurements
-    Tests  17 passed
+    Tests  19 passed
   ok  pages carry provenance and no placeholder values
 ==> the demo runs end to end, unattended
   ok  all five beats present and passing
