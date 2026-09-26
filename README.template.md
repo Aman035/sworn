@@ -6,10 +6,7 @@
 
 [![Sworn. Execution integrity for Uniswap v4](docs/assets/landing.png)](https://aman035.github.io/sworn/)
 
-**[Live dashboard](https://aman035.github.io/sworn/)** ·
-**[Feedback for Uniswap](FEEDBACK.md)** ·
-**[Run the demo](docs/DEMO.md)** ·
-**[Raw results](data/results)**
+**[Live dashboard](https://aman035.github.io/sworn/)**
 
 ---
 
