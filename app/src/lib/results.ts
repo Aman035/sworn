@@ -141,6 +141,19 @@ export const replay = () =>
     };
   }>('replay.json');
 
+export const caught = () =>
+  load<{
+    meta: Meta;
+    where: { chain: string; block: number; hook: string };
+    observed: {
+      caller_a_out: number;
+      caller_b_out: number;
+      charged_extra_bps: number;
+      sworn_settled_out: number;
+      recovered_bps: number;
+    };
+  }>('caught.json');
+
 export const scores = () => load<{ meta: Meta; hooks: ScoreRow[] }>('scores.json');
 
 export const precision = () =>

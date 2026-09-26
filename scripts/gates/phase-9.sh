@@ -55,6 +55,20 @@ recovered=$(grep "recovered (bps)" /tmp/sworn-demo.txt | grep -oE '[0-9]+$' | ta
 printf '    spoof %s bps taken, %s bps recovered by routing around it\n' "$taken" "$recovered"
 ok "the guarantee is demonstrated, not asserted"
 
+step "the demo includes the mainnet catch"
+# The fixture acts prove the mechanism. This one proves it against a hook nobody wrote for
+# the occasion, and it is the act a reader should not be able to dismiss.
+[ -f data/results/caught.json ] || fail "data/results/caught.json missing; run scripts/capture_catch.py"
+"$PY" - <<'PYEOF' || fail "the recorded catch does not show a charge or a recovery"
+import json, sys
+o = json.load(open("data/results/caught.json"))["observed"]
+if o["charged_extra_bps"] <= 0 or o["recovered_bps"] <= 0:
+    print(f"    charged {o['charged_extra_bps']} bps, recovered {o['recovered_bps']} bps")
+    sys.exit(1)
+print(f"    one caller charged {o['charged_extra_bps']} bps more; Sworn recovered {o['recovered_bps']} bps")
+PYEOF
+ok "a real Base hook priced two callers differently and Sworn routed away"
+
 step "the demo does not overclaim"
 grep -q "What the demo does not show" docs/DEMO.md \
   || fail "docs/DEMO.md must state what the demo does not show"

@@ -12,7 +12,8 @@
     "precision.json": "#/$defs/precision",
     "replay.json": "#/$defs/replay",
     "gas.json": "#/$defs/gas",
-    "scores.json": "#/$defs/scores"
+    "scores.json": "#/$defs/scores",
+    "caught.json": "#/$defs/caught"
   },
   "$defs": {
     "chainName": {
@@ -1008,6 +1009,68 @@
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "caught": {
+      "type": "object",
+      "required": ["meta", "where", "observed"],
+      "additionalProperties": false,
+      "description": "One real Base hook pricing two callers differently, and what the router did about it.",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/meta"
+        },
+        "where": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["chain", "block", "hook"],
+          "properties": {
+            "chain": {
+              "$ref": "#/$defs/chainName"
+            },
+            "block": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "original_tx": {
+              "type": "string"
+            },
+            "hook": {
+              "$ref": "#/$defs/address"
+            },
+            "pool": {
+              "type": "object"
+            }
+          }
+        },
+        "observed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "caller_a_out",
+            "caller_b_out",
+            "charged_extra_bps",
+            "sworn_settled_out",
+            "recovered_bps"
+          ],
+          "properties": {
+            "caller_a_out": {
+              "type": "integer"
+            },
+            "caller_b_out": {
+              "type": "integer"
+            },
+            "charged_extra_bps": {
+              "type": "integer"
+            },
+            "sworn_settled_out": {
+              "type": "integer"
+            },
+            "recovered_bps": {
+              "type": "integer"
             }
           }
         }

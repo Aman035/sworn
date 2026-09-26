@@ -1368,3 +1368,38 @@ html.js .reveal.in {
 .code-src + .code {
   margin-top: 0;
 }
+
+/* Two numbers meant to be read against each other, so they sit at one baseline and
+   nothing else on the panel competes with them. */
+.twoup {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px 48px;
+  margin: 32px 0 0;
+  max-width: 820px;
+}
+
+.twoup-k {
+  font-size: var(--t-s);
+  color: var(--ink-2);
+}
+
+.twoup-n {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: clamp(28px, 4vw, 44px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.twoup-n.bad {
+  color: var(--signal);
+}
+
+.twoup-note {
+  margin-top: 10px;
+  font-size: var(--t-xs);
+  color: var(--faint);
+  max-width: 30ch;
+}

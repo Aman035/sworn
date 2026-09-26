@@ -2,13 +2,14 @@ import Link from 'next/link';
 
 import { Reveal } from '@/components/Reveal';
 import { SpoofHero } from '@/components/SpoofHero';
-import { census, divergence, fmt, pct, precision, replay, scores } from '@/lib/results';
+import { caught, census, divergence, fmt, pct, precision, replay, scores } from '@/lib/results';
 
 export default function Landing() {
   const c = census();
   const d = divergence();
   const r = replay();
   const pr = precision();
+  const c2 = caught();
   // The hooklist flag lives on the score row, not the divergence row: whether a hook is
   // allowlisted is an attribute of the hook, not of this measurement.
   const listed = new Set(
@@ -252,6 +253,55 @@ export default function Landing() {
               A score tells you what a hook did last week. It cannot tell you what it is doing to
               your transaction right now.
             </p>
+          </div>
+        </Reveal>
+      ) : null}
+
+      {c2 ? (
+        <Reveal as="section" className="panel caught">
+          <div className="panel-inner">
+            <p className="hero-eyebrow">Caught on mainnet</p>
+            <h2>The same swap, priced two ways</h2>
+            <p>
+              Fork Base at block {fmt(c2.where.block)} and send one identical swap twice, from two
+              callers, into a pool behind hook{' '}
+              <a href={`https://basescan.org/address/${c2.where.hook}`} rel="noreferrer noopener">
+                <code>{c2.where.hook.slice(0, 10)}…</code>
+              </a>
+              . Neither caller is known to the hook. Both were deployed seconds earlier.
+            </p>
+
+            <div className="twoup">
+              <div>
+                <div className="twoup-k">a naive router receives</div>
+                <div className="twoup-n">{fmt(c2.observed.caller_a_out)}</div>
+                <div className="twoup-note">fee 0, nothing taken afterwards</div>
+              </div>
+              <div>
+                <div className="twoup-k">SwornRouter receives</div>
+                <div className="twoup-n bad">{fmt(c2.observed.caller_b_out)}</div>
+                <div className="twoup-note">
+                  fee 700, and the hook moves a further slice out in afterSwap
+                </div>
+              </div>
+            </div>
+
+            <p className="pull">
+              Charged {fmt(c2.observed.charged_extra_bps)} bps more for the same trade. Sworn
+              probed, saw what it was actually being offered, and settled on the hookless pool
+              beside it for {fmt(c2.observed.sworn_settled_out)}, recovering{' '}
+              {fmt(c2.observed.recovered_bps)} bps.
+            </p>
+
+            <div className="caveat">
+              <p>
+                <strong>The offline pipeline in this repo did not flag that hook.</strong> It saw a
+                handful of charged fills against nearly as many over-delivered ones and correctly
+                refused to call it a signal. A full re-quote of 10,000 fills, with a noise floor and
+                a sensitivity sweep, missed a hook that one in-transaction probe caught immediately.
+                That tells against this measurement as much as anyone else&rsquo;s.
+              </p>
+            </div>
           </div>
         </Reveal>
       ) : null}

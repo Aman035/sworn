@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "generated_at": "2026-09-26T09:53:26Z",
+    "script_commit": "6ba2ac0-dirty",
+    "config_version": 1,
+    "pipeline": "capture_catch",
+    "snapshots": [
+      {
+        "name": "census-base",
+        "sha256": "a5379268608d769898a5e9a90b37270978167c233a24381dc307a7b1adfc3205",
+        "block_from": 25350988,
+        "block_to": 51778292,
+        "rows": 15309659,
+        "chain": "base"
+      },
+      {
+        "name": "fills-base",
+        "sha256": "ed5147b030554d384ee07d44370081e78d0d7b32cf0b950da3cfb31dee297df5",
+        "block_from": 50483491,
+        "block_to": 51779491,
+        "rows": 12855496,
+        "chain": "base"
+      }
+    ]
+  },
+  "where": {
+    "chain": "base",
+    "block": 51247545,
+    "original_tx": "0x528ff79b489621493d779401eed2d60465f8b23f375655e73fef0c41504cc525",
+    "hook": "0xf54473f4c554baa8411c0a7dac7df735f34d00c4",
+    "test": "contracts/test/fork/ProtectedSwap.fork.t.sol",
+    "pool": {
+      "currency0": "0x5ab000ff9b9ffe0349ce5ffa5fd86f217c3680f5",
+      "currency1": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+    }
+  },
+  "observed": {
+    "caller_a_out": 17582769,
+    "caller_b_out": 16340546,
+    "charged_extra_bps": 707,
+    "sworn_settled_out": 17438404,
+    "recovered_bps": 672
+  }
+}

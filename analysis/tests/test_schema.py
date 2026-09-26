@@ -21,6 +21,11 @@ EXPECTED_FILES = {
     "replay.json",
     "gas.json",
     "scores.json",
+    # Beyond the nine the plan named. `caught.json` records one real Base hook pricing two
+    # callers differently, observed by a fork test rather than derived from a snapshot, and
+    # it is the only figure in the README that comes from the router rather than the
+    # measurement pipelines.
+    "caught.json",
 }
 
 MINIMAL_META = {

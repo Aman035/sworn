@@ -4,7 +4,9 @@
 # Three acts, in increasing order of how hard they are to fake:
 #   1. a spoofing hook and Sworn, on a local chain, with a fixture that provably lies;
 #   2. the same router against *real* Base hooks, on anvil forked from mainnet;
-#   3. the dashboard, rendered from the same result files the README uses.
+#   3. a real hook on Base charging one caller 707 bps more than another, and Sworn
+#      routing away from it;
+#   4. the dashboard, rendered from the same result files the README uses.
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 cd "$REPO_ROOT"
@@ -53,10 +55,17 @@ else
     forge test --root contracts --match-path 'test/fork/RealSwap.fork.t.sol' -vv \
     || fail "real-hook swap failed against the forked chain"
   ok "ETH -> USDC completed through live Base hooks, probe and execution agreed"
+
+  step "act 3: a hook on Base charging one caller more than another"
+  # The only act that is not a fixture and not a happy path: a pool that prices two
+  # callers differently at the same block, and Sworn routing away from it.
+  forge test --root contracts --match-path 'test/fork/ProtectedSwap.fork.t.sol' -vv \
+    || fail "the mainnet catch did not reproduce"
+  ok "charged 707 bps more than another caller; Sworn recovered 672 bps by routing away"
 fi
 
 # ---------------------------------------------------------------------------- act 3
-step "act 3: the dashboard, from the same result files"
+step "act 4: the dashboard, from the same result files"
 if [ -d app/node_modules ]; then
   (cd app && npm run build >/dev/null) || fail "dashboard build failed"
   npx --yes serve app/out -l 4321 >/dev/null 2>&1 &

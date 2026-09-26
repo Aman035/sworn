@@ -254,19 +254,39 @@ a hook that charges only when tx.gasprice > 0
 
 Produced live by `DemoTest`, not typed in. Run `./scripts/demo.sh` to watch it happen.
 
-## Verified against live mainnet hooks
+## Caught on mainnet
 
-[`RealSwap.fork.t.sol`](contracts/test/fork/RealSwap.fork.t.sol) forks Base and routes
-ETH → USDC through hooks that are live right now:
+Everything above this line is measurement. This is the router working, against a hook that
+is live on Base right now.
 
+Fork Base at block {{result:caught.json:where.block|int}} and send one identical swap twice, from two different
+callers, into the pool behind hook
+[`0xf54473f4…`](https://basescan.org/address/0xf54473f4c554baa8411c0a7dac7df735f34d00c4):
+
+- caller A, a naive router, receives **{{result:caught.json:observed.caller_a_out|int}}** USDC units. Fee `0`, nothing taken afterwards.
+- caller B, `SwornRouter`, receives **{{result:caught.json:observed.caller_b_out|int}}**. Fee `700`, and the hook transfers itself a further slice inside `afterSwap`.
+- caller B is charged **{{result:caught.json:observed.charged_extra_bps|int}} bps** more for the same trade.
+
+Neither caller is known to the hook. Both were deployed seconds earlier in the same test.
+
+Sworn does not need to know why it is being charged. It probes, sees what it is actually
+being offered, probes the hookless pool beside it, and settles there instead:
+**{{result:caught.json:observed.sworn_settled_out|int}}** units, **{{result:caught.json:observed.recovered_bps|int}} bps** recovered.
+
+```bash
+forge test --match-path 'test/fork/ProtectedSwap.fork.t.sol' -vv
 ```
-delivered USDC: 133138269
-reported out  : 133138269
-```
 
-The swap completes, the tokens received **equal** the amount the router reported, and the
-divergence check held against real hook bytecode at real liquidity. Two further tests cover
-a dynamic-fee hook and a sole hookless candidate.
+**The part worth sitting with:** the offline pipeline in this repo did *not* flag that hook
+as divergent. It saw a handful of charged fills against nearly as many over-delivered ones
+and correctly refused to call that a signal. A full re-quote of {{result:divergence.json:trace_confirmation.sampled|int}} fills, with a
+noise floor and a sensitivity sweep, missed a hook that a single in-transaction probe
+caught immediately.
+
+That is the argument, and it tells against this repo's own measurement as much as anyone
+else's. A score is retrospective and lossy. The probe is neither.
+
+## Also verified against live hooks
 
 ## What the guarantee costs
 

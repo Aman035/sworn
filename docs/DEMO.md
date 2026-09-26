@@ -12,9 +12,9 @@ whose numbers are typed in is a slideshow.
 The demo is written as a **test**, so it cannot rot. If the story stops being true, CI
 fails.
 
-## The three acts
+## The four acts
 
-Ordered by how hard each is to fake.
+Ordered by how hard each is to fake. Act 3 is the one that is not a fixture.
 
 ### Act 1: the spoof, on a local chain (~20 s)
 
