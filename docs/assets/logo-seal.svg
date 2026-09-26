@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
-  <rect width="64" height="64" rx="16" fill="#f2f4f6"/>
-  <g fill="none" stroke="#0d1014" stroke-width="6.20" stroke-linecap="square">
-    <path d="M19.00 15.00 H13.00 V49.00 H19.00"/>
-    <path d="M45.00 15.00 H51.00 V49.00 H45.00"/>
-    <path d="M25.00 27.50 H39.00"/>
-    <path d="M25.00 36.50 H39.00"/>
+  <rect width="64" height="64" rx="16" fill="#101418"/>
+  <path d="M53.00 32.00 A21.00 21.00 0 1 1 42.00 13.60 L53.00 20.00 Z"
+        fill="none" stroke="#f4f6f7" stroke-width="6.60" stroke-linejoin="round"/>
+  <g stroke="#f4f6f7" stroke-width="6.60" stroke-linecap="round">
+    <path d="M21.50 27.00 H42.50"/>
+    <path d="M21.50 38.00 H42.50"/>
   </g>
 </svg>

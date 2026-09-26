@@ -3,24 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-/**
- * `[=]`: the assertion the router makes, `executedDelta == probed[chosen]`: equality,
- * enforced inside a boundary. Inline rather than an <img> so it inherits `currentColor`
- * and stays crisp at every size the nav uses.
- */
-function Mark() {
-  return (
-    <svg className="mark-glyph" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <g fill="none" stroke="currentColor" strokeWidth="6.2" strokeLinecap="square">
-        <path d="M19 15 H13 V49 H19" />
-        <path d="M45 15 H51 V49 H45" />
-        <path d="M25 27.5 H39" />
-        <path d="M25 36.5 H39" />
-      </g>
-    </svg>
-  );
-}
-
 const NAV = [
   ['/hooks', 'Hooks'],
   ['/detection', 'Detection'],
@@ -28,12 +10,33 @@ const NAV = [
 ] as const;
 
 /**
- * Two states, one component.
+ * The mark: a seal with an equals struck into it.
  *
- * On the landing page the nav floats over the hero as a glass pill, because the hero is
- * the thing worth looking at and chrome above it would push it down. Everywhere else it
- * sits in a masthead with the wordmark, because those pages are read rather than watched.
+ * "Sworn" is an oath and an oath is sealed; what this one attests is the router's single
+ * assertion, `executedDelta == probed[chosen]`. Inline rather than an <img> so it takes
+ * `currentColor` and stays crisp at every size the nav uses.
+ *
+ * Geometry is kept in step with `scripts/render_graphics.py`, which renders the same mark
+ * for the favicon, the README banner and the social image.
  */
+function Mark() {
+  return (
+    <svg className="mark-glyph" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <path
+        d="M53 32 A21 21 0 1 1 42 13.6 L53 20 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="6.6"
+        strokeLinejoin="round"
+      />
+      <g stroke="currentColor" strokeWidth="6.6" strokeLinecap="round">
+        <path d="M21.5 27 H42.5" />
+        <path d="M21.5 38 H42.5" />
+      </g>
+    </svg>
+  );
+}
+
 export function Nav() {
   const pathname = usePathname();
 

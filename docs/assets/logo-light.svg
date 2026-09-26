@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
   <path d="M53.00 32.00 A21.00 21.00 0 1 1 42.00 13.60 L53.00 20.00 Z"
-        fill="none" stroke="#101418" stroke-width="6.60" stroke-linejoin="round"/>
-  <g stroke="#101418" stroke-width="6.60" stroke-linecap="round">
+        fill="none" stroke="#f4f6f7" stroke-width="6.60" stroke-linejoin="round"/>
+  <g stroke="#f4f6f7" stroke-width="6.60" stroke-linecap="round">
     <path d="M21.50 27.00 H42.50"/>
     <path d="M21.50 38.00 H42.50"/>
   </g>

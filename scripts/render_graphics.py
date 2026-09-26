@@ -35,6 +35,12 @@ RULE = "#1e252e"
 RULE_HARD = "#2c343e"
 SIGNAL = "#f04a10"
 
+# The logo does not follow the theme. Palette tokens flipped once already when the site
+# went dark, which silently inverted the mark into light-on-light; an identity has to be
+# fixed regardless of what the product's surfaces are doing.
+LOGO_DARK = "#101418"
+LOGO_LIGHT = "#f4f6f7"
+
 MONO = "ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace"
 SANS = "'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
 
@@ -459,53 +465,65 @@ def census_chart() -> str:
 # taken anything.
 
 
-def _mark(size: int = 64, ink: str = INK, stroke: float = 6.2) -> str:
-    """The bare `[=]` mark on a transparent ground, sized to a `size` box.
+def _mark(size: int = 64, ink: str = INK, stroke: float = 6.6) -> str:
+    """The mark: a seal with an equals struck into it.
 
-    Proportions are set for the smallest place it appears: a 16px browser tab, so the
-    strokes are heavier and the bracket feet shorter than they would be if this were only
-    ever going to be seen large.
+    "Sworn" is an oath, and an oath is sealed. What this one attests is the router's single
+    assertion, `executedDelta == probed[chosen]`, so the seal carries an equals sign. The
+    clipped upper-right edge is what stops it reading as a generic circle: a struck seal
+    deforms where the die meets it.
+
+    Proportions are set for the smallest place it appears, a 16px browser tab, which is why
+    the strokes are heavy and the two bars sit close together.
     """
     k = size / 64.0
-    bracket_top, bracket_bottom = 15 * k, 49 * k
-    left_x, right_x = 13 * k, 51 * k
-    foot = 6 * k
-    bar_x1, bar_x2 = 25 * k, 39 * k
-    bar_hi, bar_lo = 27.5 * k, 36.5 * k
-    w = stroke * k
 
-    return f"""  <g fill="none" stroke="{ink}" stroke-width="{w:.2f}" stroke-linecap="square">
-    <path d="M{left_x + foot:.2f} {bracket_top:.2f} H{left_x:.2f} V{bracket_bottom:.2f} H{left_x + foot:.2f}"/>
-    <path d="M{right_x - foot:.2f} {bracket_top:.2f} H{right_x:.2f} V{bracket_bottom:.2f} H{right_x - foot:.2f}"/>
-    <path d="M{bar_x1:.2f} {bar_hi:.2f} H{bar_x2:.2f}"/>
-    <path d="M{bar_x1:.2f} {bar_lo:.2f} H{bar_x2:.2f}"/>
+    def pt(*vals: float) -> str:
+        return " ".join(f"{v * k:.2f}" for v in vals)
+
+    return f"""  <path d="M{pt(53, 32)} A{pt(21, 21)} 0 1 1 {pt(42, 13.6)} L{pt(53, 20)} Z"
+        fill="none" stroke="{ink}" stroke-width="{stroke * k:.2f}" stroke-linejoin="round"/>
+  <g stroke="{ink}" stroke-width="{stroke * k:.2f}" stroke-linecap="round">
+    <path d="M{pt(21.5, 27)} H{pt(42.5)}"/>
+    <path d="M{pt(21.5, 38)} H{pt(42.5)}"/>
   </g>"""
 
 
 def logo() -> str:
-    """The mark alone, on a transparent ground. For inline use at any size."""
+    """The mark alone on a transparent ground, in dark ink. For light surfaces."""
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
-{_mark()}
+{_mark(ink=LOGO_DARK)}
+</svg>
+"""
+
+
+def logo_light() -> str:
+    """The mark alone in light ink, for dark surfaces."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
+{_mark(ink=LOGO_LIGHT)}
 </svg>
 """
 
 
 def logo_seal() -> str:
-    """The mark reversed out of a filled squircle. For favicons and avatars, where the
-    glyph needs a shape of its own to sit in."""
+    """The mark reversed out of a dark squircle. Favicons and avatars, where the glyph
+    needs a shape of its own and has to survive any background behind it."""
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
-  <rect width="64" height="64" rx="16" fill="{INK}"/>
-{_mark(ink=PAPER)}
+  <rect width="64" height="64" rx="16" fill="{LOGO_DARK}"/>
+{_mark(ink=LOGO_LIGHT)}
 </svg>
 """
 
 
 def logo_wordmark() -> str:
-    """Mark and wordmark locked up, for a header or a README."""
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64" role="img" aria-label="Sworn">
-  <rect width="64" height="64" rx="16" fill="{INK}"/>
-{_mark(ink=PAPER)}
-  <text x="82" y="45" font-family="{SANS}" font-size="38" font-weight="700" letter-spacing="-1.4" fill="{INK}">SWORN</text>
+    """Mark and wordmark locked up, on its own dark plate so it reads the same in GitHub's
+    light and dark themes."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 88" width="320" height="88" role="img" aria-label="Sworn">
+  <rect width="320" height="88" rx="14" fill="{LOGO_DARK}"/>
+  <g transform="translate(16 12)">
+{_mark(ink=LOGO_LIGHT)}
+  </g>
+  <text x="92" y="57" font-family="{SANS}" font-size="38" font-weight="700" letter-spacing="-1.4" fill="{LOGO_LIGHT}">SWORN</text>
 </svg>
 """
 
@@ -521,8 +539,8 @@ def banner() -> str:
 
     # The lockup.
     p.append('  <g transform="translate(64 44)">')
-    p.append(f'    <rect width="72" height="72" rx="18" fill="{INK}"/>')
-    p.append(_mark(size=72, ink=PAPER))
+    p.append(f'    <rect width="72" height="72" rx="18" fill="{LOGO_LIGHT}"/>')
+    p.append(_mark(size=72, ink=LOGO_DARK))
     p.append("  </g>")
     p.append(
         f'  <text x="152" y="98" font-family="{SANS}" font-size="52" font-weight="700" '
@@ -574,6 +592,7 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     drawings = {
         "logo.svg": logo,
+        "logo-light.svg": logo_light,
         "logo-seal.svg": logo_seal,
         "logo-wordmark.svg": logo_wordmark,
         "banner.svg": banner,
