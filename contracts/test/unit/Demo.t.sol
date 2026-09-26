@@ -8,7 +8,6 @@ import {Currency} from "v4-core/src/types/Currency.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 
 import {HookBook} from "../../src/HookBook.sol";
-import {SwornRouter} from "../../src/SwornRouter.sol";
 import {NaiveRouter} from "../fixtures/NaiveRouter.sol";
 import {SwornTestBase} from "./SwornTestBase.sol";
 
@@ -120,9 +119,10 @@ contract DemoTest is SwornTestBase {
         _rule();
     }
 
-    function _naive(PoolKey memory key) internal returns (uint256) {
+    function _naive(
+        PoolKey memory key
+    ) internal returns (uint256) {
         // forge-lint: disable-next-line(unsafe-typecast)
         return naive.swap(key, true, -int256(SWAP_AMOUNT), 0, address(this));
     }
-
 }

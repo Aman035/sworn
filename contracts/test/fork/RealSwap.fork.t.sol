@@ -54,11 +54,17 @@ contract RealSwapForkTest is Test {
         sworn = new SwornRouter(POOL_MANAGER, ISignatureTransfer(address(0)));
     }
 
-    function _key(address hook, uint24 fee, int24 tickSpacing) internal pure returns (PoolKey memory) {
+    function _key(
+        address hook,
+        uint24 fee,
+        int24 tickSpacing
+    ) internal pure returns (PoolKey memory) {
         return PoolKey({currency0: ETH, currency1: USDC, fee: fee, tickSpacing: tickSpacing, hooks: IHooks(hook)});
     }
 
-    function _usable(PoolKey memory key) internal view returns (bool) {
+    function _usable(
+        PoolKey memory key
+    ) internal view returns (bool) {
         (uint160 price,,,) = StateLibrary.getSlot0(POOL_MANAGER, key.toId());
         return price != 0 && StateLibrary.getLiquidity(POOL_MANAGER, key.toId()) != 0;
     }
@@ -107,9 +113,7 @@ contract RealSwapForkTest is Test {
         // — not an internal figure that happens to be positive.
         assertEq(delivered, out, "reported output does not match tokens received");
         assertEq(address(sworn).balance, 0, "router retained native value");
-        assertEq(
-            IERC20Minimal(Currency.unwrap(USDC)).balanceOf(address(sworn)), 0, "router retained USDC"
-        );
+        assertEq(IERC20Minimal(Currency.unwrap(USDC)).balanceOf(address(sworn)), 0, "router retained USDC");
     }
 
     function test_completesThroughADynamicFeeHook() public {
@@ -159,7 +163,9 @@ contract RealSwapForkTest is Test {
         assertGt(out, 0, "hookless route delivered nothing");
     }
 
-    function _params(uint256 amountIn) internal view returns (SwornParams memory) {
+    function _params(
+        uint256 amountIn
+    ) internal view returns (SwornParams memory) {
         return SwornParams({
             tokenIn: ETH,
             tokenOut: USDC,

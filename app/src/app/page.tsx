@@ -78,7 +78,9 @@ export default function Overview() {
             <div className="figure">
               <div className="n grey">{pct(r.totals.protection_hit_rate)}</div>
               <div className="k">of fills with an alternative had a better one</div>
-              <div className="note">{fmt(r.totals.fills_protected)} of {fmt(r.totals.fills_with_alternatives)}</div>
+              <div className="note">
+                {fmt(r.totals.fills_protected)} of {fmt(r.totals.fills_with_alternatives)}
+              </div>
             </div>
             <div className="figure">
               <div className="n grey">${(r.totals.probe_gas_usd_median ?? 0).toFixed(4)}</div>

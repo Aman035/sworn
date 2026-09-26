@@ -10,7 +10,7 @@ out/
 # foundry
 contracts/out/
 contracts/cache/
-contracts/broadcast/*/dry-run/
+contracts/broadcast/**/dry-run/
 contracts/.gas-snapshot.tmp
 
 # python
