@@ -1,0 +1,79 @@
+name: pages
+
+# The dashboard is a static export of committed result files, so publishing it is just
+# building the same artefact CI already tests and handing it to Pages.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'data/results/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and never cancel one midway: a half-published site is worse
+# than a stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build static export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: build
+        env:
+          # Project sites live under /<repo>; a user site would leave this empty.
+          NEXT_PUBLIC_BASE_PATH: /sworn
+        run: pnpm --filter sworn-app build
+
+      - name: guard against an empty or broken export
+        # Pages will happily publish a blank site. These are the two failures that produce
+        # one: a build that emitted no pages, and a page whose figures all resolved to
+        # nothing because a result file changed shape.
+        run: |
+          test -f app/out/index.html || { echo "no index.html in the export"; exit 1; }
+          for page in index hooks detection attribution; do
+            test -s "app/out/$page.html" || test -s "app/out/$page/index.html" \
+              || { echo "missing page: $page"; exit 1; }
+          done
+          if grep -qE '>(NaN|undefined)<' app/out/index.html; then
+            echo "export contains placeholder values; a result file changed shape"
+            exit 1
+          fi
+          # Jekyll silently drops any directory starting with an underscore, which is
+          # exactly where Next puts every script and stylesheet.
+          touch app/out/.nojekyll
+          test -d app/out/_next || { echo "no _next directory in the export"; exit 1; }
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/out
+
+  deploy:
+    name: deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

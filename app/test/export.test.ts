@@ -20,19 +20,25 @@ import { describe, expect, it } from 'vitest';
 const ROOT = resolve(__dirname, '..', '..');
 const OUT = resolve(ROOT, 'app', 'out');
 
+/**
+ * `trailingSlash: true` emits `hooks/index.html` rather than `hooks.html`, because a plain
+ * static host (GitHub Pages) does no extensionless-path rewriting. Both shapes are accepted
+ * so these tests describe the pages rather than the current export setting.
+ */
 function page(name: string): string {
-  const path = resolve(OUT, name);
-  if (!existsSync(path)) {
-    throw new Error(`${name} missing — run \`npm run build\` in app/ first`);
+  const stem = name.replace(/\.html$/, '');
+  for (const candidate of [`${stem}.html`, `${stem}/index.html`, name]) {
+    const path = resolve(OUT, candidate);
+    if (existsSync(path)) return readFileSync(path, 'utf8');
   }
-  return readFileSync(path, 'utf8');
+  throw new Error(`${name} missing — run \`npm run build\` in app/ first`);
 }
 
 function result(name: string): Record<string, unknown> {
   return JSON.parse(readFileSync(resolve(ROOT, 'data', 'results', name), 'utf8'));
 }
 
-const PAGES = ['index.html', 'hooks.html', 'detection.html', 'attribution.html'];
+const PAGES = ['index', 'hooks', 'detection', 'attribution'];
 
 describe('static export', () => {
   it.each(PAGES)('%s is built', (name) => {
@@ -58,18 +64,18 @@ describe('static export', () => {
     const census = result('census.json') as { chains: { chain: string; pools_total: number }[] };
     const base = census.chains.find((c) => c.chain === 'base');
     expect(base).toBeDefined();
-    expect(page('index.html')).toContain(base!.pools_total.toLocaleString('en-US'));
+    expect(page('index')).toContain(base!.pools_total.toLocaleString('en-US'));
   });
 
   it('the hook explorer lists the hooks the census found', () => {
     const census = result('census.json') as { chains: { chain: string; hooks_total: number }[] };
     const base = census.chains.find((c) => c.chain === 'base')!;
-    expect(page('hooks.html')).toContain(base.hooks_total.toLocaleString('en-US'));
+    expect(page('hooks')).toContain(base.hooks_total.toLocaleString('en-US'));
   });
 
   it('the detection page names every method scored', () => {
     const precision = result('precision.json') as { methods: { method: string }[] };
-    const html = page('detection.html');
+    const html = page('detection');
     for (const m of precision.methods) {
       expect(html, `detection page omits ${m.method}`).toContain(m.method);
     }
@@ -80,13 +86,13 @@ describe('static export', () => {
     // The number matters less than its presence: a coverage figure that can be dropped
     // silently is a coverage figure nobody will notice missing.
     expect(attribution.unlabeled_share).toBeGreaterThan(0);
-    expect(page('attribution.html')).toMatch(/unattributed|unlabel/i);
+    expect(page('attribution')).toMatch(/unattributed|unlabel/i);
   });
 
   it('no page claims a hook is clean without a measurement', () => {
     // `HookBook`'s central property, mirrored in the UI: absence must never read as a
     // clean bill of health.
-    const html = page('hooks.html');
+    const html = page('hooks');
     expect(html).toMatch(/not measured|unmeasured|insufficient/i);
   });
 });

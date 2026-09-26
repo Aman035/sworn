@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -25,10 +26,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               A hook is arbitrary code inside every swap. This is what they actually do.
             </p>
             <nav aria-label="Sections">
+              {/* `Link`, not `<a>`: Next rewrites these for `basePath`, and a plain
+                  anchor would send every nav click to the domain root on a project site
+                  served from /<repo>/. */}
               {NAV.map(([href, label]) => (
-                <a key={href} href={href}>
+                <Link key={href} href={href}>
                   {label}
-                </a>
+                </Link>
               ))}
             </nav>
           </div>
