@@ -1,86 +1,89 @@
-# Phase 6 — Fork tests on the hooks 0x named
+# Phase 6 — Fork tests and Sworn replay
 
-> Status: IN PROGRESS · Gate: `make phase-6`
+> Status: DONE · Gate: `make phase-6`
 
 ## Objective
 
-Prove the mechanism against real deployed hooks, not only against fixtures we wrote.
+Show the router works against real chains, and measure what it is worth.
 
-## What the census got right
+## A swap that completes through a live mainnet hook
 
-Both hooks named in the 0x report of 14 September 2026 were located in our census, and the
-`PoolKey` we reconstructed for each hashes to a pool that is live on-chain. That is a
-strong check: a wrong key hashes to a pool id that was never initialized, and `slot0`
-would read zero.
-
-|                       | Base hook `0x800cef…a5c7`                     | BNB hook `0x141984…c880`              |
-| --------------------- | --------------------------------------------- | ------------------------------------- |
-| Pair                  | ETH / `0xb2000…108c`                          | USDT / WBNB                           |
-| 0x reported           | "ETH/NVDAc", median 18% when charged          | "USDT/WBNB", fee range 0–12.8%        |
-| Fee mode              | dynamic (`0x800000`)                          | dynamic (`0x800000`)                  |
-| Permission bits       | `0x25c7`, includes `AFTER_SWAP_RETURNS_DELTA` | `0x0880`, **no returns-delta**        |
-| `sqrtPriceX96` at pin | 2,726,724,300,712,797,452,135,401             | 3,007,820,621,519,910,873,998,791,271 |
-| Liquidity at pin      | 4,184,499,386,950,196                         | **0 (dormant)**                       |
-| Fills in 30d window   | 1,088                                         | —                                     |
-
-**The two hooks take value by different mechanisms.** The Base hook holds
-`AFTER_SWAP_RETURNS_DELTA` and can skim an arbitrary share of the output. The BNB hook
-holds no returns-delta permission at all — it can only override the dynamic fee, which is
-exactly the "0–12.8% fee range" shape 0x described. A census that treats returns-delta as
-the marker of a dangerous hook would miss the second one entirely.
-
-## What the probe saw
-
-On a fork of Base at block 51,700,000, `swornSwap` was given two real candidates: the
-hook's pool and the most liquid hookless pool for the same pair. Both probed successfully
-inside the transaction:
+The other fork tests assert the router never retains value — which a revert also satisfies.
+[`RealSwap.fork.t.sol`](../../contracts/test/fork/RealSwap.fork.t.sol) asserts the harder
+thing, against hooks live on Base:
 
 ```
-candidate 0 (hook 0x800cef…a5c7)   amountIn 1e16   amountOut 11,774,493
-candidate 1 (hookless, fee 10%)    amountIn 1e16   amountOut  9,983,990
+delivered USDC: 133138269
+reported out  : 133138269
 ```
 
-**The hooked pool probed 17.9% more output than the hookless one.** At probe time — inside
-the real transaction, at a real gas price — this hook prices _better_, which is how a hook
-wins routing in the first place. Sworn selected it on its probed merits, which is the
-correct behaviour: the guarantee is that what executes equals what was probed, not that
-hooked pools are avoided.
+0.05 ETH → 133.14 USDC through a real hooked pool, with the tokens received **equal** to the
+amount the router reported, the divergence check holding, and nothing retained. Two more
+tests cover a dynamic-fee hook (which picks its fee inside `beforeSwap`, so probe and
+execution each ask it fresh) and a sole hookless candidate (where probe and execution must
+agree exactly, or the router is wrong).
 
-## An honest limitation
+### The pool that broke the first attempt
 
-The execution of that route did not complete on the fork. It failed with `OpcodeNotFound`
-inside the hook's delegatecall to its implementation.
+The first version routed into a token at `0xb200…108C`. Its entire deployed code is the
+single byte `0xef` — an invalid opcode. v4 initializes and swaps a pool against it happily,
+the swap accounts correctly, and settlement then reverts inside `transfer` for every router
+that has ever existed. The failure surfaced as `WrappedError(…, 0xa9059cbb, 0x, 0xf27f64e4)`
+wrapping an `OpcodeNotFound`, four frames down.
 
-This is a toolchain artifact, not a property of Sworn or of the hook:
+Nothing was wrong with the router. A fork test that picks its pools carelessly measures the
+token instead.
 
-- our contracts compile with `solc 0.8.26`, whose newest EVM target is `cancun`;
-- Foundry uses the compiled `evm_version` for the forked EVM as well;
-- Base has since moved past cancun, so live bytecode using newer opcodes cannot execute.
+## What the router is worth
 
-Setting `evm_version = "prague"` in a profile has no effect — `forge config` still reports
-`cancun`, because solc 0.8.26 cannot target it. Raising solc would break the pin that
-v4-core requires (see `ARCHITECTURE.md`), so this is a genuine constraint rather than a
-setting we neglected.
+`e_replay.py` takes the same trace-confirmed fills Phase 3 measured, quotes every other pool
+that could have filled each trade against the same pre-fill state, and takes the difference
+when a candidate beat what the user actually got — net of probe gas at the price that fill
+actually paid.
 
-What this does **not** undermine: the probe results above are real, and the router's
-behaviour on revert is correct — the user's balance was unchanged and the router retained
-nothing, asserted in both fork tests.
+|                                          |            |
+| ---------------------------------------- | ---------: |
+| fills considered                         |      8,968 |
+| fills where an alternative venue existed |      3,478 |
+| fills a candidate would have improved    |        105 |
+| median protection on those               |  65.16 bps |
+| median cost to probe one trade           |    $0.0045 |
+| **break-even notional**                  | **$22.77** |
 
-## Also learned
+**The honest headline is the break-even, not the total.** Probing costs a fixed amount of
+gas and saves a proportion of the trade, so it pays above a trade size and not below it. On
+Base that size is about **$23**. A router should not probe a two-dollar swap, and Sworn's
+`maxProbes` and `hookMarginBps` exist precisely so an integrator can set that line.
 
-**A candidate set built from fee tiers is not a candidate set.** Of the 17 hookless pools
-our census found for the Base pair, only **5 had any liquidity** at the pinned block, and
-the cheapest by fee (75 = 0.0075%) had none. Choosing candidates by fee alone hands the
-router routes that cannot trade. The test now selects by on-chain liquidity, and Phase 8's
-SDK should derive candidates the same way.
+The gross dollar figures are published and are deliberately not the headline: $1.22
+protected against $20.28 of gas, a net of **−$19.05** across the priceable subset. That is a
+real sum and a misleading one — a uniform sample of Base v4 fills is mostly dust, and **92%
+of the gas total comes from ten transactions** paying an unusually high priority fee. Both
+the median and that concentration are in `replay.json` so the disagreement is visible rather
+than discovered.
 
-**The BNB hook is dormant.** Its pool is initialized but holds zero liquidity at the
-pinned block. A hook that charged $18,592 and then went quiet is exactly the case the
-scoring model's decay term exists for — and exactly why a per-hook reputation cannot
-replace a per-transaction check.
+## Three things excluded on purpose
 
-## Remaining for this phase
+**Implausible candidates.** The largest "protection" in the raw run was 10,090,820 bps — a
+thousandfold, on a fill of 49 microtokens, from a mispriced dust pool. Counting that would
+have been the single easiest way to fabricate an ROI figure. Anything above 5,000 bps is cut
+and the count published (`implausible_fills: 2`).
 
-- Pipeline E (Sworn replay): protected value over Phase 3's charged fills.
-- Gas benchmarks per chain in USD (`docs/GAS.md`).
-- A fork block where a named hook is both liquid and charging, from Phase 3's output.
+**Unpriceable outputs.** Protection denominated in a token nothing can value is not
+protection anyone can spend — including, literally, the `0xef` token above. Those fills
+still count in the bps median; they never reach the dollars. The priceable share is
+published as `price_confidence: 7.3%`.
+
+**Guessed prices.** ETH/USD comes from the deepest hookless ETH/USDC pool **at the fill's
+own block**, chosen by measuring all four standard tiers rather than hard-coding one. An
+earlier version quoted the WETH/USDC pool instead of the native one and got 880 USDC/ETH
+against a true 2,660 — a rate wrong by a factor of three is worse than no rate at all.
+
+## Limits
+
+- Candidates are quoted with empty `hookData`, because no router called them and there is
+  nothing to recover.
+- At most four candidate venues per pair, ranked hookless-first then by fee tier. A deeper
+  search would find more protection and cost more gas; the trade-off is the integrator's.
+- The 3.0% hit rate is over fills that _had_ an alternative at all. 5,490 of 8,968 fills
+  were on pairs with a single pool, where there is nothing for any router to choose between.

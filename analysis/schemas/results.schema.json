@@ -813,6 +813,40 @@
             },
             "price_confidence": {
               "$ref": "#/$defs/rate"
+            },
+            "fills_with_alternatives": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Fills where more than one venue existed for the pair."
+            },
+            "implausible_fills": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Candidates quoting above the plausibility bound; excluded and published."
+            },
+            "max_plausible_protection_bps": {
+              "type": "number"
+            },
+            "protected_usd_gross": {
+              "type": ["number", "null"]
+            },
+            "probe_gas_usd": {
+              "type": ["number", "null"]
+            },
+            "breakeven_notional_usd": {
+              "type": "number",
+              "description": "Trade size above which probing pays for its own gas."
+            },
+            "protection_hit_rate": {
+              "$ref": "#/$defs/rate"
+            },
+            "probe_gas_usd_median": {
+              "type": "number",
+              "description": "What protecting one trade actually costs; the sum is outlier-driven."
+            },
+            "gas_cost_top10_share": {
+              "$ref": "#/$defs/rate",
+              "description": "Share of the gas total contributed by its ten largest fills."
             }
           }
         },

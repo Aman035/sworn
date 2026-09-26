@@ -1,0 +1,18 @@
+==> fork tests run against real chains
+  ok  fork suite passed (0 skipped for absent pools)
+==> a swap completes end to end through a live mainnet hook
+    delivered 133138269 USDC units through a live Base hook
+  ok  probe, select, execute and assert all hold on mainnet state
+==> replay.json exists and validates
+    considered 8,968  protected 105
+    median protection 65.16 bps
+    priced share 7.3%
+  ok  protected value is a validated, provenanced result
+==> replay arithmetic is pinned by tests
+.............                                                            [100%]
+  ok  protection, probe gas and pricing refusal are all covered
+==> replay reports its own coverage honestly
+  ok  every USD figure carries the share of fills it could price
+==> gas table is current
+    GAS.md figures all appear in the current benchmark output
+  ok  documented overhead matches what the benchmark measures

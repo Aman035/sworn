@@ -14,7 +14,13 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 from sworn_analysis.lib.pricing import NATIVE, price
-from sworn_analysis.pipelines.e_replay import PROBE_GAS_EACH, PROBE_GAS_FIRST, probe_gas, summarize
+from sworn_analysis.pipelines.e_replay import (
+    MAX_PLAUSIBLE_PROTECTION_BPS,
+    PROBE_GAS_EACH,
+    PROBE_GAS_FIRST,
+    probe_gas,
+    summarize,
+)
 
 USDC = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
 WETH = "0x4200000000000000000000000000000000000006"
@@ -214,10 +220,113 @@ def test_amounts_beyond_int64_survive_the_frame() -> None:
                 "candidates": 1,
                 "gas_overhead": probe_gas(1),
                 "protection": str(big),
-                "protection_bps": 10_000.0,
+                "protection_bps": 1_000.0,
             }
         ]
     )
     totals = summarize("base", rep, {}, {})
     assert totals["fills_protected"] == 1
     assert int(rep.protection[0]) == big
+
+
+def test_an_implausible_candidate_is_cut_and_counted() -> None:
+    """The largest "protection" in the real run was 10,090,820 bps — a thousandfold, from a
+    mispriced dust pool. Counting that is the easiest way to fabricate an ROI figure, so it
+    is excluded; dropping it silently would be the second easiest."""
+    rows = [
+        {
+            "chain": "base",
+            "hook": "0xa",
+            "tx_hash": "0x1",
+            "block_number": 1,
+            "out_currency": USDC,
+            "realized": "1000000",
+            "best_candidate": "1010000",
+            "best_pool": "0xp",
+            "candidates": 1,
+            "gas_overhead": probe_gas(1),
+            "protection": "10000",
+            "protection_bps": 100.0,
+        },
+        {
+            "chain": "base",
+            "hook": "0xb",
+            "tx_hash": "0x2",
+            "block_number": 1,
+            "out_currency": USDC,
+            "realized": "1000",
+            "best_candidate": "1009082000",
+            "best_pool": "0xp",
+            "candidates": 1,
+            "gas_overhead": probe_gas(1),
+            "protection": "1009081000",
+            "protection_bps": 10_090_820.0,
+        },
+    ]
+    totals = summarize("base", _frame(rows), {1: 2500.0}, {"0x1": 10**7, "0x2": 10**7})
+
+    assert totals["fills_protected"] == 1, "the dust pool was counted as protection"
+    assert totals["implausible_fills"] == 1, "the exclusion was not published"
+    assert totals["max_plausible_protection_bps"] == MAX_PLAUSIBLE_PROTECTION_BPS
+    # And it must not reach the dollars either.
+    assert totals["protected_usd_gross"] == pytest.approx(0.01, abs=0.005)
+
+
+def test_breakeven_is_the_number_that_matters() -> None:
+    """Probing costs a fixed amount of gas and saves a proportion of the trade, so it pays
+    above a notional and not below it. That threshold is the result an integrator needs."""
+    rows = []
+    for i in range(100):
+        protected = i < 5  # a 5% hit rate
+        rows.append(
+            {
+                "chain": "base",
+                "hook": "0xa",
+                "tx_hash": f"0x{i}",
+                "block_number": 1,
+                "out_currency": USDC,
+                "realized": "1000000",
+                "best_candidate": "1010000" if protected else "1000000",
+                "best_pool": "0xp",
+                "candidates": 1,
+                "gas_overhead": probe_gas(1),
+                "protection": "10000" if protected else "0",
+                "protection_bps": 100.0 if protected else 0.0,
+            }
+        )
+    gas_px = {f"0x{i}": 10**9 for i in range(100)}
+    totals = summarize("base", _frame(rows), {1: 2500.0}, gas_px)
+
+    assert totals["protection_hit_rate"] == pytest.approx(0.05)
+    # 100 bps on 5% of trades is an expected 5 bps; a probe costing g dollars therefore
+    # pays from g / 0.0005 upward.
+    gas_usd = PROBE_GAS_FIRST * 10**9 / 1e18 * 2500.0
+    assert totals["breakeven_notional_usd"] == pytest.approx(gas_usd / 0.0005, rel=0.01)
+
+
+def test_the_gas_total_publishes_its_own_concentration() -> None:
+    """In the real sample ten transactions contributed 92% of the gas. A sum that is really
+    one outlier should say so next to itself."""
+    rows = [
+        {
+            "chain": "base",
+            "hook": "0xa",
+            "tx_hash": f"0x{i}",
+            "block_number": 1,
+            "out_currency": USDC,
+            "realized": "1000000",
+            "best_candidate": "1000000",
+            "best_pool": "0xp",
+            "candidates": 1,
+            "gas_overhead": probe_gas(1),
+            "protection": "0",
+            "protection_bps": 0.0,
+        }
+        for i in range(50)
+    ]
+    gas_px = {f"0x{i}": 10**9 for i in range(50)}
+    gas_px["0x0"] = 10**13  # one transaction at a wildly higher priority fee
+    totals = summarize("base", _frame(rows), {1: 2500.0}, gas_px)
+
+    assert totals["gas_cost_top10_share"] > 0.9
+    assert totals["probe_gas_usd_median"] < totals["probe_gas_usd"] / 10

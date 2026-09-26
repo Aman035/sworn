@@ -90,6 +90,11 @@ def fmt(value: Any, style: str | None) -> str:
         return f"{float(value):,.0f} bps"
     if style == "f2":
         return f"{float(value):,.2f}"
+    if style == "f4":
+        return f"{float(value):,.4f}"
+    if style == "abs2":
+        # For a figure the prose already signs, so the page never reads "$-19.05".
+        return f"{abs(float(value)):,.2f}"
     if style == "short":
         n = float(value)
         for limit, suffix in ((1e9, "B"), (1e6, "M"), (1e3, "k")):

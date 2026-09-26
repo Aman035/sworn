@@ -171,16 +171,52 @@ Verbatim from `forge test --match-contract SwornGasTest`, against a slippage-onl
 Linear after the first, which pays for the probe machinery. On an L2 the guarantee costs a
 fraction of a cent. Full working in [docs/GAS.md](docs/GAS.md).
 
-## 7. Sworn replay
+## 7. Sworn replay — and what it costs
 
 `analysis/pipelines/e_replay.py` asks what the router would have been worth: for each
 measured fill it quotes every other pool that could have filled the same trade against the
 same pre-fill state, and takes the difference when a candidate beat what the user actually
 got — net of probe gas, charged at the price that fill actually paid.
 
-Two rules keep the figure honest: protection is measured against the **traced** output, not
-the `Swap` event; and an output token that cannot be priced from the chain is **not priced
-at all**, with the priceable share published as `price_confidence`.
+- **8,968** fills considered
+- **3,478** where an alternative venue existed at all
+- **105** a candidate would have improved
+- **65.16 bps** median protection on those
+- **$0.0045** median cost to probe one trade
+
+### The break-even is the honest headline
+
+Probing costs a **fixed** amount of gas and saves a **proportion** of the trade, so it pays
+above a trade size and not below it. On Base that size is:
+
+> **$22.77**
+
+A router should not probe a two-dollar swap, and `maxProbes` and `hookMarginBps` exist so an
+integrator can set that line. Below it, run naked and accept the risk; above it, the
+guarantee costs less than the exposure.
+
+The gross dollars are published and are deliberately **not** the headline:
+$1.22 protected against
+$20.28 of gas — a net loss of
+$19.05 across the priceable subset.
+
+That is a real sum and a misleading one. A uniform sample of Base v4 fills is mostly dust, and
+92% of the gas total comes from ten
+transactions paying an unusually high priority fee. The median is what protecting a trade
+actually costs; the sum is what ten outliers cost.
+
+### What was excluded, and why
+
+- **2 implausible candidates.** The largest raw "protection" was a
+  thousandfold, from a mispriced dust pool on a fill worth a fraction of a cent. Counting it
+  would be the easiest way to fabricate an ROI figure; dropping it silently would be the
+  second easiest, so the count is published.
+- **Unpriceable outputs.** Protection denominated in a token nothing can value is not
+  protection anyone can spend. Those fills still count in the bps median and never reach the
+  dollars; the priceable share is 7.3%.
+- **Guessed prices.** ETH/USD comes from the deepest hookless ETH/USDC pool at the fill's own
+  block, chosen by measuring all four standard tiers. An earlier version quoted the
+  WETH/USDC pool instead of the native one and was wrong by a factor of three.
 
 ## 8. HookBook and the attestor
 

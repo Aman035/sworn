@@ -60,6 +60,13 @@ PROBE_GAS_EACH = 68_000
 
 USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
 
+# A candidate quoting a large multiple of the executed route is far more likely a mispriced
+# dust pool than free money, and counting it is the single easiest way to fabricate an ROI
+# figure. In this sample the largest "protection" was 10,090,820 bps — a thousandfold — on a
+# fill of 49 microtokens. Anything above this bound is counted and published separately
+# rather than folded into the headline.
+MAX_PLAUSIBLE_PROTECTION_BPS = 5_000.0
+
 
 def probe_gas(candidates: int) -> int:
     """Overhead of probing `candidates` pools, in gas. Linear after the first."""
@@ -295,34 +302,96 @@ def replay(chain: str, sample: pd.DataFrame, by_pair: dict[Any, pd.DataFrame]) -
 def summarize(
     chain: str, rep: pd.DataFrame, eth_usd: dict[int, float], gas_px: dict[str, int]
 ) -> dict[str, Any]:
-    priced_usd, priced_net, priceable = [], [], 0
-    for _, r in rep.iterrows():
+    plausible = rep[rep.protection_bps <= MAX_PLAUSIBLE_PROTECTION_BPS]
+    implausible = int(len(rep) - len(plausible))
+
+    gross, gas_costs, priceable = [], [], 0
+    for _, r in plausible.iterrows():
         rate = eth_usd.get(int(r.block_number))
         p = price(chain, r.out_currency, int(r.protection), rate)
         if p.usd is None:
+            # Protection denominated in a token nothing can value is not protection you
+            # can spend. It still counts in the bps median; it never reaches the dollars.
             continue
         priceable += 1
         gas_wei = int(r.gas_overhead) * gas_px.get(r.tx_hash, 0)
-        gas_usd = (gas_wei / 1e18 * rate) if rate else 0.0
-        priced_usd.append(p.usd)
-        priced_net.append(p.usd - gas_usd)
+        gross.append(p.usd)
+        gas_costs.append((gas_wei / 1e18 * rate) if rate else 0.0)
 
-    protected = rep[rep.protection_bps > 0]
+    protected = plausible[plausible.protection_bps > 0]
     bps = [b for b in protected.protection_bps.tolist() if pd.notna(b)]
-    overheads = sorted(rep[rep.candidates > 0].gas_overhead.tolist())
+    probed = plausible[plausible.candidates > 0]
+    overheads = sorted(probed.gas_overhead.tolist())
 
     totals: dict[str, Any] = {
         "fills_considered": int(len(rep)),
+        # Fills where at least one alternative venue existed at all. The rest are pairs
+        # with a single pool, where there is nothing for a router to choose between.
+        "fills_with_alternatives": int(len(probed)),
         "fills_protected": int(len(protected)),
-        "protected_usd": round(sum(priced_net), 2) if priced_net else None,
+        "implausible_fills": implausible,
+        "max_plausible_protection_bps": MAX_PLAUSIBLE_PROTECTION_BPS,
+        "protected_usd_gross": round(sum(gross), 2) if gross else None,
+        "probe_gas_usd": round(sum(gas_costs), 2) if gas_costs else None,
+        "protected_usd": round(sum(gross) - sum(gas_costs), 2) if gross else None,
         "price_confidence": round(priceable / len(rep), 4) if len(rep) else 0.0,
     }
     if bps:
         totals["median_protection_bps"] = round(float(statistics.median(bps)), 2)
+
+    # The dollar sums are real but they are not representative: in this sample ten
+    # transactions paying an unusually high priority fee contributed 92% of the gas total.
+    # The median is what a trade actually costs to protect, and the concentration figure is
+    # published so nobody has to rediscover why the two disagree.
+    paid = sorted((g for g in gas_costs if g > 0), reverse=True)
+    if paid:
+        totals["probe_gas_usd_median"] = round(float(statistics.median(paid)), 6)
+        totals["gas_cost_top10_share"] = round(sum(paid[:10]) / sum(paid), 4)
+
     if overheads:
         totals["gas_overhead_p50"] = int(statistics.median(overheads))
         totals["gas_overhead_p90"] = int(overheads[max(0, int(0.9 * len(overheads)) - 1)])
+
+    # The number an integrator actually needs: probing costs a fixed amount of gas and
+    # saves a proportion of the trade, so it pays above some notional and not below it.
+    if gas_costs and bps:
+        median_gas = float(statistics.median(paid)) if paid else 0.0
+        hit_rate = len(protected) / max(1, len(probed))
+        expected_bps = statistics.median(bps) * hit_rate
+        if median_gas > 0 and expected_bps > 0:
+            totals["breakeven_notional_usd"] = round(median_gas / (expected_bps / 10_000), 2)
+            totals["protection_hit_rate"] = round(hit_rate, 4)
     return totals
+
+
+def cache_dir() -> Any:
+    d = path_for("results").parent / "cache"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def load_side_data() -> tuple[dict[int, float], dict[str, int]] | None:
+    """ETH/USD per block and gas price per transaction, from a previous run.
+
+    Both are thousands of RPC round trips and neither changes for a fixed sample, so
+    caching them is what makes re-summarising under a different plausibility bound cost
+    seconds instead of a quarter of an hour.
+    """
+    path = cache_dir() / "e_replay_prices.json"
+    if not path.is_file():
+        return None
+    blob = json.loads(path.read_text(encoding="utf-8"))
+    print(f"  reusing cached prices for {len(blob['eth_usd']):,} blocks", flush=True)
+    return {int(k): float(v) for k, v in blob["eth_usd"].items()}, {
+        k: int(v) for k, v in blob["gas_price"].items()
+    }
+
+
+def save_side_data(eth_usd: dict[int, float], gas_px: dict[str, int]) -> None:
+    (cache_dir() / "e_replay_prices.json").write_text(
+        json.dumps({"eth_usd": {str(k): v for k, v in eth_usd.items()}, "gas_price": gas_px}),
+        encoding="utf-8",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -331,6 +400,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--n", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-candidates", type=int, default=4)
+    parser.add_argument(
+        "--resummarize",
+        action="store_true",
+        help="rebuild the document from cached per-fill routes and prices, without quoting",
+    )
     args = parser.parse_args(argv)
 
     load_dotenv(repo_root() / ".env")
@@ -351,16 +425,22 @@ def main(argv: list[str] | None = None) -> int:
     if sample.empty:
         raise SystemExit("no fills survived trace confirmation")
 
-    wanted = set(zip(sample.currency0, sample.currency1, strict=True))
-    print(f"  {len(wanted):,} distinct pairs in the sample", flush=True)
-    by_pair = candidate_pools(args.chain, wanted, args.max_candidates)
-    print(f"  {sum(len(v) for v in by_pair.values()):,} candidate pools found", flush=True)
-    rep = replay(args.chain, sample, by_pair)
+    cached_prices = load_side_data() if args.resummarize else None
+    if args.resummarize and cached_prices is not None:
+        rep = pd.read_parquet(cache_dir() / "e_replay_fills.parquet")
+        print(f"  re-summarising {len(rep):,} cached routes", flush=True)
+        eth_usd, gas_px = cached_prices
+    else:
+        wanted = set(zip(sample.currency0, sample.currency1, strict=True))
+        print(f"  {len(wanted):,} distinct pairs in the sample", flush=True)
+        by_pair = candidate_pools(args.chain, wanted, args.max_candidates)
+        print(f"  {sum(len(v) for v in by_pair.values()):,} candidate pools found", flush=True)
+        rep = replay(args.chain, sample, by_pair)
 
-    blocks = rep.block_number.tolist()
-    print("  pricing from the chain ...", flush=True)
-    eth_usd = eth_usd_at(args.chain, blocks)
-    gas_px = effective_gas_prices(args.chain, rep.tx_hash.tolist())
+        print("  pricing from the chain ...", flush=True)
+        eth_usd = eth_usd_at(args.chain, rep.block_number.tolist())
+        gas_px = effective_gas_prices(args.chain, rep.tx_hash.tolist())
+        save_side_data(eth_usd, gas_px)
 
     totals = summarize(args.chain, rep, eth_usd, gas_px)
 
@@ -399,15 +479,23 @@ def main(argv: list[str] | None = None) -> int:
     out = path_for("results") / "replay.json"
     out.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
 
-    cache = path_for("results").parent / "cache"
-    cache.mkdir(parents=True, exist_ok=True)
-    parquet_safe(rep).to_parquet(cache / "e_replay_fills.parquet", index=False)
+    parquet_safe(rep).to_parquet(cache_dir() / "e_replay_fills.parquet", index=False)
 
-    print(f"\n  fills considered  {totals['fills_considered']:,}")
-    print(f"  fills protected   {totals['fills_protected']:,}")
-    print(f"  median protection {totals.get('median_protection_bps', 0)} bps")
-    print(f"  protected (net)   {totals['protected_usd']} USD")
-    print(f"  price confidence  {totals['price_confidence']:.1%}")
+    print(f"\n  fills considered   {totals['fills_considered']:,}")
+    print(f"  with alternatives  {totals['fills_with_alternatives']:,}")
+    print(f"  fills protected    {totals['fills_protected']:,}")
+    print(f"  implausible (cut)  {totals['implausible_fills']:,}")
+    print(f"  median protection  {totals.get('median_protection_bps', 0)} bps")
+    print(f"  protected gross    {totals['protected_usd_gross']} USD")
+    print(
+        f"  probe gas          {totals['probe_gas_usd']} USD total, "
+        f"{totals.get('probe_gas_usd_median', 0):.4f} median "
+        f"({totals.get('gas_cost_top10_share', 0):.0%} of it from 10 fills)"
+    )
+    print(f"  protected net      {totals['protected_usd']} USD")
+    if "breakeven_notional_usd" in totals:
+        print(f"  breakeven notional {totals['breakeven_notional_usd']:,.2f} USD")
+    print(f"  price confidence   {totals['price_confidence']:.1%}")
     print(f"\nwrote {out.relative_to(repo_root())}")
     return 0
 
