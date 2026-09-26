@@ -55,10 +55,11 @@ _"Don't route to bad hooks"_ is correct advice. The question it leaves open is t
 integrator actually faces: **how do you know which ones are bad, at the moment you
 route?** Three findings here say the available answers are not sufficient:
 
-1. The official hooklist is not a sufficient filter.
+1. The public hook registry carries no behavioural signal at all.
    [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc)
-   is on it, with verified source, and takes a median 400 bps above its stated fee on 11%
-   of its fills.
+   is in it, with verified source, and takes a median 400 bps above its stated fee on 11%
+   of its fills. The hooklist states plainly that membership is not the routing allowlist,
+   so this is a claim about the public record, not about what the Trading API routes into.
 2. You cannot compute a hook's take from logs at all, because `Swap` is emitted before
    `afterSwap`. Any list built from event data under-reports the worst hooks.
 3. Static, differential and trace detection all scored **zero recall** against settled

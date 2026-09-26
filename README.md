@@ -30,13 +30,28 @@ route?**
 
 Three questions, answered with tooling anyone can run.
 
-## 1. Is the allowlist enough?
+## 1. Does the public registry tell you?
 
-No. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **on Uniswap's official hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
+No. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **in Uniswap's hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
 
-An allowlist is a check on identity at a point in time. This is behaviour, now, and
-10,430 hooks on Base sit behind a proxy, so the code that was reviewed is not
-necessarily the code that runs.
+To be precise about what that does and does not mean: the hooklist
+[says plainly](https://github.com/Uniswap/hooklist) that being in it **does not** get a
+hook allowlisted for Uniswap's routing. It is a registry, not the routing allowlist, and
+this repo cannot see inside the latter. What it shows is that the public, verified,
+machine-readable record of a hook carries **no signal at all** about what the hook does to
+a swapper. Every field in it is identity: deployer, source verification, permission bits.
+None is behaviour.
+
+That is the gap, and it is fixable. A proposal with these fields filled in for every hook
+measured here is in [HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
+
+Routing is a separate question, and there the evidence is direct:
+**200,677**
+fills through a single UniversalRouter deployment
+([`0x6ff5693b…`](https://basescan.org/address/0x6ff5693b99212da76ad316178a184ab56d299b43))
+went into hooks measured here as charging more than they quote. That contract is used by
+the Uniswap interface and by anyone else who calls it, so this is a fact about the router,
+not a claim about any one front-end.
 
 ## 2. Can anyone measure this from logs?
 
@@ -89,8 +104,8 @@ all with reproductions in the feedback write-up:
    inverted.
 2. The **"Access msg.sender"** guide teaches hooks to read the caller, without noting that
    routers therefore cannot trust a quote.
-3. The Trading API defaults to **hooks-inclusive** routing, and allowlisting is the only
-   defence anyone ships: a defence against *identity*, not against *behaviour*.
+3. The Trading API defaults to **hooks-inclusive** routing, and the public record of a
+   hook describes *identity*, never *behaviour*.
 
 ## Measured on mainnet
 
@@ -115,11 +130,12 @@ state immediately before it and compared with what the swapper actually received
 | [`0xa5c4a1be…5a4145`](https://basescan.org/address/0xa5c4a1be2d59af03c8578609f2621c91ad5a4145) | 36 | 11 | 3 | 22% | 99 bps | 21 |
 | [`0x0d5d83c5…aba8cc`](https://basescan.org/address/0x0d5d83c5a1d27654d12670bb07461971a5aba8cc) | 41 | 9 | 2 | 17% | 45 bps | 14 |
 
-`✓ hooklist` means the hook is on Uniswap's official allowlist with verified source.
+`✓ hooklist` means the hook is in Uniswap's public registry with verified source, which
+says nothing about how it behaves.
 **The worst offender is one of them**: [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc)
 is listed, source-verified, and takes a median **400 bps above its stated
 fee** on 11% of its fills, with a worst observed take of
-44%. An allowlist keyed on address cannot express that.
+44%. A registry keyed on address cannot express that.
 
 Every figure resolves from [`divergence.json`](data/results/divergence.json), which carries
 the sha256 of the snapshot it was computed from.

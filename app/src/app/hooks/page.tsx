@@ -45,7 +45,7 @@ export default function Hooks() {
                     <th className="n">Over-delivered</th>
                     <th className="n">Net rate</th>
                     <th className="n">Median excess</th>
-                    <th>Listed</th>
+                    <th>In registry</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -68,7 +68,7 @@ export default function Hooks() {
                       </td>
                       <td>
                         {listed.has(h.address) ? (
-                          <span className="mark on">hooklist</span>
+                          <span className="mark on">registry</span>
                         ) : (
                           <span className="mark off">. </span>
                         )}
@@ -103,7 +103,7 @@ export default function Hooks() {
                     <th>Hook</th>
                     <th className="n">Pools</th>
                     <th>Can take</th>
-                    <th>Listed</th>
+                    <th>In registry</th>
                     <th>Reads environment</th>
                     <th className="n">Fills</th>
                     <th>Behaviour</th>
@@ -131,7 +131,7 @@ export default function Hooks() {
                         </td>
                         <td>
                           <span className={h.allowlisted ? 'mark on' : 'mark off'}>
-                            {h.allowlisted ? 'hooklist' : 'no'}
+                            {h.allowlisted ? 'registry' : 'no'}
                           </span>
                         </td>
                         <td>
