@@ -39,7 +39,7 @@ export default function Landing() {
           <SpoofHero />
 
           <div className="hero-cta">
-            <Link className="btn" href="/overview">
+            <Link className="btn" href="/hooks">
               See what hooks actually do
             </Link>
             <a
@@ -229,13 +229,57 @@ export default function Landing() {
             same everything a hook could key on, because it <em>is</em> the real environment. There
             is no separate quote left to lie to.
           </p>
-          <div className="hero-cta">
-            <Link className="btn" href="/overview">
-              Browse the evidence
-            </Link>
-          </div>
         </div>
       </Reveal>
+
+      {r ? (
+        <Reveal as="section" className="panel">
+          <div className="panel-inner">
+            <h2>What the guarantee is worth</h2>
+            <p>
+              For every measured fill, every other pool that could have filled the same trade was
+              quoted against the same pre-fill state. Probing costs a fixed amount of gas and saves
+              a proportion of the trade, so it pays above a trade size and not below it.
+            </p>
+            <div className="figures">
+              <div className="figure">
+                <div className="n">${(r.totals.breakeven_notional_usd ?? 0).toFixed(2)}</div>
+                <div className="k">break-even trade size</div>
+                <div className="note">below this, probe gas exceeds the expected saving</div>
+              </div>
+              <div className="figure">
+                <div className="n">{(r.totals.median_protection_bps ?? 0).toFixed(0)} bps</div>
+                <div className="k">median protection where a better route existed</div>
+              </div>
+              <div className="figure">
+                <div className="n grey">{pct(r.totals.protection_hit_rate)}</div>
+                <div className="k">of fills with an alternative had a better one</div>
+                <div className="note">
+                  {fmt(r.totals.fills_protected)} of {fmt(r.totals.fills_with_alternatives)}
+                </div>
+              </div>
+              <div className="figure">
+                <div className="n grey">${(r.totals.probe_gas_usd_median ?? 0).toFixed(4)}</div>
+                <div className="k">median cost to protect one trade</div>
+              </div>
+            </div>
+            <div className="caveat">
+              <p>
+                Only {pct(r.totals.price_confidence)} of these fills pay out in a token this repo
+                can value from the chain, and {fmt(r.totals.implausible_fills)} candidate routes
+                quoting implausible multiples were excluded as mispriced dust rather than counted as
+                recovered value. Both are published so the dollar figures can be discounted
+                accordingly.
+              </p>
+            </div>
+            <div className="hero-cta">
+              <Link className="btn" href="/hooks">
+                Browse the evidence
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      ) : null}
     </div>
   );
 }

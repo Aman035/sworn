@@ -1,48 +1,48 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 488" width="700" height="488" role="img" aria-label="Precision and recall of each hook detection method">
-  <rect width="700" height="488" rx="10" fill="#e8eaec"/>
-  <text x="28" y="40" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="600" fill="#101418" text-anchor="start">Every detector is imprecise, retrospective, or both</text>
-  <text x="28" y="62" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12.5" font-weight="400" fill="#8b939b" text-anchor="start">Ground truth is what hooks did to settled trades. This is the argument for the router.</text>
-  <text x="190" y="96" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="11" font-weight="400" fill="#8b939b" text-anchor="start" letter-spacing="0.6">precision</text>
-  <text x="440" y="96" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="11" font-weight="400" fill="#8b939b" text-anchor="start" letter-spacing="0.6">recall</text>
-  <line x1="28" y1="102" x2="672" y2="102" stroke="#d2d7db"/>
-  <text x="28" y="124" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#101418" text-anchor="start">static</text>
-  <rect x="190" y="110" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="190" y="110" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="308" y="120" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <rect x="440" y="110" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="440" y="110" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="558" y="120" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <line x1="28" y1="166" x2="672" y2="166" stroke="#d2d7db"/>
-  <text x="28" y="188" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#101418" text-anchor="start">dynamic</text>
-  <rect x="190" y="174" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="190" y="174" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="308" y="184" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <rect x="440" y="174" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="440" y="174" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="558" y="184" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <line x1="28" y1="230" x2="672" y2="230" stroke="#d2d7db"/>
-  <text x="28" y="252" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#101418" text-anchor="start">trace</text>
-  <rect x="190" y="238" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="190" y="238" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="308" y="248" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <rect x="440" y="238" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="440" y="238" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="558" y="248" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <line x1="28" y1="294" x2="672" y2="294" stroke="#d2d7db"/>
-  <text x="28" y="316" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#101418" text-anchor="start">union</text>
-  <rect x="190" y="302" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="190" y="302" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="308" y="312" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <rect x="440" y="302" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="440" y="302" width="2.0" height="10" rx="5" fill="#e2400a"/>
-  <text x="558" y="312" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e2400a" text-anchor="start">0%</text>
-  <line x1="28" y1="358" x2="672" y2="358" stroke="#d2d7db"/>
-  <text x="28" y="380" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#101418" text-anchor="start">settled_trade</text>
-  <rect x="190" y="366" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="190" y="366" width="170.0" height="10" rx="5" fill="#101418"/>
-  <text x="308" y="376" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#101418" text-anchor="start">100%</text>
-  <rect x="440" y="366" width="170" height="10" rx="5" fill="#f6f7f8" stroke="#d2d7db"/>
-  <rect x="440" y="366" width="170.0" height="10" rx="5" fill="#101418"/>
-  <text x="558" y="376" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#101418" text-anchor="start">100%</text>
-  <text x="28" y="468" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#8b939b" text-anchor="start">Ground truth: phase-3 divergent (settled trades)</text>
+  <rect width="700" height="488" rx="10" fill="#0d1014"/>
+  <text x="28" y="40" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="600" fill="#f2f4f6" text-anchor="start">Every detector is imprecise, retrospective, or both</text>
+  <text x="28" y="62" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12.5" font-weight="400" fill="#6c7680" text-anchor="start">Ground truth is what hooks did to settled trades. This is the argument for the router.</text>
+  <text x="190" y="96" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="11" font-weight="400" fill="#6c7680" text-anchor="start" letter-spacing="0.6">precision</text>
+  <text x="440" y="96" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="11" font-weight="400" fill="#6c7680" text-anchor="start" letter-spacing="0.6">recall</text>
+  <line x1="28" y1="102" x2="672" y2="102" stroke="#1e252e"/>
+  <text x="28" y="124" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#f2f4f6" text-anchor="start">static</text>
+  <rect x="190" y="110" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="190" y="110" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="308" y="120" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <rect x="440" y="110" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="440" y="110" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="558" y="120" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <line x1="28" y1="166" x2="672" y2="166" stroke="#1e252e"/>
+  <text x="28" y="188" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#f2f4f6" text-anchor="start">dynamic</text>
+  <rect x="190" y="174" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="190" y="174" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="308" y="184" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <rect x="440" y="174" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="440" y="174" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="558" y="184" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <line x1="28" y1="230" x2="672" y2="230" stroke="#1e252e"/>
+  <text x="28" y="252" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#f2f4f6" text-anchor="start">trace</text>
+  <rect x="190" y="238" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="190" y="238" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="308" y="248" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <rect x="440" y="238" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="440" y="238" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="558" y="248" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <line x1="28" y1="294" x2="672" y2="294" stroke="#1e252e"/>
+  <text x="28" y="316" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#f2f4f6" text-anchor="start">union</text>
+  <rect x="190" y="302" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="190" y="302" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="308" y="312" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <rect x="440" y="302" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="440" y="302" width="2.0" height="10" rx="5" fill="#f04a10"/>
+  <text x="558" y="312" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f04a10" text-anchor="start">0%</text>
+  <line x1="28" y1="358" x2="672" y2="358" stroke="#1e252e"/>
+  <text x="28" y="380" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#f2f4f6" text-anchor="start">settled_trade</text>
+  <rect x="190" y="366" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="190" y="366" width="170.0" height="10" rx="5" fill="#f2f4f6"/>
+  <text x="308" y="376" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f2f4f6" text-anchor="start">100%</text>
+  <rect x="440" y="366" width="170" height="10" rx="5" fill="#141a21" stroke="#1e252e"/>
+  <rect x="440" y="366" width="170.0" height="10" rx="5" fill="#f2f4f6"/>
+  <text x="558" y="376" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#f2f4f6" text-anchor="start">100%</text>
+  <text x="28" y="468" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">Ground truth: phase-3 divergent (settled trades)</text>
 </svg>

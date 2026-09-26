@@ -3,9 +3,26 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+/**
+ * `[=]` — the assertion the router makes, `executedDelta == probed[chosen]`: equality,
+ * enforced inside a boundary. Inline rather than an <img> so it inherits `currentColor`
+ * and stays crisp at every size the nav uses.
+ */
+function Mark() {
+  return (
+    <svg className="mark-glyph" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" strokeWidth="6.2" strokeLinecap="square">
+        <path d="M19 15 H13 V49 H19" />
+        <path d="M45 15 H51 V49 H45" />
+        <path d="M25 27.5 H39" />
+        <path d="M25 36.5 H39" />
+      </g>
+    </svg>
+  );
+}
+
 const NAV = [
-  ['/overview', 'Overview'],
-  ['/hooks', 'Hook explorer'],
+  ['/hooks', 'Hooks'],
   ['/detection', 'Detection'],
   ['/attribution', 'Attribution'],
 ] as const;
@@ -33,8 +50,9 @@ export function Nav() {
   if (onLanding) {
     return (
       <nav className="floatnav" aria-label="Sections">
-        <Link href="/" className="floatnav-mark">
-          SWORN
+        <Link href="/" className="floatnav-mark" aria-label="Sworn, home">
+          <Mark />
+          <span>SWORN</span>
         </Link>
         <div className="floatnav-links">{links}</div>
       </nav>
@@ -44,8 +62,9 @@ export function Nav() {
   return (
     <header className="masthead">
       <div className="masthead-inner">
-        <Link href="/" className="wordmark">
-          SWORN
+        <Link href="/" className="wordmark" aria-label="Sworn, home">
+          <Mark />
+          <span>SWORN</span>
         </Link>
         <p className="standfirst">
           A hook is arbitrary code inside every swap. This is what they actually do.

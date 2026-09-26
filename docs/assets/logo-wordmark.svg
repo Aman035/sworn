@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64" role="img" aria-label="Sworn">
+  <rect width="64" height="64" rx="16" fill="#f2f4f6"/>
+  <g fill="none" stroke="#0d1014" stroke-width="6.20" stroke-linecap="square">
+    <path d="M19.00 15.00 H13.00 V49.00 H19.00"/>
+    <path d="M45.00 15.00 H51.00 V49.00 H45.00"/>
+    <path d="M25.00 27.50 H39.00"/>
+    <path d="M25.00 36.50 H39.00"/>
+  </g>
+  <text x="82" y="45" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="38" font-weight="700" letter-spacing="-1.4" fill="#f2f4f6">SWORN</text>
+</svg>

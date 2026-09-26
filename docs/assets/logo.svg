@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
+  <g fill="none" stroke="#f2f4f6" stroke-width="6.20" stroke-linecap="square">
+    <path d="M19.00 15.00 H13.00 V49.00 H19.00"/>
+    <path d="M45.00 15.00 H51.00 V49.00 H45.00"/>
+    <path d="M25.00 27.50 H39.00"/>
+    <path d="M25.00 36.50 H39.00"/>
+  </g>
+</svg>

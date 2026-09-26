@@ -6,9 +6,9 @@
   range, row count — in monospace directly under its heading, the way a paper cites its
   source. Provenance is furniture, not a footnote.
 
-  Ground is a cool instrument grey rather than a dark panel or a warm editorial cream:
-  both of those are the default register for this kind of page, and neither says
-  "measurement". Colour carries exactly one meaning:
+  One theme across every page. The landing sets the register — a near-black instrument
+  ground with a faint grid — and the data pages continue it rather than switching to a
+  light document halfway through the site. Colour carries exactly one meaning:
 
     signal   value a hook took from someone
     ink      measured, nothing taken
@@ -21,17 +21,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --paper: #e8eaec;
-  --sheet: #f6f7f8;
-  --ink: #101418;
-  --ink-2: #454d55;
-  --faint: #8b939b;
-  --rule: #d2d7db;
-  --rule-hard: #b9c0c6;
-  --signal: #e2400a;
-  --signal-wash: rgba(226, 64, 10, 0.09);
+  --paper: #0d1014;
+  --sheet: #141a21;
+  --sheet-2: #19202a;
+  --ink: #f2f4f6;
+  --ink-2: #9ba5af;
+  --faint: #6c7680;
+  --rule: #1e252e;
+  --rule-hard: #2c343e;
+  --signal: #f04a10;
+  --signal-wash: rgba(240, 74, 16, 0.12);
 
   --display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -115,7 +116,7 @@ body {
    rather than as a watermark behind it. Hidden below 900px, where it would instead
    collide with the real one. */
 .wordmark::after {
-  content: 'SWORN';
+  content: '';
   display: none;
   position: absolute;
   top: 22px;
@@ -178,7 +179,7 @@ body {
 }
 
 .masthead nav a:hover {
-  background: var(--paper);
+  background: var(--sheet-2);
   color: var(--ink);
 }
 
@@ -197,7 +198,7 @@ main {
 }
 
 .band {
-  padding: 54px 0;
+  padding: 72px 0;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -404,7 +405,7 @@ main {
      lines is harder to read than one the reader has to nudge. */
   overflow-x: auto;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--sheet);
 }
 
@@ -440,7 +441,7 @@ main {
 }
 
 .grid tbody tr:hover td {
-  background: var(--paper);
+  background: var(--sheet-2);
 }
 
 .grid .n {
@@ -457,11 +458,10 @@ main {
 
 /* ----------------------------------------------------------------------- marks */
 
+/* Quiet by default. On a dark ground an outlined pill on every row of a long table is
+   noise, so the border is dropped and only the text carries the state. */
 .mark {
   display: inline-block;
-  padding: 2px 9px;
-  border-radius: 999px;
-  border: 1px solid var(--rule-hard);
   font-family: var(--mono);
   font-size: var(--t-xs);
   color: var(--faint);
@@ -471,18 +471,18 @@ main {
 /* Present, not loud. Nearly every row carries this mark, so drawing it at full ink
    weight spent the page's strongest contrast on something that distinguishes nothing. */
 .mark.on {
-  border-color: var(--rule-hard);
   color: var(--ink-2);
 }
 
 .mark.bad {
-  border-color: var(--signal);
+  padding: 2px 9px;
+  border-radius: 999px;
   background: var(--signal-wash);
   color: var(--signal);
 }
 
 .mark.off {
-  border-style: dashed;
+  color: var(--rule-hard);
 }
 
 /* ------------------------------------------------------------------ bar tracks */
@@ -512,9 +512,9 @@ main {
 .caveat {
   margin: 30px 0 0;
   padding: 16px 20px;
-  border-left: 3px solid var(--signal);
+  border-left: 2px solid var(--signal);
   background: var(--sheet);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 10px 10px 0;
 }
 
 .caveat p {
@@ -598,7 +598,7 @@ main:has(.landing) {
 }
 
 .landing {
-  --hero-ink: #f2f4f6;
+  --hero-ink: var(--ink);
 }
 
 /* ------------------------------------------------------------- floating nav */
@@ -753,8 +753,8 @@ main:has(.landing) {
 
 .btn.ghost {
   background: transparent;
-  border-color: rgba(255, 255, 255, 0.22);
-  color: var(--hero-ink);
+  border-color: var(--rule-hard);
+  color: var(--ink);
 }
 
 .btn.ghost:hover {
@@ -1064,4 +1064,50 @@ html.js .reveal.in {
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* ------------------------------------------------------------------ the mark */
+
+/* `[=]`, inline so it takes `currentColor`. Sized to the cap height of the text it sits
+   beside rather than to a fixed pixel value, so the lockup holds together as the
+   wordmark scales between the landing nav and the masthead. */
+.mark-glyph {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+}
+
+.floatnav-mark,
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42em;
+}
+
+.floatnav-mark .mark-glyph {
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.wordmark {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.wordmark .mark-glyph {
+  /* The wordmark is set at the hero scale; the mark next to it wants to be a little
+     smaller than cap height or it dominates the word. */
+  width: 0.78em;
+  height: 0.78em;
+}
+
+/* A table caption is a label for the table, not a title centred over it — the browser
+   default centres it, which read as a stray heading floating above the card. */
+.grid caption {
+  padding: 12px 16px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--faint);
+  border-bottom: 1px solid var(--rule);
 }

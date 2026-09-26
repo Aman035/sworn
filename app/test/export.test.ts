@@ -38,7 +38,7 @@ function result(name: string): Record<string, unknown> {
   return JSON.parse(readFileSync(resolve(ROOT, 'data', 'results', name), 'utf8'));
 }
 
-const PAGES = ['index', 'overview', 'hooks', 'detection', 'attribution'];
+const PAGES = ['index', 'hooks', 'detection', 'attribution'];
 
 describe('static export', () => {
   it.each(PAGES)('%s is built', (name) => {
@@ -81,11 +81,11 @@ describe('static export', () => {
     }
   });
 
-  it('the overview shows the real pool count', () => {
+  it('the landing shows the real pool count', () => {
     const census = result('census.json') as { chains: { chain: string; pools_total: number }[] };
     const base = census.chains.find((c) => c.chain === 'base');
     expect(base).toBeDefined();
-    expect(page('overview')).toContain(base!.pools_total.toLocaleString('en-US'));
+    expect(page('index')).toContain(base!.pools_total.toLocaleString('en-US'));
   });
 
   it('the hook explorer lists the hooks the census found', () => {

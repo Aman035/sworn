@@ -24,16 +24,16 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "data" / "results"
 OUT = ROOT / "docs" / "assets"
 
-# Matches the dashboard (app/src/app/globals.css): a cool instrument grey, near-black
-# ink, and one signal colour that means "value a hook took" and nothing else.
-PAPER = "#e8eaec"
-SHEET = "#f6f7f8"
-INK = "#101418"
-INK2 = "#454d55"
-FAINT = "#8b939b"
-RULE = "#d2d7db"
-RULE_HARD = "#b9c0c6"
-SIGNAL = "#e2400a"
+# Matches the site (app/src/app/globals.css): one near-black instrument ground across
+# every page, and one signal colour that means "value a hook took" and nothing else.
+PAPER = "#0d1014"
+SHEET = "#141a21"
+INK = "#f2f4f6"
+INK2 = "#9ba5af"
+FAINT = "#6c7680"
+RULE = "#1e252e"
+RULE_HARD = "#2c343e"
+SIGNAL = "#f04a10"
 
 MONO = "ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace"
 SANS = "'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
@@ -447,46 +447,123 @@ def census_chart() -> str:
     )
 
 
-def banner() -> str:
-    """The README's opening image: the wordmark, the claim, and the one number."""
-    doc = _load("divergence.json")
-    p: list[str] = []
-    w, h = 1200, 300
+# ------------------------------------------------------------------------- identity
+#
+# The mark is `[=]`.
+#
+# `SwornRouter` reduces to a single assertion — `executedDelta == probed[chosen]` — so the
+# logo is that assertion: equality, enforced inside a boundary. The brackets are the
+# transaction the probe happens inside; the two bars are the two deltas that have to match.
+# It is drawn rather than lettered so it survives being 16px in a browser tab, and it uses
+# no colour, because on this project colour means "value a hook took" and a logo has not
+# taken anything.
 
-    p.append(f'  <rect width="{w}" height="{h}" fill="{PAPER}"/>')
-    # The same bled watermark the dashboard uses, so the two read as one product.
+
+def _mark(size: int = 64, ink: str = INK, stroke: float = 6.2) -> str:
+    """The bare `[=]` mark on a transparent ground, sized to a `size` box.
+
+    Proportions are set for the smallest place it appears — a 16px browser tab — so the
+    strokes are heavier and the bracket feet shorter than they would be if this were only
+    ever going to be seen large.
+    """
+    k = size / 64.0
+    bracket_top, bracket_bottom = 15 * k, 49 * k
+    left_x, right_x = 13 * k, 51 * k
+    foot = 6 * k
+    bar_x1, bar_x2 = 25 * k, 39 * k
+    bar_hi, bar_lo = 27.5 * k, 36.5 * k
+    w = stroke * k
+
+    return f"""  <g fill="none" stroke="{ink}" stroke-width="{w:.2f}" stroke-linecap="square">
+    <path d="M{left_x + foot:.2f} {bracket_top:.2f} H{left_x:.2f} V{bracket_bottom:.2f} H{left_x + foot:.2f}"/>
+    <path d="M{right_x - foot:.2f} {bracket_top:.2f} H{right_x:.2f} V{bracket_bottom:.2f} H{right_x - foot:.2f}"/>
+    <path d="M{bar_x1:.2f} {bar_hi:.2f} H{bar_x2:.2f}"/>
+    <path d="M{bar_x1:.2f} {bar_lo:.2f} H{bar_x2:.2f}"/>
+  </g>"""
+
+
+def logo() -> str:
+    """The mark alone, on a transparent ground. For inline use at any size."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
+{_mark()}
+</svg>
+"""
+
+
+def logo_seal() -> str:
+    """The mark reversed out of a filled squircle. For favicons and avatars, where the
+    glyph needs a shape of its own to sit in."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sworn">
+  <rect width="64" height="64" rx="16" fill="{INK}"/>
+{_mark(ink=PAPER)}
+</svg>
+"""
+
+
+def logo_wordmark() -> str:
+    """Mark and wordmark locked up, for a header or a README."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64" role="img" aria-label="Sworn">
+  <rect width="64" height="64" rx="16" fill="{INK}"/>
+{_mark(ink=PAPER)}
+  <text x="82" y="45" font-family="{SANS}" font-size="38" font-weight="700" letter-spacing="-1.4" fill="{INK}">SWORN</text>
+</svg>
+"""
+
+
+def banner() -> str:
+    """The README's opening image: the lockup, the claim, and the one number."""
+    doc = _load("divergence.json")
+    w, h = 1200, 320
+    p: list[str] = [f'  <rect width="{w}" height="{h}" fill="{PAPER}"/>']
+
+    # No watermark. A cropped glyph at 7% on a near-black ground resolved into stray
+    # rectangles rather than into the mark; the lockup carries the identity on its own.
+
+    # The lockup.
+    p.append('  <g transform="translate(64 44)">')
+    p.append(f'    <rect width="72" height="72" rx="18" fill="{INK}"/>')
+    p.append(_mark(size=72, ink=PAPER))
+    p.append("  </g>")
     p.append(
-        f'  <text x="700" y="196" font-family="{SANS}" font-size="150" font-weight="700" '
-        f'letter-spacing="-7" fill="none" stroke="{RULE_HARD}" stroke-width="1.4">SWORN</text>'
+        f'  <text x="152" y="98" font-family="{SANS}" font-size="52" font-weight="700" '
+        f'letter-spacing="-2" fill="{INK}">SWORN</text>'
     )
-    p.append(
-        f'  <text x="64" y="150" font-family="{SANS}" font-size="118" font-weight="700" '
-        f'letter-spacing="-5.5" fill="{INK}">SWORN</text>'
-    )
-    p.append(_text(68, 196, "Execution integrity for Uniswap v4.", size=21, fill=INK2))
+
+    p.append(_text(66, 168, "Execution integrity for Uniswap v4.", size=23, fill=INK))
     p.append(
         _text(
-            68,
-            228,
+            66,
+            202,
             "A hook can quote one price and charge another. This makes it unprofitable.",
             size=17,
-            fill=FAINT,
+            fill=INK2,
         )
     )
 
+    p.append(f'  <line x1="64" y1="238" x2="{w - 64}" y2="238" stroke="{RULE_HARD}"/>')
     n = int(doc["totals"]["divergent_hooks"])
     eligible = int(doc["totals"]["eligible_hooks"])
-    p.append(f'  <line x1="64" y1="256" x2="{w - 64}" y2="256" stroke="{RULE_HARD}"/>')
     p.append(
         _text(
-            68,
-            282,
+            66,
+            270,
             f"{n} of {eligible} measurable hooks on Base charge more than they quote",
             size=15,
             family=MONO,
             fill=SIGNAL,
         )
     )
+    p.append(
+        _text(
+            66,
+            294,
+            "every figure reproducible from a hashed snapshot",
+            size=13,
+            family=MONO,
+            fill=FAINT,
+        )
+    )
+
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="Sworn: execution integrity for Uniswap v4">
 {chr(10).join(p)}
 </svg>
@@ -496,6 +573,9 @@ def banner() -> str:
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     drawings = {
+        "logo.svg": logo,
+        "logo-seal.svg": logo_seal,
+        "logo-wordmark.svg": logo_wordmark,
         "banner.svg": banner,
         "attack.svg": attack,
         "mechanism.svg": mechanism,

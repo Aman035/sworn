@@ -17,31 +17,36 @@ official interfaces are shielded.
 ([Crypto Briefing](https://cryptobriefing.com/0x-criticizes-uniswap-v4-hooks-malicious/),
 [Coin Edition](https://coinedition.com/uniswap-founder-defends-v4-upgrade-over-fud-and-misunderstanding/))
 
-Both sides had a point and neither published reproducible tooling. So this repo measured
-it independently, from `Initialize` and `Swap` logs up, with every number traceable to a
-hashed snapshot.
+**This repo takes 0x's finding as given** and asks the three narrower questions their post
+leaves open, with tooling anyone can run.
 
-## What the measurement found
+## 1. Does review protect you?
 
-**The reviewed-hooks argument does not hold.**
-[`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **on Uniswap's official hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
-Review is a check on identity at a point in time. This is behaviour, now.
+No. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **on Uniswap's official hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
 
-**0x's headline is far higher than what can be evidenced.** Their 54.2% counts hooks that *could* misbehave. Measuring what hooks actually *did* to settled trades, and subtracting the measurement's own error, leaves **4 of 25** hooks with enough fills to classify at all.
-A smaller number, and a checkable one.
+Review is a check on identity at a point in time. This is behaviour, now — and
+10,430 hooks on Base sit behind a proxy, so the code that was reviewed is not
+necessarily the code that runs.
 
-**Nobody can measure this from logs at all.** `PoolManager` emits `Swap` *before*
-`afterSwap`, so the event excludes whatever the hook takes there. Every indexer, dashboard
-and hook-scoring tool built on `Swap` events under-reports exactly the hooks that take the
-most. This one did too, until it stopped trusting the event.
+## 2. Can anyone measure this from logs?
 
-## What we built
+No, and that is the finding worth the most. `PoolManager` emits `Swap` **before**
+`afterSwap`, so the event excludes whatever the hook takes there. Every indexer,
+dashboard and hook-scoring tool built on `Swap` events under-reports exactly the hooks
+that take the most. This repo did it that way first, and spent a day chasing the
+resulting offset before reading the emission order.
 
-Detection is the wrong shape for this problem — static, differential and trace analysis
-all scored **zero recall** against ground truth here. So `SwornRouter` does not detect. It
-moves the quote **inside the transaction that settles it**: probe every candidate for
-real, revert, take the best, and assert that what executed equals what was probed. A hook
-that lies makes those disagree, and the trade does not happen.
+Measured properly — from the traced call rather than the event, with the measurement's
+own error subtracted — **4 of 25** hooks with enough fills to classify are
+charging more than they quote.
+
+## 3. Can it be closed at execution time?
+
+Yes, and not by detecting anything: static, differential and trace analysis all scored
+**zero recall** against ground truth here. `SwornRouter` moves the quote **inside the
+transaction that settles it** — probe every candidate for real, revert, take the best,
+and assert that what executed equals what was probed. A hook that lies makes those two
+disagree, and the trade does not happen.
 
 # The problem
 
@@ -126,9 +131,8 @@ before-and-after is in [PHASE-3.md](docs/phases/PHASE-3.md).
 
 ## Why nobody has noticed
 
-**`PoolManager` emits `Swap` between `beforeSwap` and `afterSwap`.** Its amounts therefore
-exclude anything the hook takes in `afterSwap` — they are neither the swapper's input nor
-their output. Measured on Base, for a hook taking exactly one percent there:
+The `Swap` event omits the `afterSwap` take, as above. The two numbers, for a hook taking
+exactly one percent:
 
 | `amount1`             |                                          value |
 | --------------------- | ---------------------------------------------: |
@@ -136,19 +140,14 @@ their output. Measured on Base, for a hook taking exactly one percent there:
 | `swap()` return value |                    `3,901,941,551,118,381,160` |
 | difference            | `39,413,551,021,397,789` — exactly one percent |
 
-Read from the event, that hook appears to hand users an extra percent. It charges them.
-**Any analytics built on `Swap` events under-reports exactly the hooks that take the
-most** — and building on the event is the obvious approach. This repo did it that way
-first, and spent a day chasing the resulting offset through fee tiers before reading the
-emission order.
-
 A second, independent defect: the event's sign pattern cannot distinguish exact-input on
-token0 from exact-output on token1. They are identical. **449** of the sampled fills
+token0 from exact-output on token1. They are identical, and **449** of the sampled fills
 turned out to be exact-output swaps the event had disguised.
 
 So every fill here is confirmed against its own transaction trace — `amountSpecified`,
 `hookData` and the realized output all come from the traced `PoolManager.swap` call. Of
-10,000 sampled fills, 8,968 survived confirmation.
+10,000 sampled fills, 8,968 survived confirmation. Both defects are filed
+upstream in [FEEDBACK.md](FEEDBACK.md).
 
 ## Detection does not catch it either
 
@@ -233,7 +232,7 @@ a dynamic-fee hook and a sole hookless candidate.
 
 ## What the guarantee costs
 
-![What the guarantee is worth, on the dashboard](docs/assets/dashboard-value.png)
+![What the guarantee is worth](docs/assets/landing-value.png)
 
 Probing costs a **fixed** amount of gas and saves a **proportion** of the trade, so it pays
 above a trade size and not below it:
@@ -302,11 +301,11 @@ string contains a number.
 Storyboard, including what the demo deliberately does **not** show, in
 [DEMO.md](docs/DEMO.md).
 
-[![The Sworn dashboard](docs/assets/dashboard.png)](https://aman035.github.io/sworn/overview/)
+[![The Sworn hook explorer](docs/assets/dashboard-hooks.png)](https://aman035.github.io/sworn/hooks/)
 
-Four pages, all rendered from the same `data/results/*.json` this README is:
-[Overview](https://aman035.github.io/sworn/overview/) ·
-[Hook explorer](https://aman035.github.io/sworn/hooks/) ·
+Three pages behind the landing, all rendered from the same `data/results/*.json` this
+README is:
+[Hooks](https://aman035.github.io/sworn/hooks/) ·
 [Detection](https://aman035.github.io/sworn/detection/) ·
 [Attribution](https://aman035.github.io/sworn/attribution/)
 

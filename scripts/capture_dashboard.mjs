@@ -31,10 +31,10 @@ const SCALE = 2;
  */
 const SHOTS = [
   { path: '/', file: 'landing.png', clipHeight: 1560 },
-  { path: '/overview/', file: 'dashboard.png', clipHeight: 1560 },
-  { path: '/overview/', file: 'dashboard-value.png', section: 'What the guarantee is worth' },
+  { path: '/', file: 'landing-value.png', section: 'What the guarantee is worth' },
   { path: '/hooks/', file: 'dashboard-hooks.png', clipHeight: 1180 },
   { path: '/detection/', file: 'dashboard-detection.png', clipHeight: 1180 },
+  { path: '/attribution/', file: 'dashboard-attribution.png', clipHeight: 1100 },
 ];
 
 async function waitForServer(url, attempts = 40) {
@@ -83,8 +83,16 @@ async function main() {
 
       const target = resolve(OUT, shot.file);
       if (shot.section) {
-        const band = page.locator('.band', { hasText: shot.section }).first();
+        const band = page.locator('.band, .panel', { hasText: shot.section }).first();
         if ((await band.count()) === 0) throw new Error(`no band matching "${shot.section}"`);
+        // Sections on the landing reveal themselves when scrolled to, so a shot taken
+        // without scrolling captures a transparent element — 14 KB of nothing.
+        await band.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(800);
+        const opacity = await band.evaluate((el) => getComputedStyle(el).opacity);
+        if (Number(opacity) < 0.99) {
+          throw new Error(`"${shot.section}" was still at opacity ${opacity} when captured`);
+        }
         await band.screenshot({ path: target });
       } else {
         // A full-page shot of a long dashboard is unreadable in a README; crop to the part

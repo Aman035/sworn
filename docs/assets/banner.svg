@@ -1,9 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="Sworn: execution integrity for Uniswap v4">
-  <rect width="1200" height="300" fill="#e8eaec"/>
-  <text x="700" y="196" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="150" font-weight="700" letter-spacing="-7" fill="none" stroke="#b9c0c6" stroke-width="1.4">SWORN</text>
-  <text x="64" y="150" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="118" font-weight="700" letter-spacing="-5.5" fill="#101418">SWORN</text>
-  <text x="68" y="196" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="21" font-weight="400" fill="#454d55" text-anchor="start">Execution integrity for Uniswap v4.</text>
-  <text x="68" y="228" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="400" fill="#8b939b" text-anchor="start">A hook can quote one price and charge another. This makes it unprofitable.</text>
-  <line x1="64" y1="256" x2="1136" y2="256" stroke="#b9c0c6"/>
-  <text x="68" y="282" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="15" font-weight="400" fill="#e2400a" text-anchor="start">4 of 25 measurable hooks on Base charge more than they quote</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Sworn: execution integrity for Uniswap v4">
+  <rect width="1200" height="320" fill="#0d1014"/>
+  <g transform="translate(64 44)">
+    <rect width="72" height="72" rx="18" fill="#f2f4f6"/>
+  <g fill="none" stroke="#0d1014" stroke-width="6.98" stroke-linecap="square">
+    <path d="M21.38 16.88 H14.62 V55.12 H21.38"/>
+    <path d="M50.62 16.88 H57.38 V55.12 H50.62"/>
+    <path d="M28.12 30.94 H43.88"/>
+    <path d="M28.12 41.06 H43.88"/>
+  </g>
+  </g>
+  <text x="152" y="98" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="52" font-weight="700" letter-spacing="-2" fill="#f2f4f6">SWORN</text>
+  <text x="66" y="168" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="23" font-weight="400" fill="#f2f4f6" text-anchor="start">Execution integrity for Uniswap v4.</text>
+  <text x="66" y="202" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="400" fill="#9ba5af" text-anchor="start">A hook can quote one price and charge another. This makes it unprofitable.</text>
+  <line x1="64" y1="238" x2="1136" y2="238" stroke="#2c343e"/>
+  <text x="66" y="270" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="15" font-weight="400" fill="#f04a10" text-anchor="start">4 of 25 measurable hooks on Base charge more than they quote</text>
+  <text x="66" y="294" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#6c7680" text-anchor="start">every figure reproducible from a hashed snapshot</text>
 </svg>
