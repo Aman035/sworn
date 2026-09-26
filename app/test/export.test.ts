@@ -38,7 +38,7 @@ function result(name: string): Record<string, unknown> {
   return JSON.parse(readFileSync(resolve(ROOT, 'data', 'results', name), 'utf8'));
 }
 
-const PAGES = ['index', 'hooks', 'detection', 'attribution'];
+const PAGES = ['index', 'overview', 'hooks', 'detection', 'attribution'];
 
 describe('static export', () => {
   it.each(PAGES)('%s is built', (name) => {
@@ -60,11 +60,32 @@ describe('static export', () => {
     expect(page(name)).toMatch(/blocks\s|snapshot|rows/i);
   });
 
+  it('the landing states the divergent-hook count against its own denominator', () => {
+    // "4 of 1,404" and "4 of 25" are very different claims. The landing must not quote
+    // the first one, and this is the page most likely to be screenshotted out of context.
+    const d = result('divergence.json') as {
+      totals: { divergent_hooks: number; eligible_hooks: number };
+    };
+    const html = page('index');
+    expect(html).toContain(String(d.totals.divergent_hooks));
+    expect(html).toContain(d.totals.eligible_hooks.toLocaleString('en-US'));
+  });
+
+  it('the landing links every named hook to a block explorer', () => {
+    const d = result('divergence.json') as { hooks: { address: string; divergent: boolean }[] };
+    const html = page('index');
+    for (const h of d.hooks.filter((x) => x.divergent)) {
+      expect(html, `landing does not link ${h.address}`).toContain(
+        `https://basescan.org/address/${h.address}`,
+      );
+    }
+  });
+
   it('the overview shows the real pool count', () => {
     const census = result('census.json') as { chains: { chain: string; pools_total: number }[] };
     const base = census.chains.find((c) => c.chain === 'base');
     expect(base).toBeDefined();
-    expect(page('index')).toContain(base!.pools_total.toLocaleString('en-US'));
+    expect(page('overview')).toContain(base!.pools_total.toLocaleString('en-US'));
   });
 
   it('the hook explorer lists the hooks the census found', () => {

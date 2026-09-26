@@ -30,8 +30,9 @@ const SCALE = 2;
  * page above it grows.
  */
 const SHOTS = [
-  { path: '/', file: 'dashboard.png', clipHeight: 1560 },
-  { path: '/', file: 'dashboard-value.png', section: 'What the guarantee is worth' },
+  { path: '/', file: 'landing.png', clipHeight: 1560 },
+  { path: '/overview/', file: 'dashboard.png', clipHeight: 1560 },
+  { path: '/overview/', file: 'dashboard-value.png', section: 'What the guarantee is worth' },
   { path: '/hooks/', file: 'dashboard-hooks.png', clipHeight: 1180 },
   { path: '/detection/', file: 'dashboard-detection.png', clipHeight: 1180 },
 ];
@@ -76,6 +77,9 @@ async function main() {
       // Web fonts change every measurement on the page, so capturing before they settle
       // produces a screenshot of a layout that never existed.
       await page.evaluate(() => document.fonts.ready);
+      // The landing page animates on load; wait for the sequence to settle so the shot
+      // shows the state a reader ends up looking at, not a frame mid-count.
+      await page.waitForTimeout(2600);
 
       const target = resolve(OUT, shot.file);
       if (shot.section) {

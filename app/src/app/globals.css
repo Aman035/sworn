@@ -578,3 +578,490 @@ main {
     animation: none !important;
   }
 }
+
+/* =====================================================================  landing
+   The landing page is the only place on the site that moves.
+
+   One orchestrated sequence: a quote resolves, the transaction resolves lower, and the
+   gap between them opens in the signal colour. That sequence is the argument, so it gets
+   the page's whole motion budget and every other section merely appears once as you
+   reach it. Everything is legible with motion disabled, before hydration, and with
+   JavaScript off — the animation is emphasis, never the message.
+   ===================================================================== */
+
+/* The landing runs full-bleed: `main` constrains the data pages to a reading measure,
+   which is right for them and wrong for a hero that is meant to fill the viewport. Each
+   landing section re-applies the measure to its own inner wrapper. */
+main:has(.landing) {
+  max-width: none;
+  padding: 0;
+}
+
+.landing {
+  --hero-ink: #f2f4f6;
+}
+
+/* ------------------------------------------------------------- floating nav */
+
+.floatnav {
+  position: fixed;
+  z-index: 20;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100vw - 32px);
+  padding: 6px 6px 6px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  /* Glass, but only here: it needs something behind it to be worth the cost. */
+  background: rgba(20, 24, 30, 0.6);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.26);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.floatnav::-webkit-scrollbar {
+  display: none;
+}
+
+.floatnav-mark {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.floatnav-links {
+  display: flex;
+  gap: 2px;
+}
+
+.floatnav a:not(.floatnav-mark) {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: var(--t-s);
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.floatnav a:not(.floatnav-mark):hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------------- hero */
+
+/* Dark, and the only dark surface on the site. The landing is the attack; the data pages
+   are the lab. Reading one as night and the other as daylight is the point. */
+.hero {
+  position: relative;
+  padding: 132px var(--gutter) 88px;
+  background: radial-gradient(1100px 520px at 18% -8%, rgba(226, 64, 10, 0.16), transparent 62%),
+    radial-gradient(900px 480px at 88% 8%, rgba(120, 140, 170, 0.14), transparent 60%), #0d1014;
+  color: var(--hero-ink);
+  overflow: hidden;
+}
+
+.hero::after {
+  /* A faint grid, so the surface reads as an instrument rather than a gradient. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(900px 600px at 30% 20%, #000 20%, transparent 78%);
+  pointer-events: none;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--page);
+  margin: 0 auto;
+}
+
+.hero-eyebrow {
+  margin: 0 0 18px;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(242, 244, 246, 0.5);
+}
+
+.hero-h {
+  margin: 0;
+  font-size: clamp(38px, 6.4vw, 78px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.038em;
+}
+
+.hero-sub {
+  max-width: 58ch;
+  margin: 22px 0 0;
+  font-size: var(--t-m);
+  line-height: 1.5;
+  color: rgba(242, 244, 246, 0.66);
+}
+
+.hero code,
+.panel code,
+.ledger code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 40px 0 0;
+}
+
+.btn {
+  display: inline-block;
+  padding: 13px 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--signal);
+  color: #fff;
+  font-size: var(--t-s);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    transform 140ms ease,
+    filter 140ms ease;
+}
+
+.btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--hero-ink);
+}
+
+.btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.panel .btn {
+  color: #fff;
+}
+
+/* ------------------------------------------------------------- the sequence */
+
+.spoof {
+  max-width: 860px;
+  margin: 52px 0 0;
+  padding: 26px 28px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.spoof-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spoof-rows li + li {
+  margin-top: 20px;
+}
+
+.spoof-k {
+  display: block;
+  font-size: var(--t-s);
+  color: rgba(242, 244, 246, 0.56);
+}
+
+.spoof-v {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: clamp(19px, 2.7vw, 30px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.spoof-bar {
+  display: block;
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+}
+
+.spoof-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: rgba(242, 244, 246, 0.5);
+}
+
+.spoof-bar i.short {
+  background: var(--signal);
+  /* The one transition that carries meaning: the second bar retracting to show the gap. */
+  transition: width 900ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+.spoof-gap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 420ms ease,
+    transform 420ms ease;
+}
+
+.spoof-gap.in {
+  opacity: 1;
+  transform: none;
+}
+
+.spoof-gap-n {
+  font-size: clamp(38px, 6vw, 62px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--signal);
+}
+
+.spoof-gap-k {
+  font-size: var(--t-s);
+  color: rgba(242, 244, 246, 0.62);
+  max-width: 34ch;
+}
+
+/* --------------------------------------------------------------- stat strip */
+
+.strip {
+  border-bottom: 1px solid var(--rule);
+  background: var(--sheet);
+}
+
+.strip-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 28px 34px;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 40px var(--gutter);
+}
+
+.strip-fig b {
+  display: block;
+  font-size: var(--t-xl);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.strip-fig b.bad {
+  color: var(--signal);
+}
+
+.strip-fig span {
+  display: block;
+  margin-top: 8px;
+  font-size: var(--t-s);
+  color: var(--ink-2);
+  max-width: 26ch;
+}
+
+/* ------------------------------------------------------------------- panels */
+
+.panel {
+  border-bottom: 1px solid var(--rule);
+}
+
+.panel-inner {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 62px var(--gutter);
+}
+
+.panel h2 {
+  margin: 0 0 16px;
+  font-size: var(--t-xl);
+  font-weight: 600;
+  letter-spacing: -0.024em;
+  line-height: 1.12;
+  max-width: 20ch;
+}
+
+.panel p {
+  max-width: 68ch;
+  margin: 0 0 14px;
+  color: var(--ink-2);
+}
+
+.panel .pull {
+  margin-top: 22px;
+  font-size: var(--t-m);
+  line-height: 1.4;
+  color: var(--ink);
+  max-width: 34ch;
+  border-left: 3px solid var(--signal);
+  padding-left: 18px;
+}
+
+.panel .fineprint {
+  margin-top: 18px;
+  font-size: var(--t-s);
+  color: var(--faint);
+}
+
+.panel.solution {
+  background: var(--sheet);
+}
+
+/* ------------------------------------------------------------------- ledger */
+
+.ledger {
+  margin: 24px 0;
+  max-width: 720px;
+}
+
+.ledger > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.ledger dt {
+  font-size: var(--t-s);
+  color: var(--ink-2);
+}
+
+.ledger dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--t-s);
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger .delta {
+  border-bottom: 0;
+}
+
+.ledger .delta dt,
+.ledger .delta dd {
+  color: var(--signal);
+}
+
+/* -------------------------------------------------------------------- steps */
+
+.steps {
+  counter-reset: step;
+  list-style: none;
+  margin: 26px 0;
+  padding: 0;
+  max-width: 760px;
+}
+
+.steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 34px 132px 1fr;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--faint);
+}
+
+.steps b {
+  font-family: var(--mono);
+  font-size: var(--t-s);
+  font-weight: 500;
+}
+
+.steps span {
+  font-size: var(--t-s);
+  color: var(--ink-2);
+}
+
+.steps .assert b,
+.steps .assert::before {
+  color: var(--signal);
+}
+
+/* ------------------------------------------------------------------ reveals */
+
+/* Visible by default. The hidden state is opted into only once the `js` class is set by
+   an inline script in `layout.tsx`, because without JavaScript the IntersectionObserver
+   never runs and a `.reveal { opacity: 0 }` default would blank the whole page. */
+.reveal {
+  transition:
+    opacity 520ms ease,
+    transform 520ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+html.js .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 700px) {
+  .hero {
+    padding-top: 108px;
+  }
+
+  .steps li {
+    grid-template-columns: 28px 1fr;
+  }
+
+  .steps span {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .reveal,
+  .spoof-gap {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

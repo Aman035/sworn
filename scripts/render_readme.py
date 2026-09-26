@@ -31,6 +31,11 @@ OUTPUT = ROOT / "README.md"
 # Whitespace-tolerant on purpose: prettier pads `|` inside markdown table cells, turning
 # `{{result:x|int}}` into `{{result:x | int}}`. A stricter pattern silently stopped
 # matching and shipped a README full of raw placeholders, because nothing checked for them.
+# `{{cite:<source>:<text>}}` — a figure this repo did **not** measure, quoted from an
+# external source. The source key must appear in docs/SOURCES.md or the build fails, so
+# an external number cannot reach the README without a documented, dated provenance entry.
+CITE = re.compile(r"\{\{\s*cite\s*:\s*([^:}]+?)\s*:\s*([^}]+?)\s*\}\}")
+
 TABLE = re.compile(r"\{\{\s*table\s*:\s*([a-z_]+)\s*\}\}")
 
 PLACEHOLDER = re.compile(
@@ -192,6 +197,15 @@ TABLES = {
 }
 
 
+def sources_text() -> str:
+    path = ROOT / "docs" / "SOURCES.md"
+    if not path.is_file():
+        raise RenderError(
+            "docs/SOURCES.md is missing; external figures cannot be cited"
+        )
+    return path.read_text(encoding="utf-8")
+
+
 def render(template: str) -> tuple[str, int]:
     cache: dict[str, Any] = {}
     count = 0
@@ -210,7 +224,18 @@ def render(template: str) -> tuple[str, int]:
             raise RenderError(f"unknown table {name!r}; have {sorted(TABLES)}")
         return TABLES[name]()
 
-    body = TABLE.sub(substitute_table, template)
+    sources = sources_text()
+
+    def substitute_cite(match: re.Match[str]) -> str:
+        key, text = match.group(1), match.group(2)
+        if key not in sources:
+            raise RenderError(
+                f"cited source {key!r} does not appear in docs/SOURCES.md; "
+                "an external figure needs a documented source before it can be printed"
+            )
+        return text
+
+    body = CITE.sub(substitute_cite, TABLE.sub(substitute_table, template))
     return PLACEHOLDER.sub(substitute, body), count
 
 

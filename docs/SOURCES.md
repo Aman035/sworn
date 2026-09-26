@@ -36,10 +36,33 @@ own thresholds published and swept. The two named hooks are the fixtures our Pha
 tests and Phase 6 fork tests must reproduce behaviour for — we report our charged rate
 next to theirs and do **not** tune parameters to match.
 
-**Response worth recording.** Hayden Adams publicly disputed the framing, arguing this
-is inherent to permissionless systems rather than a v4 design flaw. Sworn takes no
-position on that: the point of this repo is that the gap is _measurable_ and, separately,
-_closable at execution time_, which is true either way.
+### Hayden Adams' response
+
+- **Date.** 15 September 2026, on X; reported by
+  [Crypto Briefing](https://cryptobriefing.com/0x-criticizes-uniswap-v4-hooks-malicious/)
+  and [Coin Edition](https://coinedition.com/uniswap-founder-defends-v4-upgrade-over-fud-and-misunderstanding/).
+- **Status.** Verified via secondary reporting (fetched 26 September 2026). The original
+  post is cited through those outlets rather than quoted directly.
+
+Three arguments, as reported:
+
+1. `"skill issue"`.
+2. Malicious contracts have existed in every version of Uniswap; malicious hooks no more
+   indict the hook architecture than scam tokens indict ERC-20.
+3. **The Uniswap API only integrates hooks that have been reviewed**, so users going
+   through official interfaces are shielded from the worst actors.
+
+**Why this repo exists.** Argument 3 is a claim about the world, and it is testable. This
+repo tests it: `divergence.json` measures hooks on the official hooklist alongside
+everything else, and reports
+[`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) —
+allowlisted, source-verified — taking a median 400 bps above its stated fee on 11% of its
+fills.
+
+Sworn takes no position on arguments 1 and 2. On argument 3 it takes the only position a
+measurement can: here is the hook, here is the block range, here is the script, go and
+check. And separately from who is right, the gap is **closable at execution time**, which
+is what `SwornRouter` does.
 
 ---
 

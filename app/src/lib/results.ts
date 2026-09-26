@@ -67,6 +67,19 @@ export interface DivergenceHook {
   median_take_bps?: number;
   median_charged_excess_bps?: number;
   hook_data_unknown_share?: number;
+  /** Fills that came out better than quoted: impossible, so a false-positive estimate. */
+  overdelivered_fills?: number;
+  net_charged_fills?: number;
+  net_charged_rate?: number;
+  beats_noise_floor?: boolean;
+}
+
+export interface ScoreRow {
+  chain: string;
+  address: string;
+  score: number | null;
+  flags: string[];
+  insufficient_data?: boolean;
 }
 
 export interface ProbeHook {
@@ -127,6 +140,8 @@ export const replay = () =>
       price_confidence?: number;
     };
   }>('replay.json');
+
+export const scores = () => load<{ meta: Meta; hooks: ScoreRow[] }>('scores.json');
 
 export const precision = () =>
   load<{ meta: Meta; ground_truth: string; methods: Record<string, number | string>[] }>(

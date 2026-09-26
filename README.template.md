@@ -4,21 +4,44 @@
   Tables marked {{table:...}} are generated from the same files.
 -->
 
-![Sworn — execution integrity for Uniswap v4](docs/assets/banner.svg)
+[![Sworn — execution integrity for Uniswap v4](docs/assets/landing.png)](https://aman035.github.io/sworn/)
 
-**A Uniswap v4 hook can quote one price and charge another.** The quote comes from
-`eth_call`; the charge happens in a transaction; the hook is arbitrary code that runs in
-both and can tell them apart. Nothing in the protocol prevents it, every router in
-production prices off the simulated answer, and — as this repo found — the event everyone
-indexes does not even record it.
+**On 14 September 2026, 0x published
+[*"Uniswap v4 hooks were a mistake"*](https://0x.org/post/uniswap-v4-hooks-were-a-mistake).**
+They analysed {{cite:0x.org:84,163}} hooks across six chains and reported **{{cite:0x.org:54.2%}} malicious, {{cite:0x.org:19.4%}} safe**, with some hooks delivering *"as much as {{cite:0x.org:50%}} less at execution than the amount quoted"*.
 
-**[Live dashboard](https://aman035.github.io/sworn/)** ·
-**[FEEDBACK.md](FEEDBACK.md)** ·
-**[Demo](docs/DEMO.md)** ·
-**[Results](data/results)** ·
-[![dashboard](https://img.shields.io/badge/dashboard-live-101418?style=flat-square)](https://aman035.github.io/sworn/)
+**The next day, Hayden Adams replied `"skill issue"`** — and, more substantively, that
+malicious contracts have existed in every version of Uniswap, and that
+**the Uniswap API only integrates hooks that have been reviewed**, so users going through
+official interfaces are shielded.
+([Crypto Briefing](https://cryptobriefing.com/0x-criticizes-uniswap-v4-hooks-malicious/),
+[Coin Edition](https://coinedition.com/uniswap-founder-defends-v4-upgrade-over-fud-and-misunderstanding/))
 
----
+Both sides had a point and neither published reproducible tooling. So this repo measured
+it independently, from `Initialize` and `Swap` logs up, with every number traceable to a
+hashed snapshot.
+
+## What the measurement found
+
+**The reviewed-hooks argument does not hold.**
+[`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **on Uniswap's official hooklist with verified source**, and takes a median {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].median_charged_excess_bps|bps}} above its stated fee on {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].net_charged_rate|pct0}} of its fills, worst observed take {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].max_charged_excess_bps|bpspct}}.
+Review is a check on identity at a point in time. This is behaviour, now.
+
+**0x's headline is far higher than what can be evidenced.** Their {{cite:0x.org:54.2%}} counts hooks that *could* misbehave. Measuring what hooks actually *did* to settled trades, and subtracting the measurement's own error, leaves **{{result:divergence.json:totals.divergent_hooks|int}} of {{result:divergence.json:totals.eligible_hooks|int}}** hooks with enough fills to classify at all.
+A smaller number, and a checkable one.
+
+**Nobody can measure this from logs at all.** `PoolManager` emits `Swap` *before*
+`afterSwap`, so the event excludes whatever the hook takes there. Every indexer, dashboard
+and hook-scoring tool built on `Swap` events under-reports exactly the hooks that take the
+most. This one did too, until it stopped trusting the event.
+
+## What we built
+
+Detection is the wrong shape for this problem — static, differential and trace analysis
+all scored **zero recall** against ground truth here. So `SwornRouter` does not detect. It
+moves the quote **inside the transaction that settles it**: probe every candidate for
+real, revert, take the best, and assert that what executed equals what was probed. A hook
+that lies makes those disagree, and the trade does not happen.
 
 # The problem
 
@@ -261,7 +284,13 @@ string contains a number.
 Storyboard, including what the demo deliberately does **not** show, in
 [DEMO.md](docs/DEMO.md).
 
-![Sworn dashboard](docs/assets/dashboard.png)
+[![The Sworn dashboard](docs/assets/dashboard.png)](https://aman035.github.io/sworn/overview/)
+
+Four pages, all rendered from the same `data/results/*.json` this README is:
+[Overview](https://aman035.github.io/sworn/overview/) ·
+[Hook explorer](https://aman035.github.io/sworn/hooks/) ·
+[Detection](https://aman035.github.io/sworn/detection/) ·
+[Attribution](https://aman035.github.io/sworn/attribution/)
 
 ---
 

@@ -23,6 +23,11 @@ TEMPLATE = ROOT / "README.template.md"
 RENDERED = ROOT / "README.md"
 
 PLACEHOLDER = re.compile(r"\{\{\s*result\s*:[^}]+\}\}")
+# A figure quoted from an external source rather than measured here. The renderer refuses
+# to print one whose source is not documented in docs/SOURCES.md, so exempting them here
+# does not weaken the rule — it makes it "measured by us, or attributed to a source".
+CITED = re.compile(r"\{\{\s*cite\s*:[^}]+\}\}")
+TABLE_DIRECTIVE = re.compile(r"\{\{\s*table\s*:[^}]+\}\}")
 CODE_BLOCK = re.compile(r"```.*?```", re.S)
 INLINE_CODE = re.compile(r"`[^`]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
@@ -31,7 +36,7 @@ HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
 # Digits that are not measurements.
 ALLOWED = re.compile(
     r"""
-    (?:^|(?<=[\s\(\[|]))          # at a boundary
+    (?:^|(?<=[\s\(\[|*_]))        # at a boundary, including after markdown emphasis
     (?:
         v?\d+\.\d+(?:\.\d+)?      # versions: 0.8.26, v1.2
       | 0x[0-9a-fA-F]+            # hex: addresses, selectors
@@ -39,6 +44,8 @@ ALLOWED = re.compile(
       | [1-9]\d?\.                # ordered list markers: "1." "12."
       | EIP-\d+                   # standards
       | \#\d+                     # issue numbers
+      | 0x(?![0-9a-fA-F])         # the company, not an address
+      | \d{1,2}\ (?:January|February|March|April|May|June|July|August|September|October|November|December)
     )
     """,
     re.X,
@@ -58,7 +65,7 @@ def strip_exempt(text: str) -> str:
 
 def unmeasured_numbers(template: str) -> list[str]:
     # Placeholders are the sanctioned way to state a number, so remove them first.
-    text = PLACEHOLDER.sub(" ", template)
+    text = TABLE_DIRECTIVE.sub(" ", CITED.sub(" ", PLACEHOLDER.sub(" ", template)))
     text = strip_exempt(text)
     return BARE_NUMBER.findall(text)
 
@@ -72,10 +79,16 @@ def main() -> int:
     offenders = unmeasured_numbers(template)
 
     placeholders = PLACEHOLDER.findall(template)
+    cited = CITED.findall(template)
     print(f"  {len(placeholders)} measured value(s) via placeholders")
+    if cited:
+        print(f"  {len(cited)} external figure(s) cited to docs/SOURCES.md")
 
     if offenders:
-        print(f"\n  {len(offenders)} number(s) in README.template.md with no source:", file=sys.stderr)
+        print(
+            f"\n  {len(offenders)} number(s) in README.template.md with no source:",
+            file=sys.stderr,
+        )
         for n in sorted(set(offenders)):
             print(f"    {n}", file=sys.stderr)
         print(
@@ -106,10 +119,16 @@ def main() -> int:
     rendered = HTML_COMMENT.sub(" ", RENDERED.read_text(encoding="utf-8"))
     leftover = re.findall(r"\{\{[^}]*\}\}", rendered)
     if leftover:
-        print(f"\n  {len(leftover)} unresolved placeholder(s) in README.md:", file=sys.stderr)
+        print(
+            f"\n  {len(leftover)} unresolved placeholder(s) in README.md:",
+            file=sys.stderr,
+        )
         for item in sorted(set(leftover))[:8]:
             print(f"    {item}", file=sys.stderr)
-        print("\n  The renderer did not match them — check the placeholder pattern.", file=sys.stderr)
+        print(
+            "\n  The renderer did not match them — check the placeholder pattern.",
+            file=sys.stderr,
+        )
         return 1
 
     print("  README.md is current and every number resolves from data/results")

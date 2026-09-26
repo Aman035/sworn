@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { Nav } from '@/components/Nav';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -8,35 +8,18 @@ export const metadata: Metadata = {
     'Measured hook divergence across Uniswap v4 on mainnet, and a router that makes quote spoofing structurally impossible.',
 };
 
-const NAV = [
-  ['/', 'Overview'],
-  ['/hooks', 'Hook explorer'],
-  ['/detection', 'Detection'],
-  ['/attribution', 'Attribution'],
-] as const;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Runs before paint so the reveal animation can be opt-in: see `.reveal` in
+            globals.css. Without this the page still renders, just without the motion. */}
+        <script
+          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
+        />
+      </head>
       <body>
-        <header className="masthead">
-          <div className="masthead-inner">
-            <p className="wordmark">SWORN</p>
-            <p className="standfirst">
-              A hook is arbitrary code inside every swap. This is what they actually do.
-            </p>
-            <nav aria-label="Sections">
-              {/* `Link`, not `<a>`: Next rewrites these for `basePath`, and a plain
-                  anchor would send every nav click to the domain root on a project site
-                  served from /<repo>/. */}
-              {NAV.map(([href, label]) => (
-                <Link key={href} href={href}>
-                  {label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </header>
+        <Nav />
 
         <main>{children}</main>
 
