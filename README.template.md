@@ -407,11 +407,13 @@ string contains a number.
 | --- | --------- | ------------- |
 | `1` | `DemoTest` on a local chain | A fixture hook quotes well at `tx.gasprice = 0`, delivers materially less at a real gas price, and Sworn routes around it. The figures it prints are the ones shown verbatim [above](#what-it-looks-like-when-it-works) |
 | `2` | `RealSwap.fork.t.sol` on anvil forked from Base | The same router completes ETH → USDC through **live mainnet hooks**, probe and execution agreeing |
-| `3` | `ProtectedSwap.fork.t.sol` on the same fork | **The catch.** A real Base hook charges one caller {{result:caught.json:observed.charged_extra_bps|int}} bps more than another for the identical swap, and Sworn routes away, recovering {{result:caught.json:observed.recovered_bps|int}} bps |
+| `3` | `ProtectedSwap.fork.t.sol` on the same fork | **The catch.** A real Base hook charges one caller more than another for the identical swap, and Sworn routes away from it |
 | `4` | `app/` static export | The dashboard, rendered from the same result files as this README |
 
 Acts `2` and `3` need an archive RPC and are skipped with a warning without one. Act `3`
-is the one to watch: it is the only act that is neither a fixture nor a happy path.
+is the one to watch, and the only act that is neither a fixture nor a happy path: the hook
+charges the second caller {{result:caught.json:observed.charged_extra_bps|int}} bps more
+for the identical swap, and Sworn recovers {{result:caught.json:observed.recovered_bps|int}} bps by settling elsewhere.
 
 Storyboard, including what the demo deliberately does **not** show, in
 [DEMO.md](docs/DEMO.md).
