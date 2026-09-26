@@ -134,18 +134,30 @@ def eth_usd_at(chain: str, blocks: list[int]) -> dict[int, float]:
     return out
 
 
-def effective_gas_prices(chain: str, tx_hashes: list[str]) -> dict[str, int]:
-    """Per-fill gas price, so overhead is charged at what that trade actually paid."""
-    prices: dict[str, int] = {}
-    with RpcClient(archive_url(chain), timeout=90) as rpc:
-        for tx in dict.fromkeys(tx_hashes):
-            try:
+def effective_gas_prices(chain: str, tx_hashes: list[str], *, workers: int = 8) -> dict[str, int]:
+    """Per-fill gas price, so overhead is charged at what that trade actually paid.
+
+    Concurrent because this is one round trip per transaction and a ten-thousand-fill
+    sample makes it the slowest step in the pipeline by an order of magnitude — longer
+    than quoting every candidate route.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    url = archive_url(chain)
+    unique = list(dict.fromkeys(tx_hashes))
+
+    def one(tx: str) -> tuple[str, int | None]:
+        try:
+            with RpcClient(url, timeout=60) as rpc:
                 receipt = rpc.call("eth_getTransactionReceipt", [tx])
-            except Exception:  # noqa: BLE001 - a missing receipt only drops gas pricing
-                continue
-            if receipt and receipt.get("effectiveGasPrice"):
-                prices[tx] = int(receipt["effectiveGasPrice"], 16)
-    return prices
+        except Exception:  # noqa: BLE001 - a missing receipt only drops gas pricing
+            return tx, None
+        if receipt and receipt.get("effectiveGasPrice"):
+            return tx, int(receipt["effectiveGasPrice"], 16)
+        return tx, None
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return {tx: price for tx, price in pool.map(one, unique) if price is not None}
 
 
 def replay(chain: str, sample: pd.DataFrame, by_pair: dict[Any, pd.DataFrame]) -> pd.DataFrame:
