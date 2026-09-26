@@ -95,7 +95,7 @@ attestor's dry-run publishes nothing and says so.
 | Network      | Address                                      | Status                                       |
 | ------------ | -------------------------------------------- | -------------------------------------------- |
 | Base Sepolia | `0x8A4470f7DDa8525b484527b21B19c3bc876A04c3` | live, 25 scores written, attestor authorised |
-| Base mainnet |. | not deployed                                 |
+| Base mainnet | .                                            | not deployed                                 |
 
 The gate says this out loud rather than passing quietly, because a ledger that records a
 phase as DONE against a weaker check than the plan specified is worth less than no ledger.

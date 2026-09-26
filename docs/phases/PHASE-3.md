@@ -63,8 +63,8 @@ condition, not a tuning opportunity.
 
 Each of these was tested, not assumed:
 
-| Hypothesis              | Verdict                                                                           |
-| ----------------------- | --------------------------------------------------------------------------------- |
+| Hypothesis              | Verdict                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------- |
 | Wrong pool key          | **No**: the reconstructed `PoolKey` hashes to the fill's `poolId` exactly        |
 | Fork not rolling        | **No**. `quotedAtBlock` equals the fill's block for every sample                 |
 | Wrong pre-state         | **No**. Quoted-state `sqrtPriceX96` matches the fill's event price to 2e-7       |

@@ -10,7 +10,7 @@ hook behaviour mixed in.
 
 | Route                           |     Gas | Overhead vs naive |
 | ------------------------------- | ------: | ----------------: |
-| `NaiveRouter`, 1 pool, no probe | 111,553 |. |
+| `NaiveRouter`, 1 pool, no probe | 111,553 |                 . |
 | `swornSwap`, 1 candidate        | 204,270 |           +92,717 |
 | `swornSwap`, 2 candidates       | 275,159 |          +163,606 |
 | `swornSwap`, 3 candidates       | 341,845 |          +230,292 |
