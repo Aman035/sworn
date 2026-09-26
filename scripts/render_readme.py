@@ -92,6 +92,9 @@ def fmt(value: Any, style: str | None) -> str:
         return f"{float(value) * 100:.1f}%"
     if style == "pct0":
         return f"{float(value) * 100:.0f}%"
+    if style == "bpspct":
+        # A take in basis points, stated as the percentage a reader thinks in.
+        return f"{float(value) / 100:.0f}%"
     if style == "bps":
         return f"{float(value):,.0f} bps"
     if style == "f2":

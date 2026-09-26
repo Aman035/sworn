@@ -101,7 +101,9 @@ def main() -> int:
     # An unresolved placeholder is worse than a wrong number: it ships as literal braces
     # in the published README. The staleness check above cannot catch it, because a
     # renderer that fails to match produces the same unresolved text on both sides.
-    rendered = RENDERED.read_text(encoding="utf-8")
+    # Comments are stripped first: the template documents its own syntax in one, and a
+    # literal `{{table:...}}` there is documentation, not an unresolved placeholder.
+    rendered = HTML_COMMENT.sub(" ", RENDERED.read_text(encoding="utf-8"))
     leftover = re.findall(r"\{\{[^}]*\}\}", rendered)
     if leftover:
         print(f"\n  {len(leftover)} unresolved placeholder(s) in README.md:", file=sys.stderr)
