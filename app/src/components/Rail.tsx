@@ -69,7 +69,9 @@ export function Rail({
       {meta.snapshots.length > SHOWN ? (
         <div>
           <dt>and {meta.snapshots.length - SHOWN} more</dt>
-          <dd className="hash">
+          {/* A comma list of names, not a hash: `.hash` is nowrap so a hex string stays
+              intact, and reusing it here pushed the page 16px wide at 375px. */}
+          <dd className="more">
             {meta.snapshots
               .slice(SHOWN)
               .map((s) => s.name)
