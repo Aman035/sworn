@@ -66,20 +66,32 @@ def probe_gas(candidates: int) -> int:
     return 0 if candidates <= 0 else PROBE_GAS_FIRST + PROBE_GAS_EACH * (candidates - 1)
 
 
-def candidate_pools(chain: str, max_per_pair: int) -> dict[tuple[str, str], pd.DataFrame]:
-    """Every pool in the census, grouped by currency pair.
+def candidate_pools(
+    chain: str, wanted: set[tuple[str, str]], max_per_pair: int
+) -> dict[tuple[str, str], pd.DataFrame]:
+    """Candidate venues for each pair in `wanted`, from the census.
 
     Hookless *and* hooked pools are candidates: `SwornRouter` does not refuse to route
     through a hook, it refuses to route through one that quotes differently than it
     executes. Excluding hooked candidates would understate the router by pretending the
     only safe venue is a plain pool.
+
+    Restricted to the pairs actually sampled, and filtered **inside** the shard loop. The
+    Base census is 15M pools across millions of distinct pairs; grouping all of it would
+    build millions of one-row frames to answer a question about a few thousand.
     """
+
+    def keep(part: pd.DataFrame) -> pd.DataFrame:
+        pairs = pd.Series(list(zip(part.currency0, part.currency1, strict=True)), index=part.index)
+        return part[pairs.isin(wanted)]
+
     pools = load_shards(
         snapshot_dir(f"census-{chain}"),
         columns=["pool_id", "currency0", "currency1", "fee", "tick_spacing", "hook", "hookless"],
+        where=keep,
     )
     if pools.empty:
-        raise SystemExit(f"no census for {chain}")
+        raise SystemExit(f"no census pools for the sampled pairs on {chain}")
 
     # A pair with thousands of pools is a long tail of dust; probing all of them is not
     # what the router does. Keep the ones most likely to be real venues: hookless first,
@@ -278,7 +290,10 @@ def main(argv: list[str] | None = None) -> int:
     if sample.empty:
         raise SystemExit("no fills survived trace confirmation")
 
-    by_pair = candidate_pools(args.chain, args.max_candidates)
+    wanted = set(zip(sample.currency0, sample.currency1, strict=True))
+    print(f"  {len(wanted):,} distinct pairs in the sample", flush=True)
+    by_pair = candidate_pools(args.chain, wanted, args.max_candidates)
+    print(f"  {sum(len(v) for v in by_pair.values()):,} candidate pools found", flush=True)
     rep = replay(args.chain, sample, by_pair)
 
     blocks = rep.block_number.tolist()

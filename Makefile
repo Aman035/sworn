@@ -72,6 +72,13 @@ $(addprefix phase-,$(PHASES)): phase-%:
 	@./scripts/mark-phase.sh $*
 
 .PHONY: clean
+readme: ## Render README.md and its graphics from data/results
+	$(PY) scripts/render_graphics.py
+	$(PY) scripts/render_readme.py
+	npx --yes prettier --write README.md README.template.md >/dev/null
+	$(PY) scripts/verify_readme_numbers.py
+.PHONY: readme
+
 clean: ## Remove build output (keeps .venv and node_modules)
 	cd contracts && forge clean
 	rm -rf $(addsuffix /dist,index probe attestor sdk app) app/.next
