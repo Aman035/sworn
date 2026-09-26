@@ -70,7 +70,7 @@ export default function Hooks() {
                         {listed.has(h.address) ? (
                           <span className="mark on">registry</span>
                         ) : (
-                          <span className="mark off">. </span>
+                          <span className="mark off">no</span>
                         )}
                       </td>
                     </tr>
@@ -145,9 +145,7 @@ export default function Hooks() {
                             <span className="mark off">not probed</span>
                           )}
                         </td>
-                        <td className="n">
-                          {dv ? fmt(dv.fills) : <span className="mark off">&mdash;</span>}
-                        </td>
+                        <td className="n">{dv ? fmt(dv.fills) : null}</td>
                         <td>
                           {!dv ? (
                             <span className="mark off">not measured</span>

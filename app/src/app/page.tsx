@@ -10,7 +10,7 @@ export default function Landing() {
   const r = replay();
   const pr = precision();
   const c2 = caught();
-  // The hooklist flag lives on the score row, not the divergence row: whether a hook is
+  // The registry flag lives on the score row, not the divergence row: whether a hook is
   // allowlisted is an attribute of the hook, not of this measurement.
   const listed = new Set(
     (scores()?.hooks ?? []).filter((h) => h.flags?.includes('ALLOWLISTED')).map((h) => h.address),
@@ -199,7 +199,7 @@ export default function Landing() {
                     <th className="n">Fills</th>
                     <th className="n">Net charged</th>
                     <th className="n">Median excess</th>
-                    <th>Listed</th>
+                    <th>In registry</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -220,9 +220,9 @@ export default function Landing() {
                       </td>
                       <td>
                         {listed.has(h.address) ? (
-                          <span className="mark on">hooklist</span>
+                          <span className="mark on">registry</span>
                         ) : (
-                          <span className="mark off">. </span>
+                          <span className="mark off">no</span>
                         )}
                       </td>
                     </tr>
