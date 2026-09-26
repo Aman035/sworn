@@ -140,7 +140,7 @@ def table_divergent_hooks() -> str:
         key=lambda h: -h.get("median_charged_excess_bps", 0),
     ):
         flags = scores.get(h["address"], {}).get("flags", [])
-        listed = " ✓ registry" if "ALLOWLISTED" in flags else ""
+        listed = " ✓ hooklist" if "ALLOWLISTED" in flags else ""
         rows.append(
             f"| {_scan('https://basescan.org', h['address'])}{listed} "
             f"| {h['fills']:,} | {h['charged_fills']:,} | {h['overdelivered_fills']:,} "
@@ -179,18 +179,40 @@ def table_detection() -> str:
 
 
 def table_attribution() -> str:
-    """Which products route users into hooked pools."""
+    """Which products send swaps into the hooks measured as charging more than they quote.
+
+    One row per product, not per router contract: Uniswap and 0x each run several, and
+    splitting them made the table longer without making it say anything more. The
+    dashboard aggregates the same way, and a README that disagreed with it would be worse
+    than either.
+    """
     doc = _load("attribution.json")
+    by_product: dict[str, dict[str, int]] = {}
+    for p in doc["products"]:
+        if p["product"] == "unlabeled":
+            continue
+        row = by_product.setdefault(p["product"], {"into": 0, "total": 0})
+        row["into"] += int(p["fills_into_divergent"])
+        row["total"] += int(p.get("fills_total", 0))
+
+    ranked = sorted(
+        ((name, v) for name, v in by_product.items() if v["into"] > 0),
+        key=lambda kv: -kv[1]["into"],
+    )[:6]
+    total = sum(int(p["fills_into_divergent"]) for p in doc["products"])
+    named = sum(v["into"] for _, v in ranked)
+
     rows = [
-        "| Product | Router | Fills | Into hooked pools |",
-        "| ------- | ------ | ----: | ----------------: |",
+        "| Product | Swaps into those hooks | Share of its v4 swaps |",
+        "| ------- | ---------------------: | --------------------: |",
     ]
-    for p in doc["products"][:6]:
-        rows.append(
-            f"| {p['product']} | {_scan('https://basescan.org', p['router'])} "
-            f"| {int(p['fills_total']):,} "
-            f"| {float(p['share_of_product_v4_volume']) * 100:.1f}% |"
-        )
+    for name, v in ranked:
+        share = v["into"] / v["total"] if v["total"] else 0.0
+        rows.append(f"| {name} | {v['into']:,} | {share * 100:.1f}% |")
+    rows.append(
+        f"| routers nobody has identified | {total - named:,} "
+        f"| {float(doc['unlabeled_share']) * 100:.1f}% of all fills |"
+    )
     return "\n".join(rows)
 
 

@@ -38,7 +38,12 @@ ALLOWED = re.compile(
     r"""
     (?:^|(?<=[\s\(\[|*_]))        # at a boundary, including after markdown emphasis
     (?:
-        v?\d+\.\d+(?:\.\d+)?      # versions: 0.8.26, v1.2
+        v\d+(?:\.\d+)+            # versions with a v: v1.2, v0.8.26
+      | \d+\.\d+\.\d+             # three-part versions: 0.8.26
+                                #   a bare two-part decimal is NOT exempt: "17.99" is a
+                                #   measurement far more often than it is a version, and
+                                #   exempting it let hand-typed percentages into the
+                                #   README for as long as this check has existed.
       | 0x[0-9a-fA-F]+            # hex: addresses, selectors
       | \d{4}                     # years
       | [1-9]\d?\.                # ordered list markers: "1." "12."

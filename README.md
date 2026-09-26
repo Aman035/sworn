@@ -14,6 +14,12 @@ and reverts if what executed differs from what it probed. It is periphery, not a
 [`SwornRouter`](contracts/src/SwornRouter.sol) sits where a UniversalRouter sits, and
 hooks are what it defends against.
 
+Building it surfaced three defects in Uniswap's own surfaces, each with a reproduction:
+the `Swap` event is emitted **before** `afterSwap` so it cannot show what a hook took, its
+natspec documents the opposite sign to what the code emits, and the public record of a
+hook carries identity but never behaviour. Those, and the rest of the build notes, are in
+**[FEEDBACK.md](FEEDBACK.md)**.
+
 ---
 
 Why that is worth building, in the order the evidence arrived.
@@ -38,28 +44,41 @@ route?**
 
 Three questions, answered with tooling anyone can run.
 
-## 1. Does the public registry tell you?
+## 1. Does the public record of a hook tell you?
 
-No. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **in Uniswap's hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
+First, the two lists people confuse, because the rest of this section turns on the
+difference:
 
-To be precise about what that does and does not mean: the hooklist
-[says plainly](https://github.com/Uniswap/hooklist) that being in it **does not** get a
-hook allowlisted for Uniswap's routing. It is a registry, not the routing allowlist, and
-this repo cannot see inside the latter. What it shows is that the public, verified,
-machine-readable record of a hook carries **no signal at all** about what the hook does to
-a swapper. Every field in it is identity: deployer, source verification, permission bits.
-None is behaviour.
+- **The [hooklist](https://github.com/Uniswap/hooklist)** is Uniswap's public,
+  machine-readable file of hooks. Anyone can open a pull request to add theirs. It records
+  who deployed it, whether the source is verified, and which permission bits the address
+  encodes. It is public, and this repo reads it.
+- **The routing allowlist** is a private list *inside* Uniswap's routing API: the hooks
+  that API is willing to send a user's trade through. It is not published, and nothing
+  here can see it.
 
-That is the gap, and it is fixable. A proposal with these fields filled in for every hook
-measured here is in [HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
+They are not the same list, and the hooklist's own README says so: being in it **does
+not** get a hook onto the routing allowlist. So the honest question this section can
+answer is the narrower one, about the public record.
 
-Routing is a separate question, and there the evidence is direct:
+No, it does not tell you. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **in the hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
+
+Every field in the hooklist is **identity**: who deployed it, is the source verified, what
+may it do. None is **behaviour**: what does it actually charge. A hook can be listed,
+verified and well-behaved on paper while taking 44% out of a fill,
+because nothing in the format has anywhere to record that.
+
+That is the gap, and it is fixable. A proposal with behaviour fields filled in for every
+hook measured here is in [HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
+
+Routing, the other list, cannot be inspected from outside, but its *effects* can be
+counted:
 **200,677**
 fills through a single UniversalRouter deployment
 ([`0x6ff5693b…`](https://basescan.org/address/0x6ff5693b99212da76ad316178a184ab56d299b43))
 went into hooks measured here as charging more than they quote. That contract is used by
-the Uniswap interface and by anyone else who calls it, so this is a fact about the router,
-not a claim about any one front-end.
+the Uniswap interface and by anyone else who calls it, so this is a fact about what
+reached the router, not a claim about any one front-end or its allowlist.
 
 ## 2. Can anyone measure this from logs?
 
@@ -133,13 +152,15 @@ state immediately before it and compared with what the swapper actually received
 
 | Hook (Base) | Fills | Charged | Over-delivered | Net rate | Median excess | Score |
 | ----------- | ----: | ------: | -------------: | -------: | ------------: | ----: |
-| [`0x1f91c998…e02acc`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) ✓ registry | 782 | 183 | 99 | 11% | 400 bps | 24 |
-| [`0x985c14ba…ca2acc`](https://basescan.org/address/0x985c14baa2a18316ffda0aefb3a632fadfca2acc) ✓ registry | 751 | 126 | 105 | 3% | 142 bps | 14 |
+| [`0x1f91c998…e02acc`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) ✓ hooklist | 782 | 183 | 99 | 11% | 400 bps | 24 |
+| [`0x985c14ba…ca2acc`](https://basescan.org/address/0x985c14baa2a18316ffda0aefb3a632fadfca2acc) ✓ hooklist | 751 | 126 | 105 | 3% | 142 bps | 14 |
 | [`0xa5c4a1be…5a4145`](https://basescan.org/address/0xa5c4a1be2d59af03c8578609f2621c91ad5a4145) | 36 | 11 | 3 | 22% | 99 bps | 21 |
 | [`0x0d5d83c5…aba8cc`](https://basescan.org/address/0x0d5d83c5a1d27654d12670bb07461971a5aba8cc) | 41 | 9 | 2 | 17% | 45 bps | 14 |
 
-`✓ registry` means the hook is in Uniswap's public hooklist with verified source, which
-says nothing about how it behaves.
+`✓ hooklist` means the hook is in Uniswap's public hooklist with verified source, which
+says nothing about how it behaves. `Score` is this repo's own divergence score, `0-100`,
+**higher is worse**; it is defined in [METRICS.md](docs/METRICS.md) and written on-chain
+by `HookBook`, not by Uniswap.
 **The worst offender is one of them**: [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc)
 is listed, source-verified, and takes a median **400 bps above its stated
 fee** on 11% of its fills, with a worst observed take of
@@ -212,19 +233,21 @@ transaction right now.
 
 ## Who is routing into this
 
-Attribution covers every fill and publishes its own blind spot.
+These hooks are not off to the side. Every v4 swap logs the contract that called
+`PoolManager`, never the person swapping, so mapping those contracts to the products that
+run them is what this table does:
 
-| Product | Router | Fills | Into hooked pools |
-| ------- | ------ | ----: | ----------------: |
-| Uniswap | [`0x6ff5693b…299b43`](https://basescan.org/address/0x6ff5693b99212da76ad316178a184ab56d299b43) | 3,220,269 | 30.9% |
-| Uniswap | [`0xfdf682f5…27fbc7`](https://basescan.org/address/0xfdf682f51fe81aa4898f0ae2163d8a55c127fbc7) | 1,602,197 | 44.7% |
-| unlabeled | [`0x8f10b468…13f996`](https://basescan.org/address/0x8f10b468b06c6fd214b65f87778827f7d113f996) | 892,068 | 60.9% |
-| unknown-aggregator | [`0x5cdc0f0f…e438e1`](https://basescan.org/address/0x5cdc0f0fa28e0bb05893a4558c988e2bdce438e1) | 471,867 | 7.4% |
-| 0x | [`0x7747f8d2…7f2359`](https://basescan.org/address/0x7747f8d2a76bd6345cc29622a946a929647f2359) | 458,339 | 45.3% |
-| unlabeled | [`0x11111605…76ca11`](https://basescan.org/address/0x111116053f09d34a7eae8102887004445176ca11) | 408,744 | 0.3% |
+| Product | Swaps into those hooks | Share of its v4 swaps |
+| ------- | ---------------------: | --------------------: |
+| Uniswap | 233,431 | 4.8% |
+| 0x | 104,643 | 12.9% |
+| unknown-aggregator | 13,665 | 2.9% |
+| routers nobody has identified | 497,712 | 50.2% of all fills |
 
 **50.2% of fills are unattributed**, reported rather than dropped, because a table
-that hides its coverage is not evidence. The products above are not doing anything wrong: they are doing the normal thing, which is to trust a quote.
+that hides its coverage is not evidence. The products above are not doing anything wrong:
+they are doing the normal thing, which is to trust a quote. That is the point. The gap is
+invisible from where a router stands, so avoiding it cannot be a matter of diligence.
 
 ---
 
@@ -392,15 +415,19 @@ because the registry already held that block. Scoring is fully specified, with a
 ./scripts/demo.sh
 ```
 
-Three acts, ordered by how hard each is to fake. No manual steps, and every figure is
+Four acts, ordered by how hard each is to fake. No manual steps, and every figure is
 produced by the EVM during the run: the gate greps the source to prove no `console.log`
 string contains a number.
 
-| Act | What runs                                                     | What it shows                                                                    |
-| --- | ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `1` | `DemoTest` on a local chain                                    | A hook quotes well at `tx.gasprice = 0`, delivers 17.99% less at a real gas price, and Sworn recovers 21.95% by routing around it |
-| `2` | `RealSwap.fork.t.sol` on anvil forked from Base                | The same router completes ETH → USDC through **live mainnet hooks** |
-| `3` | `app/` static export                                           | The dashboard, rendered from the same result files as this README |
+| Act | What runs | What it shows |
+| --- | --------- | ------------- |
+| `1` | `DemoTest` on a local chain | A fixture hook quotes well at `tx.gasprice = 0`, delivers materially less at a real gas price, and Sworn routes around it. The figures it prints are the ones shown verbatim [above](#what-it-looks-like-when-it-works) |
+| `2` | `RealSwap.fork.t.sol` on anvil forked from Base | The same router completes ETH → USDC through **live mainnet hooks**, probe and execution agreeing |
+| `3` | `ProtectedSwap.fork.t.sol` on the same fork | **The catch.** A real Base hook charges one caller 707 bps more than another for the identical swap, and Sworn routes away, recovering 672 bps |
+| `4` | `app/` static export | The dashboard, rendered from the same result files as this README |
+
+Acts `2` and `3` need an archive RPC and are skipped with a warning without one. Act `3`
+is the one to watch: it is the only act that is neither a fixture nor a happy path.
 
 Storyboard, including what the demo deliberately does **not** show, in
 [DEMO.md](docs/DEMO.md).

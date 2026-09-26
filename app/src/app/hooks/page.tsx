@@ -45,7 +45,7 @@ export default function Hooks() {
                     <th className="n">Over-delivered</th>
                     <th className="n">Net rate</th>
                     <th className="n">Median excess</th>
-                    <th>In registry</th>
+                    <th>In hooklist</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -85,6 +85,16 @@ export default function Hooks() {
                 symmetric, their count estimates the false positives in the column beside them. A
                 hook only appears here if its charged fills beat its own over-delivered tail.
               </p>
+              <p>
+                <strong>&ldquo;In hooklist&rdquo;</strong> means the hook is in{' '}
+                <a href="https://github.com/Uniswap/hooklist" rel="noreferrer noopener">
+                  Uniswap&rsquo;s public hooklist
+                </a>{' '}
+                with verified source. Anyone can open a pull request to add theirs, it records who
+                deployed the hook and what it is permitted to do, and it says nothing about what the
+                hook charges. It is not the private allowlist Uniswap&rsquo;s routing API uses,
+                which is not published and cannot be read from here.
+              </p>
             </div>
           </Band>
         ) : null}
@@ -103,7 +113,7 @@ export default function Hooks() {
                     <th>Hook</th>
                     <th className="n">Pools</th>
                     <th>Can take</th>
-                    <th>In registry</th>
+                    <th>In hooklist</th>
                     <th>Reads environment</th>
                     <th className="n">Fills</th>
                     <th>Behaviour</th>

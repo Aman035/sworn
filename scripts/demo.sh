@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # The demo, start to finish, with no manual steps. Storyboard in docs/DEMO.md.
 #
-# Three acts, in increasing order of how hard they are to fake:
+# Four acts, in increasing order of how hard they are to fake:
 #   1. a spoofing hook and Sworn, on a local chain, with a fixture that provably lies;
 #   2. the same router against *real* Base hooks, on anvil forked from mainnet;
-#   3. a real hook on Base charging one caller 707 bps more than another, and Sworn
-#      routing away from it;
+#   3. a real hook on Base charging one caller more than another, and Sworn routing
+#      away from it;
 #   4. the dashboard, rendered from the same result files the README uses.
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
@@ -61,10 +61,11 @@ else
   # callers differently at the same block, and Sworn routing away from it.
   forge test --root contracts --match-path 'test/fork/ProtectedSwap.fork.t.sol' -vv \
     || fail "the mainnet catch did not reproduce"
-  ok "charged 707 bps more than another caller; Sworn recovered 672 bps by routing away"
+  caught=$("$(venv_python)" -c 'import json;o=json.load(open("data/results/caught.json"))["observed"];print(o["charged_extra_bps"],o["recovered_bps"])')
+  ok "charged $(echo "$caught" | cut -d" " -f1) bps more than another caller; Sworn recovered $(echo "$caught" | cut -d" " -f2) bps by routing away"
 fi
 
-# ---------------------------------------------------------------------------- act 3
+# ---------------------------------------------------------------------------- act 4
 step "act 4: the dashboard, from the same result files"
 if [ -d app/node_modules ]; then
   (cd app && npm run build >/dev/null) || fail "dashboard build failed"
