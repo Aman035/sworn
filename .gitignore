@@ -44,3 +44,9 @@ data/cache/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# The recorded walkthrough. Reproducible from scripts/record_demo.mjs, and a 5 MB
+# binary that changes wholesale on every re-record does not belong in git history.
+docs/assets/sworn-demo.mp4
+docs/assets/sworn-demo.webm
+.video-raw/

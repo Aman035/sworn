@@ -1,0 +1,98 @@
+
+-- Act 1. A hook that quotes honestly under eth_call and charges under a real gas price, on a local chain.
+==> act 1: a hook that quotes one price and charges another
+No files changed, compilation skipped
+
+Ran 1 test for test/unit/Demo.t.sol:DemoTest
+[PASS] test_demo() (gas: 898697)
+Logs:
+  --------------------------------------------------------------
+  SWORN DEMO -- a hook that quotes one price and charges another
+  --------------------------------------------------------------
+  
+  ACT 1  Two pools for the same pair.
+    pool A  hookless, the honest baseline
+    pool B  hooked by GaspriceSniffHook at 0x0000000000000000000000000000000003850088
+            it reads tx.gasprice: zero means a simulator is asking
+  
+  ACT 2  What a quote sees. tx.gasprice = 0, as in every eth_call.
+    pool B quotes: 996999005991991
+  
+  ACT 3  What a real transaction gets. Same pool, same size.
+    pool B delivers: 817539331628894
+    taken without being quoted (bps): 1799
+  
+  ACT 4  Sworn probes both pools inside the transaction that settles.
+    naive router, trusting the quote: 817539331628894
+    sworn router, probing in-tx    : 996999005991991
+    recovered (bps): 2195
+  
+  ACT 5  What HookBook says, and what it refuses to say.
+    scored hook   hasScore: true
+                  score   : 82
+                  flags   : 0
+    unseen hook   hasScore: false
+                  flags   : 1024
+    an unmeasured hook reads as INSUFFICIENT_DATA, never as a clean 0
+  
+  --------------------------------------------------------------
+  The quote was a lie. The probe was not, because it was the trade.
+  --------------------------------------------------------------
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 13.77ms (4.77ms CPU time)
+
+Ran 1 test suite in 140.03ms (13.77ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
+  ok  spoof shown, probed, and routed around
+
+-- Act 2. The same router against real Base hooks, on anvil forked from mainnet.
+==> act 2: the same router against real Base hooks, on anvil
+  ok  anvil forked Base at block 51700000
+No files changed, compilation skipped
+
+Ran 3 tests for test/fork/RealSwap.fork.t.sol:RealSwapForkTest
+[PASS] test_completesASwapThroughALiveHook() (gas: 188830)
+Logs:
+  delivered USDC: 133138269
+  reported out  : 133138269
+
+[PASS] test_completesThroughADynamicFeeHook() (gas: 270417)
+[PASS] test_soleCandidateStillPassesTheDivergenceCheck() (gas: 153609)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 45.60ms (2.35ms CPU time)
+
+Ran 1 test suite in 128.01ms (45.60ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
+  ok  ETH -> USDC completed through live Base hooks, probe and execution agreed
+
+-- Act 3. The catch: a live Base hook that prices two callers differently for the identical swap.
+==> act 3: a hook on Base charging one caller more than another
+No files changed, compilation skipped
+
+Ran 2 tests for test/fork/ProtectedSwap.fork.t.sol:ProtectedSwapForkTest
+[PASS] test_swornRoutesAwayFromTheChargingHook() (gas: 695581)
+Logs:
+  Base block                       51247545
+  what the hook offered this caller 16340546
+  what Sworn settled for            17438404
+  recovered, bps                    671
+
+[PASS] test_theHookChargesByCaller() (gas: 541152)
+Logs:
+  same pool, same block, same amount in
+    caller A (NaiveRouter) receives 17582769
+    caller B (SwornRouter) receives 16340546
+    the hook charged caller B more, by bps 706
+
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 272.49ms (3.10ms CPU time)
+
+Ran 1 test suite in 273.41ms (272.49ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)
+  ok  charged 707 bps more than another caller; Sworn recovered 672 bps by routing away
+
+-- Act 4. The dashboard, built from the same result files the README is generated from.
+==> act 4: the dashboard, from the same result files
+  ok  dashboard serving on http://127.0.0.1:4321
+
+    Leave it running with: cd app && npm run dev
+
+==> done
+  ok  every number above was produced by the run, not typed into it
+
+-- The dashboard and the forked chain are still up. Press enter to shut them down.
