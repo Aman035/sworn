@@ -53,6 +53,59 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* The origin, attributed. 0x's study establishes the scale of the problem; this
+          repo cannot, and presenting their figures as ours would undo the one thing it
+          has going for it. Every cited number carries its source inline. */}
+      <Reveal as="section" className="panel origin">
+        <div className="panel-inner">
+          <div className="origin-grid">
+            <article>
+              <p className="origin-who">
+                <a
+                  href="https://0x.org/post/uniswap-v4-hooks-were-a-mistake"
+                  rel="noreferrer noopener"
+                >
+                  0x, 14 September 2026
+                </a>
+              </p>
+              <h2>&ldquo;Uniswap v4 hooks were a mistake&rdquo;</h2>
+              <ul className="origin-stats">
+                <li>
+                  <b>84,163</b> hooks analysed, six chains
+                </li>
+                <li>
+                  <b className="bad">54.2%</b> malicious
+                </li>
+                <li>
+                  <b>19.4%</b> safe
+                </li>
+              </ul>
+              <p className="fineprint">
+                Their analysis, their numbers — cited, not reproduced here.
+              </p>
+            </article>
+
+            <article>
+              <p className="origin-who">
+                <a
+                  href="https://x.com/haydenzadams/status/2099711270115013085"
+                  rel="noreferrer noopener"
+                >
+                  Hayden Adams, in reply
+                </a>
+              </p>
+              <blockquote>Skill issue, don&rsquo;t route to bad hooks</blockquote>
+              <p>
+                Pointing integrators at the Uniswap API, which &ldquo;avoids malicious hooks&rdquo;.
+                He is right — and this repo is an attempt to make that advice executable, because it
+                leaves open the question an integrator actually faces:{' '}
+                <strong>how do you know which ones are bad, at the moment you route?</strong>
+              </p>
+            </article>
+          </div>
+        </div>
+      </Reveal>
+
       <Reveal as="section" className="strip">
         <div className="strip-inner">
           {base ? (

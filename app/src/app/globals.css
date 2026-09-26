@@ -1181,3 +1181,78 @@ html.js .reveal.in {
   white-space: normal;
   max-width: 34ch;
 }
+
+/* ------------------------------------------------------------------- origin */
+
+/* The public exchange this work answers. Figures here are *cited*, not measured, so they
+   are visually separated from every other number on the site and each carries a link to
+   its source — the project's credibility rests on that line never blurring. */
+.origin {
+  background: var(--sheet);
+}
+
+.origin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px 56px;
+}
+
+.origin-who {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.origin-who a {
+  color: var(--faint);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule-hard);
+  padding-bottom: 2px;
+}
+
+.origin-who a:hover {
+  color: var(--ink);
+}
+
+.origin h2 {
+  font-size: var(--t-l);
+  max-width: none;
+}
+
+.origin-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 32px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.origin-stats li {
+  font-size: var(--t-s);
+  color: var(--ink-2);
+}
+
+.origin-stats b {
+  display: block;
+  font-size: var(--t-l);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.origin-stats b.bad {
+  color: var(--signal);
+}
+
+.origin blockquote {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  border-left: 2px solid var(--signal);
+  font-size: var(--t-m);
+  line-height: 1.35;
+  color: var(--ink);
+}
