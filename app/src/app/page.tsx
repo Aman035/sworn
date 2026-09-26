@@ -220,7 +220,7 @@ export default function Landing() {
                       </td>
                       <td>
                         {listed.has(h.address) ? (
-                          <span className="mark on">registry</span>
+                          <span className="mark on">yes</span>
                         ) : (
                           <span className="mark off">no</span>
                         )}

@@ -68,7 +68,7 @@ export default function Hooks() {
                       </td>
                       <td>
                         {listed.has(h.address) ? (
-                          <span className="mark on">registry</span>
+                          <span className="mark on">yes</span>
                         ) : (
                           <span className="mark off">no</span>
                         )}
@@ -131,7 +131,7 @@ export default function Hooks() {
                         </td>
                         <td>
                           <span className={h.allowlisted ? 'mark on' : 'mark off'}>
-                            {h.allowlisted ? 'registry' : 'no'}
+                            {h.allowlisted ? 'yes' : 'no'}
                           </span>
                         </td>
                         <td>

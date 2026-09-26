@@ -409,8 +409,8 @@ that matter most.
 
 ```bash
 git clone https://github.com/Aman035/sworn && cd sworn
-git submodule update --init --recursive
-make install
+corepack enable            # the repo is a pnpm workspace; Node ships corepack
+make install               # pnpm, git submodules, a venv, and the analysis package
 ```
 
 **The dashboard**, entirely from committed data, no network:
