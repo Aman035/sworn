@@ -16,6 +16,7 @@ lies makes those two disagree, and the trade does not happen.
 [![metrics](https://img.shields.io/badge/metrics-defined_before_measured-e8b84b?style=flat-square)](docs/METRICS.md)
 [![phases](https://img.shields.io/badge/phases-gated-5a6675?style=flat-square)](PHASES.md)
 [![feedback](https://img.shields.io/badge/v4_feedback-filed_upstream-e5644e?style=flat-square)](FEEDBACK.md)
+[![dashboard](https://img.shields.io/badge/dashboard-live-5a6675?style=flat-square)](https://aman035.github.io/sworn/)
 
 ---
 
@@ -308,6 +309,8 @@ evidence:
 Full model in [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 
 ## 12. The dashboard
+
+**Live: [aman035.github.io/sworn](https://aman035.github.io/sworn/)**
 
 ![Sworn dashboard](docs/assets/dashboard.png)
 
