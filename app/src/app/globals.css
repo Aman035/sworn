@@ -734,6 +734,36 @@ main:has(.landing) {
   color: #fff;
 }
 
+/* On a phone the three links plus the wordmark do not fit inside the pill, and the pill
+   scrolls its overflow with the scrollbar hidden: the last section looks truncated and
+   nothing says it can be swiped. Drop the word, keep the mark, and everything fits down
+   to 320px. */
+@media (max-width: 460px) {
+  .floatnav {
+    padding-left: 8px;
+    gap: 2px;
+  }
+
+  .floatnav-mark span {
+    display: none;
+  }
+
+  /* Without the word beside it the mark is a 17px tap target, so pad it out to the same
+     height as the links it sits next to. */
+  .floatnav-mark {
+    padding: 8px 4px;
+  }
+
+  .floatnav-mark .mark-glyph {
+    width: 1.5em;
+    height: 1.5em;
+  }
+
+  .floatnav a:not(.floatnav-mark) {
+    padding: 8px 11px;
+  }
+}
+
 /* ---------------------------------------------------------------------- hero */
 
 /* Dark, and the only dark surface on the site. The landing is the attack; the data pages
