@@ -1,0 +1,27 @@
+==> README renders from the template
+    rendered 17 measurement(s) into README.md
+  ok  every placeholder resolved against data/results
+==> no placeholder sits inside a markdown table
+  ok  placeholders live in prose and lists only
+==> no number in the README was typed by hand
+      17 measured value(s) via placeholders
+      README.md is current and every number resolves from data/results
+  ok  README.md is current and fully sourced
+==> the rendered README is committed
+  ok  no drift between template and rendered file
+==> graphics are generated, not drawn by hand
+      wrote docs/assets/attack.svg
+      wrote docs/assets/mechanism.svg
+      wrote docs/assets/precision.svg
+      wrote docs/assets/census.svg
+  ok  diagrams and charts rebuild to the committed bytes
+==> every link in the README resolves
+    all relative links and anchors resolve
+  ok  nothing points at a file or heading that does not exist
+==> FEEDBACK.md has the four required sections
+  ok  all four sections present
+==> the README states its limits
+  ok  limits and the measurement's own error are published
+==> the headline uses an honest denominator
+    4 divergent of 25 eligible; ~48% of charged fills are error
+  ok  denominator and error published next to the number

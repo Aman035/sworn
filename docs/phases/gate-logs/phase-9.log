@@ -1,0 +1,13 @@
+==> dashboard typechecks and builds
+  ok  static export produced
+==> every page renders real measurements
+    Tests  17 passed
+  ok  pages carry provenance and no placeholder values
+==> the demo runs end to end, unattended
+  ok  all five beats present and passing
+==> the demo's numbers come from the run
+    no console.log string literal contains a figure
+    spoof 1799 bps taken, 2195 bps recovered by routing around it
+  ok  the guarantee is demonstrated, not asserted
+==> the demo does not overclaim
+  ok  limits stated alongside the walkthrough
