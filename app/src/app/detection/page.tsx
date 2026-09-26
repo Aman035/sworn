@@ -2,6 +2,16 @@ import { Band, Missing } from '@/components/Band';
 import { PageHead } from '@/components/PageHead';
 import { fmt, precision, probe } from '@/lib/results';
 
+// The result files name methods the way the pipeline does. A reader should see what the
+// method actually is, and whether it is something they could run before a trade.
+const METHOD: Record<string, { name: string; when: 'before' | 'after' }> = {
+  static: { name: 'Static bytecode scan', when: 'before' },
+  dynamic: { name: 'Differential eth_call', when: 'before' },
+  trace: { name: 'Trace of a priced call', when: 'before' },
+  union: { name: 'All three together', when: 'before' },
+  settled_trade: { name: 'Re-quoting settled trades', when: 'after' },
+};
+
 export default function Detection() {
   const p = probe();
   const pr = precision();
@@ -14,6 +24,11 @@ export default function Detection() {
 
   const divergent = pr?.methods.find((m) => m.method === 'settled_trade');
   const positives = divergent ? Number(divergent.tp) + Number(divergent.fn) : 0;
+
+  // The claim on this page is about what an integrator can run *before* a trade, so the
+  // retrospective method is excluded from it.
+  const upfront = (pr?.methods ?? []).filter((m) => METHOD[String(m.method)]?.when === 'before');
+  const foundUpfront = upfront.reduce((n, m) => n + Number(m.tp), 0);
 
   return (
     <>
@@ -75,48 +90,89 @@ export default function Detection() {
         </Band>
 
         <Band meta={pr?.meta ?? null}>
-          <h2>Precision against settled trades</h2>
           {!pr ? (
-            <Missing pipeline="python -m sworn_analysis.pipelines.f_precision" />
+            <>
+              <h2>Scored against what hooks actually did</h2>
+              <Missing pipeline="python -m sworn_analysis.pipelines.f_precision" />
+            </>
           ) : positives === 0 ? (
-            <div className="caveat">
-              <p>
-                No hook in the scored set is labelled divergent, so precision and recall are
-                undefined here, not zero. There is nothing for a detector to be right or wrong
-                about.
-              </p>
-              <p>
-                The number that needs fixing is the size of the overlap between probed and measured
-                hooks, not the detectors.
-              </p>
-            </div>
+            <>
+              <h2>Scored against what hooks actually did</h2>
+              <div className="caveat">
+                <p>
+                  No hook in the scored set is labelled divergent, so precision and recall are
+                  undefined here, not zero. There is nothing for a detector to be right or wrong
+                  about.
+                </p>
+                <p>
+                  The number that needs fixing is the size of the overlap between probed and
+                  measured hooks, not the detectors.
+                </p>
+              </div>
+            </>
           ) : (
-            <div className="scroll">
-              <table className="grid">
-                <thead>
-                  <tr>
-                    <th>Method</th>
-                    <th className="n">TP</th>
-                    <th className="n">FP</th>
-                    <th className="n">FN</th>
-                    <th className="n">Precision</th>
-                    <th className="n">Recall</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pr.methods.map((m) => (
-                    <tr key={String(m.method)}>
-                      <td>{String(m.method)}</td>
-                      <td className="n">{fmt(Number(m.tp))}</td>
-                      <td className="n">{fmt(Number(m.fp))}</td>
-                      <td className="n">{fmt(Number(m.fn))}</td>
-                      <td className="n">{Number(m.precision).toFixed(2)}</td>
-                      <td className="n">{Number(m.recall).toFixed(2)}</td>
+            <>
+              <h2>
+                {foundUpfront === 0 ? `None of them found a single one` : `What each method found`}
+              </h2>
+              <p>
+                {fmt(positives)} hooks in this set were independently measured, from settled trades,
+                as charging more than they quote. That is the ground truth. Every method an
+                integrator could run <em>before</em> a trade was scored against it.
+              </p>
+
+              <div className="scroll">
+                <table className="grid">
+                  <caption>of the {fmt(positives)} hooks that were charging</caption>
+                  <thead>
+                    <tr>
+                      <th>Method</th>
+                      <th>Runs</th>
+                      <th className="n">Found</th>
+                      <th className="n">Missed</th>
+                      <th className="n">False alarms</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {pr.methods.map((m) => {
+                      const key = String(m.method);
+                      const meta = METHOD[key];
+                      const after = meta?.when === 'after';
+                      return (
+                        <tr key={key}>
+                          <td>{meta?.name ?? key}</td>
+                          <td className="dim">{after ? 'after the trade' : 'before the trade'}</td>
+                          <td className="n">{fmt(Number(m.tp))}</td>
+                          <td className="n">{fmt(Number(m.fn))}</td>
+                          <td className="n">{fmt(Number(m.fp))}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="pull">
+                The only method with perfect recall is the one that reads a trade that has already
+                settled. By then the user has been paid less than they were quoted.
+              </p>
+
+              <div className="caveat">
+                <p>
+                  <strong>{fmt(positives)} is a small ground truth.</strong> It is the overlap
+                  between the hooks this repo probed and the hooks it measured from settled trades,
+                  and it is too small to claim a detection <em>rate</em>. What it does show is that
+                  the checks available before a trade found none of the hooks that were demonstrably
+                  charging, and that the bytecode scan raised{' '}
+                  {fmt(Number(pr.methods.find((m) => m.method === 'static')?.fp ?? 0))} alarms on
+                  hooks that were not.
+                </p>
+                <p>
+                  Widening the overlap is the fix, and it needs a larger re-quoted sample rather
+                  than better detectors. The counts are published either way.
+                </p>
+              </div>
+            </>
           )}
         </Band>
       </div>
