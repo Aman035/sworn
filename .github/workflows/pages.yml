@@ -49,7 +49,7 @@ jobs:
         # nothing because a result file changed shape.
         run: |
           test -f app/out/index.html || { echo "no index.html in the export"; exit 1; }
-          for page in index hooks detection attribution; do
+          for page in index evidence; do
             test -s "app/out/$page.html" || test -s "app/out/$page/index.html" \
               || { echo "missing page: $page"; exit 1; }
           done
