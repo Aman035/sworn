@@ -46,7 +46,7 @@ for asset in banner.svg logo.svg logo-seal.svg logo-wordmark.svg \
 done
 # Screen captures are produced by scripts/capture_dashboard.mjs, not the SVG renderer, so
 # they are checked for existence only.
-for shot in landing.png landing-value.png dashboard-hooks.png dashboard-detection.png; do
+for shot in landing.png landing-value.png dashboard-evidence.png; do
   [ -f "docs/assets/$shot" ] || fail "docs/assets/$shot is missing; run node scripts/capture_dashboard.mjs"
 done
 ok "diagrams and charts rebuild to the committed bytes"
