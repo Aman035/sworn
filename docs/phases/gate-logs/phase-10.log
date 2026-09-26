@@ -5,7 +5,7 @@
   ok  placeholders live in prose and lists only
 ==> no number in the README was typed by hand
       34 measured value(s) via placeholders
-      4 external figure(s) cited to docs/SOURCES.md
+      6 external figure(s) cited to docs/SOURCES.md
       README.md is current and every number resolves from data/results
   ok  README.md is current and fully sourced
 ==> the rendered README is committed
@@ -24,8 +24,11 @@
     all relative links and anchors resolve
   ok  nothing points at a file or heading that does not exist
 ==> the README points at real contract lines
-    13 contract line anchors all resolve to real code
+    11 contract line anchors all resolve to real code
   ok  reviewers can verify every claim at the line that makes it
+==> quoted source matches the file it cites
+    1 quoted block(s) match the contract
+  ok  the code the README shows is the code that runs
 ==> the repository is publishable
   ok  MIT licensed, .env untracked, no credential anywhere in history
 ==> FEEDBACK.md has the four required sections
