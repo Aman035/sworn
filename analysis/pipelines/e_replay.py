@@ -41,7 +41,7 @@ from ..lib.cheap_quote import quote_many
 from ..lib.compact import load_shards, parquet_safe
 from ..lib.config import load_config, path_for, repo_root
 from ..lib.deployments import pool_manager
-from ..lib.pricing import WETH, price
+from ..lib.pricing import NATIVE, price
 from ..lib.requote import RequoteInput, result_key
 from ..lib.rpc import RpcClient
 from ..lib.schema import validate_result
@@ -100,37 +100,86 @@ def candidate_pools(
     return {key: g.head(max_per_pair) for key, g in pools.groupby(["currency0", "currency1"])}
 
 
+# Probe size for the reference rate. Small on purpose: 1 ETH through the shallower Base
+# ETH/USDC tiers moves the price by more than 40%, so a "rate" quoted at that size is a
+# measure of the pool's depth, not of the price.
+ETH_PROBE_WEI = 10**16  # 0.01 ETH
+
+# Tiers to consider for the reference pool. The deepest wins, decided by measurement.
+ETH_USDC_TIERS: tuple[tuple[int, int], ...] = ((500, 10), (3000, 60), (100, 1), (10000, 200))
+
+
+def _eth_usdc_input(fee: int, tick_spacing: int, tag: int, amount: int) -> RequoteInput:
+    # Native ETH, not WETH: v4 pools on Base quote ETH/USDC against `address(0)`, and the
+    # WETH/USDC pools are far thinner. Quoting the wrong one gave 880 USDC per ETH against
+    # a true 2,660 — a price feed that is wrong by a factor of three is worse than none.
+    return RequoteInput(
+        tx_hash=f"0x{tag:064x}",
+        log_index=0,
+        currency0=NATIVE,
+        currency1=USDC_BASE,
+        fee=fee,
+        tick_spacing=tick_spacing,
+        hooks=NATIVE,
+        zero_for_one=True,
+        amount_specified=amount,
+    )
+
+
+def deepest_eth_usdc_tier(chain: str, block: int) -> tuple[int, int] | None:
+    """Pick the reference tier by quoting each and taking the best rate.
+
+    Least slippage on an identical probe is the cheapest available proxy for depth, and it
+    is measured rather than assumed — the tier that is deepest on Base today is not
+    guaranteed to be the one hard-coded last month.
+    """
+    pairs = [
+        (_eth_usdc_input(fee, ts, i, ETH_PROBE_WEI), block)
+        for i, (fee, ts) in enumerate(ETH_USDC_TIERS)
+    ]
+    results = quote_many(archive_url(chain), pool_manager(chain), pairs)
+    best, best_out = None, 0
+    for (fee, ts), r in zip(ETH_USDC_TIERS, results, strict=True):
+        if r.ok and r.expected > best_out:
+            best, best_out = (fee, ts), r.expected
+    if best is None:
+        return None
+    print(
+        f"  reference ETH/USDC pool: fee={best[0]} tickSpacing={best[1]} "
+        f"({best_out / ETH_PROBE_WEI * 1e18 / 1e6:,.0f} USDC/ETH at block {block})",
+        flush=True,
+    )
+    return best
+
+
 def eth_usd_at(chain: str, blocks: list[int]) -> dict[int, float]:
-    """ETH/USD at each block, from the deepest hookless WETH/USDC pool on that chain."""
-    weth, usdc = WETH.get(chain), USDC_BASE
-    if chain != "base" or not weth:
+    """ETH/USD at each block, from the deepest hookless ETH/USDC pool on that chain."""
+    if chain != "base":
+        return {}
+    unique = sorted(set(blocks))
+    if not unique:
         return {}
 
-    c0, c1 = sorted([weth, usdc], key=lambda a: int(a, 16))
-    one_eth = 10**18
-    pairs = [
-        (
-            RequoteInput(
-                tx_hash=f"0x{b:064x}",
-                log_index=0,
-                currency0=c0,
-                currency1=c1,
-                fee=500,
-                tick_spacing=10,
-                hooks="0x0000000000000000000000000000000000000000",
-                zero_for_one=(c0.lower() == weth),
-                amount_specified=one_eth,
-            ),
-            b,
-        )
-        for b in sorted(set(blocks))
-    ]
+    tier = deepest_eth_usdc_tier(chain, unique[len(unique) // 2])
+    if tier is None:
+        return {}
+    fee, tick_spacing = tier
+
+    pairs = [(_eth_usdc_input(fee, tick_spacing, b, ETH_PROBE_WEI), b) for b in unique]
+
+    def show(done: int, total: int, rows: int) -> None:
+        if done % 50 == 0 or done == total:
+            print(f"    eth/usd {done}/{total} batches, {rows:,} blocks", flush=True)
+
     out: dict[int, float] = {}
     for r, (_, b) in zip(
-        quote_many(archive_url(chain), pool_manager(chain), pairs), pairs, strict=True
+        quote_many(archive_url(chain), pool_manager(chain), pairs, progress=show),
+        pairs,
+        strict=True,
     ):
         if r.ok and r.expected > 0:
-            out[b] = r.expected / 1e6
+            # USDC has 6 decimals; scale the probe back up to one whole ETH.
+            out[b] = r.expected / 1e6 * (10**18 / ETH_PROBE_WEI)
     return out
 
 
