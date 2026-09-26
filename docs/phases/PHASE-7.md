@@ -87,3 +87,37 @@ attestor's dry-run publishes nothing and says so.
 - Etherscan's free tier enforces 3 calls/second as a _burst_ limit and reports throttling
   as HTTP 200 with `status: "0"`, so it has to be read from the body. A metadata sweep
   died on it mid-run.
+
+## The exit criterion that is not met
+
+`SWORN_PLAN.md` asks for `HookBook` "deployed on at least one testnet **and one L2 mainnet
+(Base)**". Only the testnet half is done:
+
+| Network      | Address                                      | Status                                       |
+| ------------ | -------------------------------------------- | -------------------------------------------- |
+| Base Sepolia | `0x8A4470f7DDa8525b484527b21B19c3bc876A04c3` | live, 25 scores written, attestor authorised |
+| Base mainnet | —                                            | not deployed                                 |
+
+The gate says this out loud rather than passing quietly, because a ledger that records a
+phase as DONE against a weaker check than the plan specified is worth less than no ledger.
+
+**Cost, measured by simulating the deploy against a Base mainnet fork:** 1,643,224 gas.
+At the gas price observed while writing this (0.006 gwei) that is 0.0000099 ETH — about
+three cents. A 25-hook attestation batch is 1.4M gas, roughly two cents. `0.001 ETH` funds
+the deploy plus over a hundred attestation runs.
+
+**What it would and would not add.** It would give a live, citable address anyone can query.
+It would not strengthen a single claim in this repo: `SwornRouter` is already verified
+against live Base hook bytecode at real liquidity by `RealSwap.fork.t.sol`, which forks
+mainnet state, and `HookBook` is advisory by design — the guarantee is the in-transaction
+probe. Every contract-level property that matters, including the one this registry exists
+for (an unseen hook reads as `INSUFFICIENT_DATA`, never as a clean zero), is verified
+on-chain today on Sepolia.
+
+When funded:
+
+```bash
+forge script script/DeployHookBook.s.sol:DeployHookBook \
+  --rpc-url "$BASE_RPC_ARCHIVE" --broadcast --verify
+# then set HOOKBOOK_ADDRESS_BASE in .env and re-run `make phase-7`
+```

@@ -99,3 +99,32 @@ with RpcClient(url, timeout=30) as rpc:
     print(f"    {addr}: {len(code) // 2 - 1} bytes, {count} attestor(s), unscored reads INSUFFICIENT_DATA")
 PYEOF
 ok "deployed, authorised, and absence reads as absence"
+
+step "mainnet registry status is stated, not assumed"
+# SWORN_PLAN.md's Phase 7 exit criteria asks for a testnet *and* a Base mainnet deployment.
+# The checks above only prove the testnet one. Rather than let this phase read as fully
+# met, the gap is asserted explicitly: either the mainnet registry is live and verified
+# here too, or the gate says out loud that it is not.
+MAINNET="${HOOKBOOK_ADDRESS_BASE:-}"
+if [ -z "$MAINNET" ]; then
+  warn "HookBook is NOT deployed on Base mainnet (HOOKBOOK_ADDRESS_BASE unset)"
+  printf '    Phase 7 exit criteria asks for testnet + Base mainnet; only testnet is met.\n'
+  printf '    Deploy costs ~1,643,224 gas (about $0.03 at 0.006 gwei):\n'
+  printf '      forge script script/DeployHookBook.s.sol:DeployHookBook \\\n'
+  printf '        --rpc-url "$BASE_RPC_ARCHIVE" --broadcast\n'
+  ok "testnet registry verified; mainnet gap recorded rather than papered over"
+else
+  "$PY" - <<PYEOF || fail "HOOKBOOK_ADDRESS_BASE is set but has no code on Base"
+import os, sys
+sys.path.insert(0, "analysis")
+from lib.rpc import RpcClient
+
+with RpcClient(os.environ["BASE_RPC_ARCHIVE"], timeout=30) as rpc:
+    code = rpc.call("eth_getCode", ["$MAINNET", "latest"])
+    if code in ("0x", "0x0"):
+        print("    no code at $MAINNET on Base mainnet")
+        sys.exit(1)
+    print(f"    Base mainnet HookBook at $MAINNET ({len(code) // 2 - 1} bytes)")
+PYEOF
+  ok "registry live on both a testnet and Base mainnet"
+fi

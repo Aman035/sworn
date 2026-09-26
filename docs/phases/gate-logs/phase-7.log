@@ -2,7 +2,7 @@
 No files changed, compilation skipped
 
 Ran 19 tests for test/unit/HookBook.t.sol:HookBookTest
-[PASS] testFuzz_scoreRoundTrips(uint8,uint32,uint64) (runs: 512, μ: 74428, ~: 74339)
+[PASS] testFuzz_scoreRoundTrips(uint8,uint32,uint64) (runs: 512, μ: 74457, ~: 74339)
 [PASS] test_attestorCountTracksTheSet() (gas: 37796)
 [PASS] test_batchLengthMismatchReverts() (gas: 15814)
 [PASS] test_batchWrite() (gas: 119132)
@@ -21,9 +21,9 @@ Ran 19 tests for test/unit/HookBook.t.sol:HookBookTest
 [PASS] test_staleUpdateIsRejected() (gas: 71640)
 [PASS] test_tamperedSignedScoreIsRejected() (gas: 23216)
 [PASS] test_unscoredHookReadsAsInsufficientData() (gas: 20634)
-Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 15.61ms (18.20ms CPU time)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 14.96ms (16.99ms CPU time)
 
-Ran 1 test suite in 127.69ms (15.61ms CPU time): 19 tests passed, 0 failed, 0 skipped (19 total tests)
+Ran 1 test suite in 126.63ms (14.96ms CPU time): 19 tests passed, 0 failed, 0 skipped (19 total tests)
   ok  auth, freshness, signatures and replay protection
 ==> flag bits agree across Solidity, config and docs
 .....                                                                    [100%]
@@ -32,18 +32,25 @@ Ran 1 test suite in 127.69ms (15.61ms CPU time): 19 tests passed, 0 failed, 0 sk
 ...............                                                          [100%]
   ok  score, decay and every contribution match METRICS.md
 ==> scores.json
-    69,242 hooks: 0 scored, 69,242 insufficient data
+    69,242 hooks: 25 scored, 69,217 insufficient data
   ok  every score carries the snapshot it can be re-derived from
 ==> attestor refuses unprovenanced or unmeasured scores
   ok  skips unscored hooks rather than writing them as zero
 ==> attestor dry-run against the real scores file
-  base: 69242 hooks in document, 0 publishable
+  base: 69242 hooks in document, 25 publishable
   snapshot 0xa5379268608d769898a5e9a90b37270978167c233a24381dc307a7b1adfc3205
-  0 batch(es) of up to 100
-  nothing scored yet — nothing to publish
+  1 batch(es) of up to 100
+  dry run: not sending
 
-base: 0/69242 published in 0 batch(es) (dry run)
+base: 25/69242 scored, 1/1 batch(es) written (dry run)
   ok  attestor runs end to end
 ==> HookBook is deployed
     0x8A4470f7DDa8525b484527b21B19c3bc876A04c3: 5140 bytes, 1 attestor(s), unscored reads INSUFFICIENT_DATA
   ok  deployed, authorised, and absence reads as absence
+==> mainnet registry status is stated, not assumed
+ warn HookBook is NOT deployed on Base mainnet (HOOKBOOK_ADDRESS_BASE unset)
+    Phase 7 exit criteria asks for testnet + Base mainnet; only testnet is met.
+    Deploy costs ~1,643,224 gas (about $0.03 at 0.006 gwei):
+      forge script script/DeployHookBook.s.sol:DeployHookBook \
+        --rpc-url "$BASE_RPC_ARCHIVE" --broadcast
+  ok  testnet registry verified; mainnet gap recorded rather than papered over

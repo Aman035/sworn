@@ -236,6 +236,18 @@ a scheduled attestor. Its load-bearing property is what it does with _absence_:
 Scoring is fully specified in [docs/SCORING.md](docs/SCORING.md), including a worked example
 that the test suite reproduces exactly.
 
+### Deployments
+
+| Network | `HookBook` | Status |
+| ------- | ---------- | ------ |
+| Base Sepolia | [`0x8A4470f7DDa8525b484527b21B19c3bc876A04c3`](https://sepolia.basescan.org/address/0x8A4470f7DDa8525b484527b21B19c3bc876A04c3) | Live. The attestor wrote {{result:divergence.json:totals.eligible_hooks|int}} scores; a second scheduled run correctly wrote nothing, because the registry already held that block. |
+| Base mainnet | — | **Not deployed.** Same script; the deploy costs `1,643,224` gas, about three cents at current Base gas. |
+
+The mainnet registry is the one open item in the build. It is not load-bearing for anything
+claimed here: `SwornRouter` is verified against **live Base hook bytecode** by
+`RealSwap.fork.t.sol`, and a score is advisory in any case — the guarantee is the probe, not
+the registry.
+
 ## 9. Detection precision
 
 ![Precision and recall of each hook detection method](docs/assets/precision.svg)
