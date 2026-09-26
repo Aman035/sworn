@@ -132,8 +132,8 @@ def table_divergent_hooks() -> str:
     doc = _load("divergence.json")
     scores = {h["address"]: h for h in _load("scores.json")["hooks"]}
     rows = [
-        "| Hook (Base) | Fills | Charged | Over-delivered | Net rate | Median excess | Score |",
-        "| ----------- | ----: | ------: | -------------: | -------: | ------------: | ----: |",
+        "| Hook (Base) | Fills | Charged | Over-delivered | Median excess |",
+        "| ----------- | ----: | ------: | -------------: | ------------: |",
     ]
     for h in sorted(
         (h for h in doc["hooks"] if h["divergent"]),
@@ -144,82 +144,15 @@ def table_divergent_hooks() -> str:
         rows.append(
             f"| {_scan('https://basescan.org', h['address'])}{listed} "
             f"| {h['fills']:,} | {h['charged_fills']:,} | {h['overdelivered_fills']:,} "
-            f"| {h['net_charged_rate'] * 100:.0f}% "
-            f"| {h.get('median_charged_excess_bps', 0):,.0f} bps "
-            f"| {scores.get(h['address'], {}).get('score', 'n/a')} |"
+            f"| {h.get('median_charged_excess_bps', 0):,.0f} bps |"
         )
     return "\n".join(rows)
 
 
-def table_detection() -> str:
-    """Precision and recall per detection method, against settled trades."""
-    doc = _load("precision.json")
-    # A bare 0.00 recall invites the question it does not answer: out of how many? The
-    # found/missed counts are the denominator, and they are small enough that hiding them
-    # would be the dishonest choice.
-    rows = [
-        "| Method | What it looks at | Found | Missed | False alarms | Recall |",
-        "| ------ | ---------------- | ----: | -----: | -----------: | -----: |",
-    ]
-    looks_at = {
-        "static": "bytecode contains an environment opcode",
-        "dynamic": "quotes disagree under permuted `eth_call`",
-        "trace": "an environment opcode *executes* while pricing",
-        "union": "any of the above",
-        "settled_trade": "re-quoting real fills against real prior state",
-    }
-    for m in doc["methods"]:
-        name = str(m["method"])
-        rows.append(
-            f"| `{name}` | {looks_at.get(name, '')} "
-            f"| {int(m['tp'])} | {int(m['fn'])} | {int(m['fp'])} "
-            f"| {float(m['recall']):.2f} |"
-        )
-    return "\n".join(rows)
-
-
-def table_attribution() -> str:
-    """Which products send swaps into the hooks measured as charging more than they quote.
-
-    One row per product, not per router contract: Uniswap and 0x each run several, and
-    splitting them made the table longer without making it say anything more. The
-    dashboard aggregates the same way, and a README that disagreed with it would be worse
-    than either.
-    """
-    doc = _load("attribution.json")
-    by_product: dict[str, dict[str, int]] = {}
-    for p in doc["products"]:
-        if p["product"] == "unlabeled":
-            continue
-        row = by_product.setdefault(p["product"], {"into": 0, "total": 0})
-        row["into"] += int(p["fills_into_divergent"])
-        row["total"] += int(p.get("fills_total", 0))
-
-    ranked = sorted(
-        ((name, v) for name, v in by_product.items() if v["into"] > 0),
-        key=lambda kv: -kv[1]["into"],
-    )[:6]
-    total = sum(int(p["fills_into_divergent"]) for p in doc["products"])
-    named = sum(v["into"] for _, v in ranked)
-
-    rows = [
-        "| Product | Swaps into those hooks | Share of its v4 swaps |",
-        "| ------- | ---------------------: | --------------------: |",
-    ]
-    for name, v in ranked:
-        share = v["into"] / v["total"] if v["total"] else 0.0
-        rows.append(f"| {name} | {v['into']:,} | {share * 100:.1f}% |")
-    rows.append(
-        f"| routers nobody has identified | {total - named:,} "
-        f"| {float(doc['unlabeled_share']) * 100:.1f}% of all fills |"
-    )
-    return "\n".join(rows)
 
 
 TABLES = {
     "divergent_hooks": table_divergent_hooks,
-    "detection": table_detection,
-    "attribution": table_attribution,
 }
 
 

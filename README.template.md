@@ -51,10 +51,18 @@ received:
 - the worst is **in Uniswap's hooklist with verified source**, taking a median
   {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].median_charged_excess_bps|bps}} above its stated fee, worst observed take {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].max_charged_excess_bps|bpspct}}
 
-Roughly {{result:divergence.json:noise_floor.estimated_false_positive_share|pct}} of charged fills in that sample are measurement error, estimated from
-the fills that measured as **over-delivered**, which a hook cannot do. That noise floor is
-subtracted before any hook is named, which is why the headline is {{result:divergence.json:totals.divergent_hooks|int}} and not a larger
-number. Every hook, every fill and every snapshot hash is on the
+Named, because a claim that "some hooks charge" is unfalsifiable and a claim about
+`0x1f91c998…` is one you can go and check:
+
+{{table:divergent_hooks}}
+
+`✓ hooklist` means the hook is listed by Uniswap with verified source. **Over-delivered**
+counts fills that came out *better* than quoted, which a hook cannot do, so those are
+pure measurement error; because the error is symmetric, their count estimates the false
+positives sitting in the charged column beside them. Roughly {{result:divergence.json:noise_floor.estimated_false_positive_share|pct}} of charged fills
+in this sample are error, and a hook is only named once its charged fills beat its own
+over-delivered tail. That is why the headline is {{result:divergence.json:totals.divergent_hooks|int}} and not a larger number. Every
+hook, fill and snapshot hash is on the
 [dashboard](https://aman035.github.io/sworn/hooks/).
 
 **And you cannot see any of this in the logs.** `PoolManager` emits `Swap` *before*
