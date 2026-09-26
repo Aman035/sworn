@@ -86,7 +86,7 @@ async function main() {
         const band = page.locator('.band, .panel', { hasText: shot.section }).first();
         if ((await band.count()) === 0) throw new Error(`no band matching "${shot.section}"`);
         // Sections on the landing reveal themselves when scrolled to, so a shot taken
-        // without scrolling captures a transparent element — 14 KB of nothing.
+        // without scrolling captures a transparent element. 14 KB of nothing.
         await band.scrollIntoViewIfNeeded();
         await page.waitForTimeout(800);
         const opacity = await band.evaluate((el) => getComputedStyle(el).opacity);

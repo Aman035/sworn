@@ -1,6 +1,6 @@
 """Decode Uniswap v4 hook permissions from the hook address.
 
-v4 encodes a hook's permissions in the low 14 bits of its own address — that is why hook
+v4 encodes a hook's permissions in the low 14 bits of its own address: that is why hook
 deployments are mined with CREATE2 salts. Constants mirror
 `contracts/lib/v4-core/src/libraries/Hooks.sol` at the pinned tag `v4.0.0`; the Phase 2
 gate checks the two agree by parsing that file, so a dependency bump cannot silently
@@ -71,7 +71,7 @@ def permissions(address: str) -> dict[str, bool]:
 
 
 def names(address: str) -> list[str]:
-    """Set permissions, in Hooks.sol order — stable output for snapshots and diffs."""
+    """Set permissions, in Hooks.sol order. Stable output for snapshots and diffs."""
     bits = bitmap(address)
     return [name for name, mask in FLAGS.items() if bits & mask]
 

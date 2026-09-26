@@ -23,16 +23,16 @@ need forge
 [ -f .env ] && set -a && . ./.env && set +a
 
 # ---------------------------------------------------------------------------- act 1
-step "act 1 — a hook that quotes one price and charges another"
+step "act 1: a hook that quotes one price and charges another"
 (cd contracts && forge test --match-contract DemoTest -vv) \
   || fail "the narrated demo failed; the story is no longer true"
 ok "spoof shown, probed, and routed around"
 
 # ---------------------------------------------------------------------------- act 2
 if [ -z "${BASE_RPC_ARCHIVE:-}" ]; then
-  warn "BASE_RPC_ARCHIVE not set — skipping the mainnet act"
+  warn "BASE_RPC_ARCHIVE not set. Skipping the mainnet act"
 else
-  step "act 2 — the same router against real Base hooks, on anvil"
+  step "act 2: the same router against real Base hooks, on anvil"
   anvil --fork-url "$BASE_RPC_ARCHIVE" --fork-block-number 51700000 \
         --port "$ANVIL_PORT" --silent &
   ANVIL_PID=$!
@@ -56,7 +56,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------- act 3
-step "act 3 — the dashboard, from the same result files"
+step "act 3: the dashboard, from the same result files"
 if [ -d app/node_modules ]; then
   (cd app && npm run build >/dev/null) || fail "dashboard build failed"
   npx --yes serve app/out -l 4321 >/dev/null 2>&1 &
@@ -67,7 +67,7 @@ if [ -d app/node_modules ]; then
   ok "dashboard serving on http://127.0.0.1:4321"
   printf '\n    Leave it running with: cd app && npm run dev\n\n'
 else
-  warn "app/node_modules missing — run 'cd app && npm install' to include the dashboard"
+  warn "app/node_modules missing. Run 'cd app && npm install' to include the dashboard"
 fi
 
 step "done"

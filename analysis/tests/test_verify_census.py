@@ -1,4 +1,4 @@
-"""Reconciliation logic — the check that the census is not silently incomplete."""
+"""Reconciliation logic: the check that the census is not silently incomplete."""
 
 from __future__ import annotations
 

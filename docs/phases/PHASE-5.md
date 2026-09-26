@@ -1,4 +1,4 @@
-# Phase 5 — `SwornRouter` and toxic fixtures
+# Phase 5. `SwornRouter` and toxic fixtures
 
 > Status: DONE · Gate: `make phase-5`
 
@@ -10,7 +10,7 @@ toxic pattern.
 ## The claim, measured
 
 A gas-price-sniffing hook quotes free to a simulator and charges 18% to a real
-transaction — the median take 0x reported for the Base hook `0x800cef…a5c7`. Measured by
+transaction: the median take 0x reported for the Base hook `0x800cef…a5c7`. Measured by
 `test_reportSpoofGapAndRecovery`:
 
 ```
@@ -25,12 +25,12 @@ Sworn returns the user to the honest price exactly.
 
 ## What it costs
 
-From `SwornGasTest`, against `NaiveRouter` — a slippage-only router that does what a
+From `SwornGasTest`, against `NaiveRouter`: a slippage-only router that does what a
 competent router does today:
 
 | Route                         |     Gas | Overhead |
 | ----------------------------- | ------: | -------: |
-| NaiveRouter, 1 pool, no probe | 111,553 |        — |
+| NaiveRouter, 1 pool, no probe | 111,553 |. |
 | `swornSwap`, 1 candidate      | 204,270 |  +92,717 |
 | `swornSwap`, 2 candidates     | 275,159 | +163,606 |
 | `swornSwap`, 3 candidates     | 341,845 | +230,292 |
@@ -61,13 +61,13 @@ Every capability in `THREAT_MODEL.md` has a fixture and a passing test.
 Two of these are worth singling out.
 
 **The hook observes exactly the same gas.** `RecordingGasSniffHook` measured 1,932,728 in
-both the probe and the execution — identical. That is EIP-150's 63/64 rule not biting,
+both the probe and the execution. Identical. That is EIP-150's 63/64 rule not biting,
 demonstrated rather than argued.
 
 **The safety net is tested by defeating it.** Every other fixture loses because the EVM
 gives a hook no way to distinguish a probe from an execution. `CheatingDivergentHook`
 cheats: it keeps its invocation count _host-side_ via cheatcodes, where the probe's revert
-cannot reach, quotes free and then charges. No deployable hook can do this — that is the
+cannot reach, quotes free and then charges. No deployable hook can do this: that is the
 point. The test proves that when the threat model's reasoning is wrong, the transaction
 reverts and the user's balance is unchanged. **Denial, not theft.**
 
@@ -95,14 +95,12 @@ reverts and the user's balance is unchanged. **Denial, not theft.**
   compile against the tag. Two versions would give the compiler two distinct
   `IPoolManager` types. See `ARCHITECTURE.md`.
 - **The gas table is a dedicated benchmark, not `forge test --gas-report`.** Gas
-  instrumentation interferes with `vm.txGasPrice`, which disarms the spoofing fixtures —
-  the report would keep passing while measuring nothing. Caught because two tests failed
+  instrumentation interferes with `vm.txGasPrice`, which disarms the spoofing fixtures: the report would keep passing while measuring nothing. Caught because two tests failed
   only under `--gas-report`.
 - **Probe and execution share one `runRoute` entry point.** The plan asks for
   byte-identical calldata; that is not literally achievable since the two calls must
   differ somehow. They share a selector and a prologue, and the only differing parameter
-  is read _after_ every externally observable call, so gas at hook entry is identical —
-  which is the property that actually matters, and is tested.
+  is read _after_ every externally observable call, so gas at hook entry is identical, which is the property that actually matters, and is tested.
 
 ## Friction (feeds FEEDBACK.md)
 

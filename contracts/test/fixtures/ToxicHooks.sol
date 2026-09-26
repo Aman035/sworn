@@ -33,7 +33,7 @@ contract HonestHook is SkimmingHook {
 }
 
 // ---------------------------------------------------------------------------------------
-// Environment sniffing — honest to a simulator, toxic to a real transaction
+// Environment sniffing. Honest to a simulator, toxic to a real transaction
 // ---------------------------------------------------------------------------------------
 
 /// @notice `eth_call` defaults `tx.gasprice` to 0. A real transaction cannot.
@@ -119,7 +119,7 @@ contract GasSniffHook is SkimmingHook {
 // ---------------------------------------------------------------------------------------
 
 /// @notice Fee from block randomness. Identical within a block, so a probe in the same
-///         transaction sees the *true* outcome — which is the point.
+///         transaction sees the *true* outcome, which is the point.
 contract DiceRollBlockHook is SkimmingHook {
     constructor(
         IPoolManager _pm
@@ -263,7 +263,7 @@ contract CallbackSniffHook is SkimmingHook {
 
 /// @notice Reverts for anything that is not a simulation.
 /// @dev Costs the user gas and pollutes routing, but takes nothing. Sworn catches the
-///      probe revert, marks the candidate unavailable and routes elsewhere — converting
+///      probe revert, marks the candidate unavailable and routes elsewhere. Converting
 ///      a failed transaction into a slightly more expensive successful one.
 contract RevertGriefHook is BaseTestHook {
     error Griefed();

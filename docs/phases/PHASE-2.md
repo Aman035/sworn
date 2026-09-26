@@ -1,4 +1,4 @@
-# Phase 2 — Hook census and base indexer
+# Phase 2. Hook census and base indexer
 
 > Status: DONE · Gate: `make phase-2`
 
@@ -24,8 +24,8 @@ Unichain is excluded: the available endpoint is on Alchemy's free tier, which ca
 **Base is not like the others.** 98.5% of its pools carry a hook, against 18–25%
 elsewhere. Hooked pools are not a niche on Base; they are the platform.
 
-**The distribution is extremely skewed.** 15.1M hooked pools come from 69,242 hooks — a
-mean of 218 pools per hook — but the single largest hook holds 8,170,323 pools, 54% of the
+**The distribution is extremely skewed.** 15.1M hooked pools come from 69,242 hooks: a
+mean of 218 pools per hook, but the single largest hook holds 8,170,323 pools, 54% of the
 chain, and it is allowlisted.
 
 **Presence of an environment opcode is almost meaningless.** Across all 69,242 Base hooks:
@@ -86,7 +86,7 @@ decoder cannot hide in the other.
   remains the right tool for the _live_ index in Phase 9; it was the wrong tool for a
   one-shot historical sweep.
 - **Volume and TVL are deferred to Phase 3.** They need `Swap` amounts and a price source.
-  `census.json` carries `volume_usd_30d: null` rather than an estimate — a fabricated
+  `census.json` carries `volume_usd_30d: null` rather than an estimate: a fabricated
   number is worse than a missing one.
 - **`metadata_hooks_covered` was added to the schema.** Etherscan is rate limited, so
   `upgradeable` and `verified` are counts _within the subset that was fetched_. Publishing
@@ -95,9 +95,8 @@ decoder cannot hide in the other.
 ## Friction (feeds FEEDBACK.md)
 
 - The `Swap` event's natspec says `amount0` is "the delta of the currency0 balance of the
-  pool", but `PoolManager.sol:241` emits `delta.amount0()` — the **swapper's** delta, the
+  pool", but `PoolManager.sol:241` emits `delta.amount0()`: the **swapper's** delta, the
   opposite sign. Anyone implementing from the documentation gets every fill backwards.
 - Provider behaviour varies enough that a single fetch strategy cannot work: QuickNode
   caps on _response size_ (413) while Alchemy caps on _block range_, and both emit
-  transient 5xx and node-level errors during long pulls. Each needs a different response —
-  shrink, wait, or retry — and conflating them either corrupts the data or wastes hours.
+  transient 5xx and node-level errors during long pulls. Each needs a different response. Shrink, wait, or retry, and conflating them either corrupts the data or wastes hours.

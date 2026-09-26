@@ -1,16 +1,16 @@
 """Generate the hooklist schema proposal and a worked sample from real measurements.
 
-The hooklist describes hooks by **identity** — who deployed it, is the source verified, is
-there an audit — and by **static permissions** decoded from the address. Neither answers
+The hooklist describes hooks by **identity**. Who deployed it, is the source verified, is
+there an audit, and by **static permissions** decoded from the address. Neither answers
 the question an integrator is actually asking, which is *what does this hook do to my
 users*. An address-keyed allowlist also cannot express that a listed hook was upgraded the
 block after it was listed, and on Base most hooks sit behind a proxy.
 
 This emits:
 
-* `docs/HOOKLIST_PROPOSAL.md` — the proposed fields, with the reasoning and the failure
+* `docs/HOOKLIST_PROPOSAL.md`: the proposed fields, with the reasoning and the failure
   each one prevents;
-* `data/results/hooklist_proposal.json` — the same fields filled in for every hook this
+* `data/results/hooklist_proposal.json`: the same fields filled in for every hook this
   repo has actually measured, so the PR arrives with data rather than with a schema.
 
 Every value comes from `data/results/*.json`; nothing here is hand-entered.
@@ -80,7 +80,7 @@ FIELDS: list[tuple[str, str, str]] = [
 def load(name: str) -> Any:
     path = RESULTS / name
     if not path.is_file():
-        raise SystemExit(f"{name} missing — run its pipeline first")
+        raise SystemExit(f"{name} missing. Run its pipeline first")
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -133,8 +133,7 @@ A proposal for [Uniswap/hooklist](https://github.com/Uniswap/hooklist), with dat
 
 ## The gap
 
-The hooklist describes a hook by **who made it** — deployer, verified source, audit link —
-and by the **static permissions** encoded in its address. Both are checkable and both are
+The hooklist describes a hook by **who made it**. Deployer, verified source, audit link, and by the **static permissions** encoded in its address. Both are checkable and both are
 useful. Neither answers the question an integrator turning on hooks-inclusive routing is
 actually asking: *what does this hook do to my users?*
 
@@ -143,7 +142,7 @@ Two specific failures follow:
 1. **Listing is permanent; bytecode is not.** {proxied:,} of the {hooks_total:,} hooks on
    Base sit behind a proxy. An address-keyed allowlist cannot express that a listed hook
    changed after it was listed. Of the {scored} hooks measured here, {upgradeable} are
-   upgradeable — a fact about which hooks carry the most volume, not a reason to drop the
+   upgradeable: a fact about which hooks carry the most volume, not a reason to drop the
    field.
 2. **Permissions are capability, not behaviour.** `beforeSwapReturnsDelta` says a hook
    *can* alter the amounts. Almost every interesting hook has it. It says nothing about
@@ -185,7 +184,7 @@ path{"" if worst is None else f". The highest score is {worst['divergenceScore']
 
 The same values are published on-chain by [`HookBook`](../contracts/src/HookBook.sol), so a
 generator can fill this section of the hooklist from a contract call rather than from a
-file anyone can edit — and `HookBook` already refuses to report an unmeasured hook as
+file anyone can edit, and `HookBook` already refuses to report an unmeasured hook as
 clean, returning `hasScore() == false` and `INSUFFICIENT_DATA` instead of a zero.
 
 ## What this proposal does not claim
@@ -205,7 +204,7 @@ clean, returning `hasScore() == false` and `INSUFFICIENT_DATA` instead of a zero
 def main() -> int:
     entries = build_entries()
     if not entries:
-        print("no scored hooks yet — run the scoring pipeline first", file=sys.stderr)
+        print("no scored hooks yet. Run the scoring pipeline first", file=sys.stderr)
         return 1
 
     scores_meta = load("scores.json")["meta"]

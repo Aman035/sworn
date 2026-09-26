@@ -41,7 +41,7 @@ class CompactResult:
 
 
 def shard_paths(directory: Path, prefix: str = SHARD_PREFIX) -> list[Path]:
-    """Complete shards only — `.parquet.tmp` files are in-progress writes."""
+    """Complete shards only. `.parquet.tmp` files are in-progress writes."""
     return sorted(p for p in directory.glob(f"{prefix}*.parquet") if not p.name.endswith(".tmp"))
 
 
@@ -78,7 +78,7 @@ def compact(
     """Decode `raw` into parquet shards, record progress, and remove the raw file.
 
     Rows are flushed on chunk boundaries, so peak memory is roughly `batch_rows` plus one
-    chunk's worth of logs — independent of how large the raw pull is.
+    chunk's worth of logs. Independent of how large the raw pull is.
     """
     if not raw.is_file():
         return CompactResult(None, 0, 0, None, 0)
@@ -97,7 +97,7 @@ def compact(
         """Write one shard atomically.
 
         A shard written in place is corrupt if the process dies mid-write, and parquet
-        gives no partial-read recovery — the footer is at the end. Writing to a temp file
+        gives no partial-read recovery: the footer is at the end. Writing to a temp file
         and renaming means a shard on disk is always complete and readable.
         """
         nonlocal rows, total
@@ -182,7 +182,7 @@ def load_shards(
 def parquet_safe(frame: pd.DataFrame) -> pd.DataFrame:
     """Return `frame` with any out-of-int64-range integer column stored as strings.
 
-    Parquet has no 128-bit integer, and a v4 swap amount routinely exceeds 2^63 — one fill
+    Parquet has no 128-bit integer, and a v4 swap amount routinely exceeds 2^63, one fill
     in the Base sample is 1.9e25 raw units. Writing such a column raises
     `OverflowError: Python int too large to convert to C long` **at write time**, which in
     this repo means after ten thousand transactions have already been traced. This is

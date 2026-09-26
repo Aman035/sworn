@@ -1,4 +1,4 @@
-# Phase 0 — Bootstrap, conventions, gating
+# Phase 0. Bootstrap, conventions, gating
 
 > Status: DONE · Gate: `make phase-0`
 
@@ -9,17 +9,17 @@ anything; it exists so that Phases 1–11 cannot quietly skip a check.
 
 ## What was built
 
-- **Monorepo layout** — matches `SWORN_PLAN.md` §1: `contracts/`, `analysis/`, `index/`,
+- **Monorepo layout**. Matches `SWORN_PLAN.md` §1: `contracts/`, `analysis/`, `index/`,
   `probe/`, `attestor/`, `sdk/`, `app/`, `data/`, `docs/`, `scripts/`.
-- **Foundry project** — `contracts/`, solc 0.8.26, via-IR, cancun, optimizer 800 runs.
+- **Foundry project**. `contracts/`, solc 0.8.26, via-IR, cancun, optimizer 800 runs.
   Dependencies are git submodules pinned by tag/commit (see `docs/ARCHITECTURE.md`).
-- **pnpm workspace** — five TS packages, strict `tsconfig.base.json`
+- **pnpm workspace**. Five TS packages, strict `tsconfig.base.json`
   (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`).
-- **Python package** — `analysis/` installs as `sworn_analysis` while keeping the
+- **Python package**. `analysis/` installs as `sworn_analysis` while keeping the
   plan's file paths (`analysis/lib/…`, `analysis/pipelines/…`); ruff + mypy + pytest.
-- **Gate runner** — `scripts/mark-phase.sh` runs the gate itself and appends to
+- **Gate runner**. `scripts/mark-phase.sh` runs the gate itself and appends to
   `PHASES.md` only on exit 0. There is no way to hand it a pre-computed pass.
-- **CI** — `ci.yml` (forge fmt/build/test, TS typecheck/test, ruff/pytest, actionlint),
+- **CI**. `ci.yml` (forge fmt/build/test, TS typecheck/test, ruff/pytest, actionlint),
   `fork.yml` (nightly + `run-fork-tests` label, needs archive RPC secrets),
   `attestor.yml` (hourly cron, gated off behind the `ATTESTOR_ENABLED` repo variable
   until Phase 7).
@@ -70,7 +70,7 @@ Full log: `docs/phases/gate-logs/phase-0.log`. Ledger row: `PHASES.md`.
 ## Friction (feeds FEEDBACK.md)
 
 - `Uniswap/v4-periphery` has no release tags, so downstream builders cannot pin to a
-  reviewed version — every integrator ends up pinning an arbitrary `main` commit.
+  reviewed version: every integrator ends up pinning an arbitrary `main` commit.
 - `Uniswap/permit2`'s only tag is the deployed address string, which is not a version.
 
 ## Next

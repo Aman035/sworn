@@ -1,4 +1,4 @@
-# Phase 7 — `HookBook` attestations and the attestor
+# Phase 7. `HookBook` attestations and the attestor
 
 > Status: DONE · Gate: `make phase-7`
 
@@ -18,32 +18,31 @@ verified on the explorer. Deploy cost 0.000008 ETH; one authorised attestor.
 0x-named Base hook, which nobody has scored, reads `flags = 1024`.
 
 This is the load-bearing decision in the whole design and it cuts both ways. A hook cannot
-earn a clean rating by not trading — otherwise the cheapest route to a perfect score would
+earn a clean rating by not trading. Otherwise the cheapest route to a perfect score would
 be to deploy, wait, and turn toxic later. And an honest builder's 0 means something
 precisely because it can only be reached by being measured.
 
 The property is preserved end to end: `HookBook` distinguishes the two cases on-chain, the
 attestor **skips** unscored hooks rather than writing zeros, the SDK's `explain()` renders
-"never measured — absence of a score is not evidence of honesty", and `isAcceptable()`
+"never measured. Absence of a score is not evidence of honesty", and `isAcceptable()`
 rejects them when a ceiling is requested.
 
 **Updates are monotonic in `asOfBlock`.** That is replay protection and staleness
 protection in one: a re-broadcast signature is rejected for the same reason a late arrival
-is — it describes a world that has been superseded.
+is: it describes a world that has been superseded.
 
 **Scores are advisory and the execution path never reads them.** A stale, wrong or absent
 score cannot cause a bad fill. At worst it costs gas by skipping a probe.
 
 ## Scoring
 
-`analysis/lib/scoring.py` reproduces the worked example in `METRICS.md` **exactly** —
-score 67, decay 0.8620, and all seven contributions to four decimals. That test found a
+`analysis/lib/scoring.py` reproduces the worked example in `METRICS.md` **exactly**. Score 67, decay 0.8620, and all seven contributions to four decimals. That test found a
 rounding error in the documentation rather than in the code: 0.5^(3/14) is 0.8620, not the
 0.8623 originally written.
 
 Behaviour carries 0.55 of the weight (charged rate and median excess); capabilities carry
 0.10 (upgradeable, owner switches). A proxy hook that has never charged anyone scores 5,
-not 50. Context flags — `ALLOWLISTED`, `VERIFIED`, `DYNAMIC_FEE`, `RETURNS_DELTA` — are
+not 50. Context flags. `ALLOWLISTED`, `VERIFIED`, `DYNAMIC_FEE`, `RETURNS_DELTA`. Are
 recorded but carry **no weight**, so a hook cannot buy a better number by getting listed,
 and cannot be punished for holding a permission it uses honestly. Asserted by
 `test_context_flags_carry_no_weight`.
@@ -96,20 +95,20 @@ attestor's dry-run publishes nothing and says so.
 | Network      | Address                                      | Status                                       |
 | ------------ | -------------------------------------------- | -------------------------------------------- |
 | Base Sepolia | `0x8A4470f7DDa8525b484527b21B19c3bc876A04c3` | live, 25 scores written, attestor authorised |
-| Base mainnet | —                                            | not deployed                                 |
+| Base mainnet |. | not deployed                                 |
 
 The gate says this out loud rather than passing quietly, because a ledger that records a
 phase as DONE against a weaker check than the plan specified is worth less than no ledger.
 
 **Cost, measured by simulating the deploy against a Base mainnet fork:** 1,643,224 gas.
-At the gas price observed while writing this (0.006 gwei) that is 0.0000099 ETH — about
+At the gas price observed while writing this (0.006 gwei) that is 0.0000099 ETH, about
 three cents. A 25-hook attestation batch is 1.4M gas, roughly two cents. `0.001 ETH` funds
 the deploy plus over a hundred attestation runs.
 
 **What it would and would not add.** It would give a live, citable address anyone can query.
 It would not strengthen a single claim in this repo: `SwornRouter` is already verified
 against live Base hook bytecode at real liquidity by `RealSwap.fork.t.sol`, which forks
-mainnet state, and `HookBook` is advisory by design — the guarantee is the in-transaction
+mainnet state, and `HookBook` is advisory by design: the guarantee is the in-transaction
 probe. Every contract-level property that matters, including the one this registry exists
 for (an unseen hook reads as `INSUFFICIENT_DATA`, never as a clean zero), is verified
 on-chain today on Sepolia.

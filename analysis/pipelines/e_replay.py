@@ -1,9 +1,9 @@
-"""Pipeline E — what Sworn would have protected.
+"""Pipeline E. What Sworn would have protected.
 
 Every other pipeline measures what hooks did. This one measures what the router is worth:
 for each measured fill, find the other pools that could have filled the same trade, quote
-them against the same pre-fill state, and ask whether `SwornRouter` — which probes every
-candidate inside the transaction and takes the best — would have delivered more.
+them against the same pre-fill state, and ask whether `SwornRouter`, which probes every
+candidate inside the transaction and takes the best. Would have delivered more.
 
     protection = best_candidate_output - realized_output      (when positive)
 
@@ -62,7 +62,7 @@ USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
 
 # A candidate quoting a large multiple of the executed route is far more likely a mispriced
 # dust pool than free money, and counting it is the single easiest way to fabricate an ROI
-# figure. In this sample the largest "protection" was 10,090,820 bps — a thousandfold — on a
+# figure. In this sample the largest "protection" was 10,090,820 bps: a thousandfold, on a
 # fill of 49 microtokens. Anything above this bound is counted and published separately
 # rather than folded into the headline.
 MAX_PLAUSIBLE_PROTECTION_BPS = 5_000.0
@@ -119,7 +119,7 @@ ETH_USDC_TIERS: tuple[tuple[int, int], ...] = ((500, 10), (3000, 60), (100, 1), 
 def _eth_usdc_input(fee: int, tick_spacing: int, tag: int, amount: int) -> RequoteInput:
     # Native ETH, not WETH: v4 pools on Base quote ETH/USDC against `address(0)`, and the
     # WETH/USDC pools are far thinner. Quoting the wrong one gave 880 USDC per ETH against
-    # a true 2,660 — a price feed that is wrong by a factor of three is worse than none.
+    # a true 2,660: a price feed that is wrong by a factor of three is worse than none.
     return RequoteInput(
         tx_hash=f"0x{tag:064x}",
         log_index=0,
@@ -137,7 +137,7 @@ def deepest_eth_usdc_tier(chain: str, block: int) -> tuple[int, int] | None:
     """Pick the reference tier by quoting each and taking the best rate.
 
     Least slippage on an identical probe is the cheapest available proxy for depth, and it
-    is measured rather than assumed — the tier that is deepest on Base today is not
+    is measured rather than assumed: the tier that is deepest on Base today is not
     guaranteed to be the one hard-coded last month.
     """
     pairs = [
@@ -194,7 +194,7 @@ def effective_gas_prices(chain: str, tx_hashes: list[str], *, workers: int = 8) 
     """Per-fill gas price, so overhead is charged at what that trade actually paid.
 
     Concurrent because this is one round trip per transaction and a ten-thousand-fill
-    sample makes it the slowest step in the pipeline by an order of magnitude — longer
+    sample makes it the slowest step in the pipeline by an order of magnitude. Longer
     than quoting every candidate route.
     """
     from concurrent.futures import ThreadPoolExecutor

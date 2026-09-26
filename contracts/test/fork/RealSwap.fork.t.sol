@@ -19,7 +19,7 @@ import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.so
 ///
 /// @dev The other fork tests assert that the router never retains value, which a revert
 ///      also satisfies. This one asserts the harder thing: that a swap through a live
-///      mainnet hook **completes**, pays out, and passes the divergence check — so the
+///      mainnet hook **completes**, pays out, and passes the divergence check, so the
 ///      guarantee is not merely a well-defended way of refusing to trade.
 ///
 ///      ETH/USDC was chosen deliberately. An earlier version of this test routed into a
@@ -110,7 +110,7 @@ contract RealSwapForkTest is Test {
 
         assertGt(out, 0, "router reported no output");
         // The router's return value is the user's money, so it must be the money that moved
-        // — not an internal figure that happens to be positive.
+        //, not an internal figure that happens to be positive.
         assertEq(delivered, out, "reported output does not match tokens received");
         assertEq(address(sworn).balance, 0, "router retained native value");
         assertEq(IERC20Minimal(Currency.unwrap(USDC)).balanceOf(address(sworn)), 0, "router retained USDC");

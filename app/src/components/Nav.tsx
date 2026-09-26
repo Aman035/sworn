@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 /**
- * `[=]` — the assertion the router makes, `executedDelta == probed[chosen]`: equality,
+ * `[=]`: the assertion the router makes, `executedDelta == probed[chosen]`: equality,
  * enforced inside a boundary. Inline rather than an <img> so it inherits `currentColor`
  * and stays crisp at every size the nav uses.
  */

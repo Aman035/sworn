@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 export interface ScoreRow {
   chain: string;
   address: `0x${string}`;
-  /** null means the hook has too little evidence to score — not that it is clean. */
+  /** null means the hook has too little evidence to score, not that it is clean. */
   score: number | null;
   flags_bitmap: number;
   flags: string[];
@@ -32,7 +32,7 @@ export function loadScores(path: string): ScoresDocument {
   if (!doc.meta?.snapshots?.length) {
     // A score without provenance cannot be re-derived, which is the only thing that makes
     // it worth more than an opinion.
-    throw new AttestorError(`${path}: no meta.snapshots — refusing to attest unprovenanced scores`);
+    throw new AttestorError(`${path}: no meta.snapshots. Refusing to attest unprovenanced scores`);
   }
   if (!Array.isArray(doc.hooks)) {
     throw new AttestorError(`${path}: no hooks array`);
@@ -44,8 +44,8 @@ export function loadScores(path: string): ScoresDocument {
  * The rows that are actually publishable.
  *
  * Unscored hooks are skipped rather than written as 0. Writing them would make
- * "unmeasured" indistinguishable from "measured clean" on-chain — the exact confusion
- * `HookBook` exists to avoid — and would burn gas saying nothing.
+ * "unmeasured" indistinguishable from "measured clean" on-chain: the exact confusion
+ * `HookBook` exists to avoid, and would burn gas saying nothing.
  */
 export function publishable(doc: ScoresDocument, chain: string): ScoreRow[] {
   return doc.hooks.filter(

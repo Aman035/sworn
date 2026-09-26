@@ -1,5 +1,5 @@
 /**
- * sworn-attestor — publish computed hook scores to `HookBook`.
+ * sworn-attestor. Publish computed hook scores to `HookBook`.
  *
  * Run on a schedule (see `.github/workflows/attestor.yml`). Reads
  * `data/results/scores.json`, which a pipeline produced from a hashed snapshot, and
@@ -79,7 +79,7 @@ export interface AttestReport {
   skipped: number;
 }
 
-/** `StaleUpdate(uint64,uint64)` — the registry already holds this block or newer. */
+/** `StaleUpdate(uint64,uint64)`: the registry already holds this block or newer. */
 export const STALE_UPDATE_SELECTOR = '0xecef4381';
 
 export function isStaleUpdate(error: unknown): boolean {
@@ -112,7 +112,7 @@ export async function attest(options: AttestOptions): Promise<AttestReport> {
   if (rows.length === 0) {
     // Not an error: before Phase 3 produces behavioural evidence this is the expected
     // state, and writing zeros would be worse than writing nothing.
-    log('  nothing scored yet — nothing to publish');
+    log('  nothing scored yet. Nothing to publish');
     return {
       chain,
       total: doc.hooks.length,

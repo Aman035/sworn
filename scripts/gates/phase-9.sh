@@ -14,7 +14,7 @@ ok "static export produced"
 step "every page renders real measurements"
 # Deliberately asserted against the built HTML rather than through a browser: the export is
 # fully static, so a browser would only confirm that Chrome can display a string already in
-# the file. What these tests catch is the failure this dashboard is actually prone to — a
+# the file. What these tests catch is the failure this dashboard is actually prone to: a
 # result file changing shape and every figure silently rendering `undefined` or `NaN` while
 # the layout still looks perfect.
 (cd app && npx vitest run >/tmp/sworn-app-test.txt 2>&1) \

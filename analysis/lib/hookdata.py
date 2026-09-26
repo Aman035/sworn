@@ -4,7 +4,7 @@
 hook free to price on it is a hook that will be measured against a call it never received
 if the field is guessed.
 
-Decoding router calldata was the obvious approach and is the wrong one — it needs a
+Decoding router calldata was the obvious approach and is the wrong one: it needs a
 decoder per router, every router encodes differently, and the two Universal Router
 deployments on Base do not even use the standard `execute` selector. Tracing the
 transaction and reading the argument the PoolManager was actually handed is

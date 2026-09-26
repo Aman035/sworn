@@ -1,4 +1,4 @@
-# SWORN — Build Plan for Claude Code
+# SWORN. Build Plan for Claude Code
 
 > **Sworn**: execution-integrity for Uniswap v4. Toxic hooks quote one price to simulators and deliver another at execution. Sworn (1) measures that gap across every hooked pool on every chain, continuously; (2) makes it impossible to exploit by moving the quote _inside_ the transaction and selecting the route at execution time; (3) publishes on-chain attestations that wallets, aggregators and agents can read in one call.
 >
@@ -75,7 +75,7 @@ sworn/
 
 Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit criteria → Pitfalls.**
 
-### Phase 0 — Bootstrap, conventions, gating
+### Phase 0. Bootstrap, conventions, gating
 
 **Objective.** A repo where every later phase can be checked mechanically.
 
@@ -94,7 +94,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 
 ---
 
-### Phase 1 — Story, sources, metric definitions
+### Phase 1. Story, sources, metric definitions
 
 **Objective.** Freeze what we are measuring and why, before touching data. This prevents drifting numbers later.
 
@@ -102,7 +102,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 
 1. `docs/STORY.md`: the five claims from §0, each with the external evidence that motivates it and the internal artifact that will prove it (table: claim → source → our artifact → phase).
 2. `docs/SOURCES.md`: the external reports we reference (0x "Uniswap v4 hooks were a mistake", Enso "Toxic Pools", the hackmd consolidated impact report Enso links, Uniswap hooklist repo and schema, Uniswap "Access msg.sender inside a hook" guide, Uniswap Trading API `hooksOptions`). For each: URL, date, the exact figures we cite, and a note that we _reproduce_ rather than _reuse_ their numbers.
-3. `docs/METRICS.md` — precise definitions:
+3. `docs/METRICS.md`. Precise definitions:
    - **Expected output** of a fill: output of the identical swap (same pool, same direction, same `amountSpecified`, same `sqrtPriceLimitX96`, same `hookData`) evaluated against the pool state immediately _before_ the fill's transaction. Primary method: Foundry `vm.rollFork(txHash)` (state after all prior txs in the block) + `V4Quoter`. Secondary (cheap) method: quote at block `N-1` end state; flagged `approx=true`.
    - **Realized output**: from the `Swap` event deltas of the fill.
    - **Shortfall** = `(expected − realized) / expected`. **Take** = shortfall in bps, positive means user got less.
@@ -115,7 +115,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
    - **Front-end attribution**: `Swap.sender` → router → product mapping table (`analysis/data/routers.csv`, hand-curated with sources).
    - **Protected value (Sworn replay)**: for a charged fill, `max(0, fallbackOutput − realized)` where `fallbackOutput` is the output of the best hookless pool for the same pair at the same state, minus estimated probe gas in output-token terms.
    - **Divergence score (0–100)** formula and its inputs (charged rate, median excess, intermittency, env-sensitivity, owner switches, upgradeability, revert-gating), with weights in config and a worked example.
-4. `docs/THREAT_MODEL.md` (first draft): attacker capabilities (env sniffing, dice-roll, owner switch, sender-based whitelisting incl. whitelisting _our router_, gas-left sniffing, callbacks into the router, revert-griefing), what Sworn guarantees against each, what it cannot (a hook honest to everyone but bad for LPs; nondeterminism sourced from state Sworn cannot roll back — there is none inside a tx, document why).
+4. `docs/THREAT_MODEL.md` (first draft): attacker capabilities (env sniffing, dice-roll, owner switch, sender-based whitelisting incl. whitelisting _our router_, gas-left sniffing, callbacks into the router, revert-griefing), what Sworn guarantees against each, what it cannot (a hook honest to everyone but bad for LPs; nondeterminism sourced from state Sworn cannot roll back. There is none inside a tx, document why).
 5. `docs/ARCHITECTURE.md` (skeleton): components, data flow diagram (mermaid), chain list, RPC requirements (archive + `debug_traceCall`).
 
 **Gate (`make phase-1`).** A docs linter: every metric in `METRICS.md` has a definition, a parameter in `analysis/config.yaml`, and a named output field in `analysis/schemas/results.schema.json`; `STORY.md` claim table has no empty cells; mermaid renders (`@mermaid-js/mermaid-cli` smoke).
@@ -124,7 +124,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 
 ---
 
-### Phase 2 — Hook census and base indexer
+### Phase 2. Hook census and base indexer
 
 **Objective.** Enumerate every v4 hook and pool on target chains, with flags, TVL and volume. This is the denominator for everything.
 
@@ -135,7 +135,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 3. Bytecode fetch + hash for every hook (`analysis/pipelines/a_census.py` → `data/snapshots/census/`). Detect EIP-1967 implementation slot (upgradeable), `Ownable`-style selectors, `pause` selectors. Fetch verified source from Etherscan-family APIs where available; store `verified: bool`.
 4. TVL/volume: per pool, 30-day volume in USD from `Swap` amounts × a price source (Uniswap v3/v4 stable-pair TWAPs for major assets; fall back to CoinGecko snapshot for the rest; record which). Aggregate per hook.
 5. Pull `Uniswap/hooklist` `hooklist.json`; join on (chain, address); store `allowlisted: bool` and their `properties`.
-6. `data/results/census.json`: per chain — hooks total, by flag combination, with returns-delta, dynamic-fee, upgradeable, verified, allowlisted; top 100 hooks by volume.
+6. `data/results/census.json`: per chain. Hooks total, by flag combination, with returns-delta, dynamic-fee, upgradeable, verified, allowlisted; top 100 hooks by volume.
 
 **Gate (`make phase-2`).**
 
@@ -150,13 +150,13 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 
 ---
 
-### Phase 3 — Settled-trade divergence, intermittency, attribution (analyses B, C, D)
+### Phase 3. Settled-trade divergence, intermittency, attribution (analyses B, C, D)
 
 **Objective.** The headline numbers: which hooks charge, how much, when, and who routed users into them.
 
 **Tasks.**
 
-1. **Fill re-quote engine** (`analysis/lib/requote.py` + `contracts/script/Requote.s.sol`): for a fill `(chain, txHash, logIndex)`, run a Foundry script that `vm.rollFork(txHash)`, constructs the identical `swap` via `V4Quoter` (`quoteExactInputSingle` / `quoteExactOutputSingle`, with the fill's `hookData` if the router passed any — recover from the tx calldata when decodable; otherwise empty and flag `hookDataUnknown`), and prints `expected`. Batch via `forge script` with `--ffi`-free JSON I/O; parallelize across worker processes with separate fork RPC connections.
+1. **Fill re-quote engine** (`analysis/lib/requote.py` + `contracts/script/Requote.s.sol`): for a fill `(chain, txHash, logIndex)`, run a Foundry script that `vm.rollFork(txHash)`, constructs the identical `swap` via `V4Quoter` (`quoteExactInputSingle` / `quoteExactOutputSingle`, with the fill's `hookData` if the router passed any. Recover from the tx calldata when decodable; otherwise empty and flag `hookDataUnknown`), and prints `expected`. Batch via `forge script` with `--ffi`-free JSON I/O; parallelize across worker processes with separate fork RPC connections.
 2. **Cheap re-quote** (`eth_call` at block `N-1`) for bulk coverage; mark `approx=true`; compare the two methods on a 2,000-fill sample and report agreement in `docs/phases/PHASE-3.md`.
 3. **Pipeline B** (`b_divergence.py`): for every fill in hooked pools (full coverage for top 500 pools by volume per chain; stratified sample elsewhere), compute expected, realized, nominal fee, excess take. Per hook: fills, charged fills, charged rate, median excess when charged, p90, max, USD total excess. Output `data/results/divergence.json` + per-hook parquet.
 4. **Pipeline C** (`c_intermittency.py`): hourly charged rate per hook over 30/90 days; switch count; toxic-hour share; owner-switch correlation where an `Ownable` setter tx is observed near a regime change (join with hook tx history).
@@ -177,7 +177,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 
 ---
 
-### Phase 4 — `hook-probe` detection kit and precision calibration (analysis F)
+### Phase 4. `hook-probe` detection kit and precision calibration (analysis F)
 
 **Objective.** An open, reproducible detector for spoof-capable hooks, and an honest measurement of where each method fails.
 
@@ -185,7 +185,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 
 1. `probe/static`: EVM disassembler (use `evmole` or `sevm`); for each hook bytecode: env opcodes present (`GASPRICE 0x3a`, `ORIGIN 0x32`, `COINBASE 0x41`, `BASEFEE 0x48`, `PREVRANDAO 0x44`, `GASLIMIT 0x45`, `GAS 0x5a`), proxy pattern, `SELFDESTRUCT`, owner-gated fee/discount setters (heuristics over selectors + storage writes), calls back to `sender` (`IMsgSender.msgSender()` selector), `tx.origin` usage in access control.
 2. `probe/dynamic`: for a pool, construct a canonical swap and run `eth_call` against `V4Quoter` (or a `ProbeRouter` view contract of ours) under permutations: `gasPrice ∈ {0, baseFee+1 gwei, 100 gwei}`, `from ∈ {EOA, contract}`, `gas ∈ {default, 2×}`; plus `debug_traceCall` capturing which env opcodes execute _on the swap path_ (not just present). Output: `envSensitive`, `signals[]`, `outputs[]`.
-3. `probe/repeat`: same call N times in one `eth_call` batch to detect state-independent randomness (dice-roll with `prevrandao`/blockhash returns stable within a block; with a per-call counter it changes — but counters revert in `eth_call`; document what this can and cannot see; the _settled-trade_ method (Phase 3) is the only reliable detector for dice-roll hooks).
+3. `probe/repeat`: same call N times in one `eth_call` batch to detect state-independent randomness (dice-roll with `prevrandao`/blockhash returns stable within a block; with a per-call counter it changes, but counters revert in `eth_call`; document what this can and cannot see; the _settled-trade_ method (Phase 3) is the only reliable detector for dice-roll hooks).
 4. `probe/report`: JSON per hook merged into `data/results/probe.json`.
 5. **Pipeline F** (`f_precision.py`): confusion matrix of static/dynamic flags vs Phase 3 `divergent`. Report precision/recall per method and the union. Expect: env probes catch sniffers, miss dice-rollers; settled trades catch both but lag. This table is a README section.
 
@@ -199,7 +199,7 @@ Each phase: **Objective → Tasks → Artifacts → Gate (tests/checks) → Exit
 
 ---
 
-### Phase 5 — `SwornRouter` and toxic fixtures (contracts, unit/fuzz/invariant)
+### Phase 5. `SwornRouter` and toxic fixtures (contracts, unit/fuzz/invariant)
 
 **Objective.** The mechanism, correct at the v4 level, with adversarial fixtures that model every observed toxic pattern.
 
@@ -245,7 +245,7 @@ Rules the implementation must obey (each becomes a test):
 - `GaspriceSniffHook`: 0 fee when `tx.gasprice == 0`, 18% via `beforeSwapReturnDelta` otherwise.
 - `OriginSniffHook`: honest for `tx.origin == 0`/allowlisted, toxic otherwise.
 - `CoinbaseBasefeeSniffHook`.
-- `DiceRollHook`: fee from `prevrandao ^ counter` — with `counter` in storage (reverted in probe) and a variant using only block data (identical in probe and exec).
+- `DiceRollHook`: fee from `prevrandao ^ counter`, with `counter` in storage (reverted in probe) and a variant using only block data (identical in probe and exec).
 - `OwnerSwitchHook`: `discountBps` toggled by owner.
 - `GasSniffHook`: charges more when `gasleft()` at entry differs from a recorded value.
 - `RouterWhitelistHook`: honest only when `sender == knownRouter`.
@@ -266,7 +266,7 @@ Rules the implementation must obey (each becomes a test):
 
 ---
 
-### Phase 6 — Fork tests on real toxic hooks, gas benchmarks, Sworn replay (analysis E)
+### Phase 6. Fork tests on real toxic hooks, gas benchmarks, Sworn replay (analysis E)
 
 **Objective.** Prove the mechanism against real deployed hooks and produce the product's ROI number.
 
@@ -283,7 +283,7 @@ Rules the implementation must obey (each becomes a test):
 
 ---
 
-### Phase 7 — `HookBook` attestations and the attestor
+### Phase 7. `HookBook` attestations and the attestor
 
 **Objective.** Make honesty legible on-chain and keep it fresh.
 
@@ -300,7 +300,7 @@ Rules the implementation must obey (each becomes a test):
 
 ---
 
-### Phase 8 — `sworn-sdk` and integrations
+### Phase 8. `sworn-sdk` and integrations
 
 **Objective.** Make Sworn adoptable in one line by wallets, aggregators and agents.
 
@@ -318,13 +318,13 @@ Rules the implementation must obey (each becomes a test):
 
 ---
 
-### Phase 9 — Dashboard and demo
+### Phase 9. Dashboard and demo
 
 **Objective.** Make the data and the guarantee visible.
 
 **Tasks.**
 
-1. `app/` (Next.js): pages — Hook Explorer (search, score, flags, charged rate, sparkline of hourly rate, pools, front-ends that routed into it), Chain Overview (census + divergence headline), Front-end Attribution table, Protected Value counter (from `Sworn` events), Hook Certification page ("submit your hook, see your score and how to improve it").
+1. `app/` (Next.js): pages. Hook Explorer (search, score, flags, charged rate, sparkline of hourly rate, pools, front-ends that routed into it), Chain Overview (census + divergence headline), Front-end Attribution table, Protected Value counter (from `Sworn` events), Hook Certification page ("submit your hook, see your score and how to improve it").
 2. Read from the `data` branch JSON and the index; no server-side secrets needed for read paths.
 3. Demo script (`docs/DEMO.md`): a 3-minute sequence on an anvil Base fork: (a) show two pools, toxic quotes better; (b) naive router: user loses 18%; (c) Sworn: probe outputs printed, routes to honest, `Divergence` assertion; (d) `HookBook.score` for both; (e) dashboard hook page. Record a screen-capture; storyboard in the doc.
 
@@ -334,7 +334,7 @@ Rules the implementation must obey (each becomes a test):
 
 ---
 
-### Phase 10 — README (Solvent structure), FEEDBACK.md, hooklist PR, submission
+### Phase 10. README (Solvent structure), FEEDBACK.md, hooklist PR, submission
 
 **Objective.** Tell the story with only numbers this repo produced.
 
@@ -354,7 +354,7 @@ Rules the implementation must obey (each becomes a test):
 12. **Reproduce everything.** Commands per phase; snapshot hashes.
 13. Pointers to contract lines (prize requirement), `FEEDBACK.md`, and the hooklist PR.
 
-**Other tasks.** `FEEDBACK.md` (time to first success, friction, missing capability, the one improvement with the greatest impact — written from `docs/phases/*` notes kept during the build); submit the Uniswap developer feedback form with the `FEEDBACK.md` link; open the hooklist schema PR with the new fields and a generator that fills them from `HookBook`; record integration debrief.
+**Other tasks.** `FEEDBACK.md` (time to first success, friction, missing capability, the one improvement with the greatest impact. Written from `docs/phases/*` notes kept during the build); submit the Uniswap developer feedback form with the `FEEDBACK.md` link; open the hooklist schema PR with the new fields and a generator that fills them from `HookBook`; record integration debrief.
 
 **Gate (`make phase-10`).** README linter: every number matches a value in `data/results` (script `scripts/verify-readme-numbers.py` parses `{{result:path}}` placeholders and renders them; raw digits outside placeholders fail the check); all links resolve; `FEEDBACK.md` exists with the four required sections; submission checklist in `PHASES.md` complete.
 
@@ -362,7 +362,7 @@ Rules the implementation must obey (each becomes a test):
 
 ---
 
-### Phase 11 — Product hardening (post-hackathon, ambitious)
+### Phase 11. Product hardening (post-hackathon, ambitious)
 
 **Objective.** Turn the repo into the execution-integrity layer for anyone who routes trades.
 
@@ -395,7 +395,7 @@ Rules the implementation must obey (each becomes a test):
 
 **Result files (schema in `analysis/schemas/results.schema.json`).** `census.json`, `divergence.json`, `intermittency.json`, `attribution.json`, `probe.json`, `precision.json`, `replay.json`, `gas.json`, `scores.json`. The README, dashboard and attestor consume only these.
 
-**RPC needs.** Archive nodes with `debug_traceCall` on all target chains; expect tens of thousands of `rollFork` calls for Phase 3 full coverage — batch by block, reuse forks, cache expected outputs keyed by `(chain, txHash, logIndex)`.
+**RPC needs.** Archive nodes with `debug_traceCall` on all target chains; expect tens of thousands of `rollFork` calls for Phase 3 full coverage. Batch by block, reuse forks, cache expected outputs keyed by `(chain, txHash, logIndex)`.
 
 ---
 

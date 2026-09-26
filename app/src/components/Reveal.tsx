@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Reveals a section once, the first time it comes into view.
  *
- * Deliberately one effect, used on section containers only — a fade-and-slide on every
+ * Deliberately one effect, used on section containers only: a fade-and-slide on every
  * card is the tell of a page that mistakes motion for design. This exists so the page has
  * a sense of unfolding as you read down it, and it never repeats.
  *

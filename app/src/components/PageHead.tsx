@@ -3,8 +3,8 @@
  *
  * The landing opens on a full-bleed dark hero; without an equivalent, the data pages
  * started abruptly under a floating nav with a row of hashes as the first thing on
- * screen. This gives them the same opening register — eyebrow, large title, one line of
- * standfirst — so the site reads as one product rather than a landing page bolted to a
+ * screen. This gives them the same opening register. Eyebrow, large title, one line of
+ * standfirst, so the site reads as one product rather than a landing page bolted to a
  * set of tables.
  */
 export function PageHead({

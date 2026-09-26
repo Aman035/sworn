@@ -16,7 +16,7 @@
   <circle cx="56" cy="173" r="13" fill="none" stroke="#f2f4f6"/>
   <text x="56" y="178" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="middle">2</text>
   <text x="84" y="169" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#f2f4f6" text-anchor="start">probe each candidate</text>
-  <text x="84" y="187" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#6c7680" text-anchor="start">run the real route, then revert — state and transient storage roll back</text>
+  <text x="84" y="187" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#6c7680" text-anchor="start">run the real route, then revert. State and transient storage roll back</text>
   <rect x="28" y="208" width="644" height="50" rx="6" fill="#141a21" stroke="#1e252e"/>
   <circle cx="56" cy="233" r="13" fill="none" stroke="#f2f4f6"/>
   <text x="56" y="238" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="middle">3</text>

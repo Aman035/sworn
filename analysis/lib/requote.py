@@ -7,7 +7,7 @@ the result.
 
 The calibration rule is the reason this exists in a testable form: hookless pools must
 come back with ~zero excess take. If they do not, the engine is wrong and every
-downstream number is worthless — so the harness is built to make that check cheap to run
+downstream number is worthless, so the harness is built to make that check cheap to run
 rather than to be run once by hand.
 """
 

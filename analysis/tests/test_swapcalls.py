@@ -6,7 +6,7 @@ long measurement run to surface:
 * the realized output must come from the call's **return value**, not the `Swap` event,
   because `PoolManager` emits that event before `afterSwap` and so omits the hook's take;
 * every amount must survive a round trip through the on-disk cache. Swap amounts routinely
-  exceed 2^63 and parquet has no int128, so an int column fails at write time — after the
+  exceed 2^63 and parquet has no int128, so an int column fails at write time, after the
   expensive tracing is already done.
 """
 

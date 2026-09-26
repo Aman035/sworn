@@ -1,4 +1,4 @@
-# Phase 9 — Dashboard and demo
+# Phase 9. Dashboard and demo
 
 > Status: DONE · Gate: `make phase-9`
 
@@ -14,14 +14,14 @@ panel showing the snapshot hash, block range and row count behind it. No server,
 on the read path.
 
 **Demo** (`scripts/demo.sh`, storyboarded in [DEMO.md](../DEMO.md)): three acts, ordered by
-how hard each is to fake — a spoofing fixture on a local chain, the same router against
+how hard each is to fake: a spoofing fixture on a local chain, the same router against
 real Base hooks on anvil forked from mainnet, then the dashboard.
 
 ## The two decisions worth recording
 
 **The demo is a test.** `contracts/test/unit/Demo.t.sol` is narrated with `console.log` and
 asserted with `assertGt`. If the story stops being true, CI fails. The gate additionally
-greps the source to prove that **no `console.log` string literal contains a figure** — every
+greps the source to prove that **no `console.log` string literal contains a figure**. Every
 number reaching the screen came out of the EVM during that run. A demo whose numbers are
 typed in is a slideshow.
 
@@ -58,7 +58,7 @@ That trade gives up layout and interaction coverage. Responsive behaviour is han
 The export tests failed on first run, for a real reason: the detection page renders its
 precision table only when there is at least one positive, and `precision.json` still held
 the run from when zero hooks were divergent. Re-running `f_precision` against the corrected
-divergence result populated it — and produced the sharpest number in the repo:
+divergence result populated it, and produced the sharpest number in the repo:
 
 | method        | precision | recall |
 | ------------- | --------: | -----: |

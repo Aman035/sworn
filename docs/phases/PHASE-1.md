@@ -1,4 +1,4 @@
-# Phase 1 — Story, sources, metric definitions
+# Phase 1. Story, sources, metric definitions
 
 > Status: DONE · Gate: `make phase-1`
 
@@ -10,22 +10,22 @@ order makes the Phase 3 sensitivity sweep credible rather than defensive.
 
 ## What was built
 
-- **`docs/STORY.md`** — the five claims as a table with no empty cells: claim → source →
+- **`docs/STORY.md`**: the five claims as a table with no empty cells: claim → source →
   our artefact → phase. Each claim is owned by a file that produces it.
-- **`docs/SOURCES.md`** — the external reports, with URL, date, verification status and
+- **`docs/SOURCES.md`**: the external reports, with URL, date, verification status and
   the exact figures quoted. 0x and Enso were fetched and their figures transcribed
   verbatim; two Uniswap docs pages are marked `unverified` and are barred from the README
   until Phase 10 re-checks them.
-- **`docs/METRICS.md`** — thirteen metrics, each with a definition, its parameters in
+- **`docs/METRICS.md`**. Thirteen metrics, each with a definition, its parameters in
   `analysis/config.yaml` and its fields in `analysis/schemas/results.schema.json`,
   including the divergence-score formula and a fully worked example.
-- **`docs/THREAT_MODEL.md`** — eleven attacker capabilities, what Sworn does about each,
+- **`docs/THREAT_MODEL.md`**. Eleven attacker capabilities, what Sworn does about each,
   the gas-stipend argument, and an explicit list of what Sworn does _not_ protect.
-- **`docs/ARCHITECTURE.md`** — components, a mermaid data-flow diagram, the RPC capability
+- **`docs/ARCHITECTURE.md`**. Components, a mermaid data-flow diagram, the RPC capability
   matrix, and why `evm_version = cancun` is load-bearing.
-- **`analysis/schemas/results.schema.json`** — all nine result files, `additionalProperties: false`
+- **`analysis/schemas/results.schema.json`**. All nine result files, `additionalProperties: false`
   throughout, with an `x-files` map from filename to definition.
-- **`scripts/lint_docs.py`** — the gate: six checks tying the docs to the config and the
+- **`scripts/lint_docs.py`**: the gate: six checks tying the docs to the config and the
   schema in both directions.
 
 ## Gate output
@@ -61,13 +61,13 @@ order makes the Phase 3 sensitivity sweep credible rather than defensive.
   `INSUFFICIENT_DATA`, not a clean bill of health. This matters for claim 4: an honest
   builder needs a low score to _mean_ something.
 - **Dynamic-fee hooks are reported twice.** Excess over their own nominal fee, and excess
-  over the nearest static tier — otherwise a dynamic-fee hook could legitimise any take by
+  over the nearest static tier. Otherwise a dynamic-fee hook could legitimise any take by
   declaring it as its fee.
 
 ## Friction (feeds FEEDBACK.md)
 
 - There is no machine-readable, canonical mapping from a router address to the product
-  that operates it. Attribution — the question every integrator actually cares about — has
+  that operates it. Attribution: the question every integrator actually cares about. Has
   to be hand-curated with a confidence column. A field in the hooklist schema, or an
   equivalent registry for routers, would make this reproducible rather than artisanal.
 - `hooklist` records curation but no behavioural evidence, so "is this hook listed" and

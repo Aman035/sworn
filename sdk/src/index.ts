@@ -1,5 +1,5 @@
 /**
- * sworn-sdk — build `SwornRouter` calldata, and read `HookBook` scores.
+ * sworn-sdk. Build `SwornRouter` calldata, and read `HookBook` scores.
  *
  * The router's guarantee does not depend on anything in this package: a swap routed
  * through `SwornRouter` cannot be served a price different from the one that executes,

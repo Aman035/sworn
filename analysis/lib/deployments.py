@@ -3,7 +3,7 @@
 Addresses are verified rather than trusted: `verify_pool_manager` checks that the
 address holds code and that it emits `Initialize`, and `find_deployment_block` binary
 searches `eth_getCode` for the block it appeared. The census must start at the
-deployment block — starting later silently truncates the denominator for every later
+deployment block. Starting later silently truncates the denominator for every later
 number, and starting at 0 wastes hours of `eth_getLogs`.
 """
 
@@ -65,7 +65,7 @@ def code_size(rpc: RpcClient, address: str, block: int | str = "latest") -> int:
 def find_deployment_block(rpc: RpcClient, address: str, hi: int | None = None) -> int:
     """First block at which `address` has code, by binary search.
 
-    ~log2(chain height) `eth_getCode` calls — around 27 for a chain with 500M blocks,
+    ~log2(chain height) `eth_getCode` calls. Around 27 for a chain with 500M blocks,
     which is cheap enough to re-verify rather than hard-code a number that quietly rots.
     """
     hi = hi if hi is not None else rpc.block_number()
@@ -112,7 +112,7 @@ def verify_pool_manager(rpc: RpcClient, chain: Chain, log_window: int = 900) -> 
                     }
                 ],
             )
-        except Exception as exc:  # noqa: BLE001 — retried at a narrower window below
+        except Exception as exc:  # noqa: BLE001. Retried at a narrower window below
             last_error = exc
             continue
         return True, f"code {size}B, {len(logs)} Initialize logs in last {window} blocks"

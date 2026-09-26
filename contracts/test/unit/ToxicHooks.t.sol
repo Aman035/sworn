@@ -118,7 +118,7 @@ contract ToxicHooksTest is SwornTestBase {
     function test_diceRollBlock_isChosenWhenTheRollIsHonest() public {
         (, PoolKey memory toxic) = deployHookAndPool("DiceRollBlockHook", abi.encode(manager), SKIM_FLAGS, 14);
 
-        // An even roll means no fee at all. Sworn must not blacklist the hook — it has no
+        // An even roll means no fee at all. Sworn must not blacklist the hook: it has no
         // opinion about hooks, only about probed outputs.
         vm.prevrandao(bytes32(uint256(2)));
 
@@ -201,7 +201,7 @@ contract ToxicHooksTest is SwornTestBase {
 
         _swornBoth(toxic);
 
-        // The hook ran twice — once probed, once executed — but the probe reverted, so
+        // The hook ran twice. Once probed, once executed, but the probe reverted, so
         // its own bookkeeping shows a single invocation. A hook literally cannot count
         // how many times it has been probed, which is the guarantee stated in
         // docs/THREAT_MODEL.md, observed from the attacker's side.

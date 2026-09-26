@@ -1,10 +1,10 @@
-"""Pipeline F — run `hook-probe` over hooks and write `data/results/probe.json`.
+"""Pipeline F. Run `hook-probe` over hooks and write `data/results/probe.json`.
 
 Three methods per hook, reported separately rather than merged into a verdict:
 
-* **static** — does the bytecode contain a simulation-distinguishing opcode?
-* **differential** — does the quote move when only the environment changes?
-* **trace** — does the hook *execute* such an opcode while pricing a swap?
+* **static**. Does the bytecode contain a simulation-distinguishing opcode?
+* **differential**. Does the quote move when only the environment changes?
+* **trace**. Does the hook *execute* such an opcode while pricing a swap?
 
 Their disagreement is the finding. On Base, 38.3% of hooks carry a distinguishing opcode
 statically; the trace shows most never run one on the swap path.

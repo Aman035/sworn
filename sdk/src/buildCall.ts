@@ -17,8 +17,8 @@ export const DEFAULT_PROBE_GAS = 2_000_000n;
 /**
  * How much better a hooked route must price to be chosen over the best hookless one.
  *
- * Not zero by default. A hooked route carries more ways to fail — a revert, a griefing
- * hook, more gas — so it should have to be usefully better, not merely equal. Integrators
+ * Not zero by default. A hooked route carries more ways to fail: a revert, a griefing
+ * hook, more gas, so it should have to be usefully better, not merely equal. Integrators
  * who disagree can pass 0.
  */
 export const DEFAULT_HOOK_MARGIN_BPS = 5;
@@ -73,7 +73,7 @@ export function candidateIsHooked(candidate: Candidate): boolean {
  *
  * The router compares probed outputs directly; it has no way to know that two routes end
  * in different tokens. That makes a malformed candidate set the integrator's error, and
- * an unchecked one a real hazard — so it is rejected here rather than producing a
+ * an unchecked one a real hazard, so it is rejected here rather than producing a
  * confidently wrong route on-chain.
  */
 export function validateCandidates(

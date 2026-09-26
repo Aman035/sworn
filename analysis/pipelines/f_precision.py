@@ -1,4 +1,4 @@
-"""Pipeline F — how well each detection method predicts measured behaviour.
+"""Pipeline F. How well each detection method predicts measured behaviour.
 
 Ground truth is Phase 3's `divergent` label, which comes from settled trades: what the
 hook actually did to users. Each detection method is scored against it.
@@ -6,13 +6,13 @@ hook actually did to users. Each detection method is scored against it.
 The expected shape, and the reason this table is in the README rather than a single
 headline number:
 
-* **static** — high recall, terrible precision. 99.2% of Base hooks contain an
+* **static**. High recall, terrible precision. 99.2% of Base hooks contain an
   environment opcode, so a detector built on presence flags nearly everything.
-* **differential** — catches hooks that price differently by environment, misses
+* **differential**. Catches hooks that price differently by environment, misses
   dice-rollers and anything keyed on state.
-* **trace** — catches hooks that *execute* an environment read while pricing. Needs
+* **trace**. Catches hooks that *execute* an environment read while pricing. Needs
   `debug_traceCall`, which not every provider offers.
-* **settled_trade** — catches everything, but only after someone has been hurt.
+* **settled_trade**. Catches everything, but only after someone has been hurt.
 
 That last row is the argument for `SwornRouter`: every detector is either imprecise or
 retrospective, and neither is a guarantee.
@@ -64,7 +64,7 @@ def build(chain: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         raise SystemExit("no probe.json; run f_probe first")
     if divergence is None:
         raise SystemExit(
-            "no divergence.json; run b_divergence first — there is no ground truth without it"
+            "no divergence.json; run b_divergence first. There is no ground truth without it"
         )
 
     probed = {h["address"].lower(): h for h in probe["hooks"] if h["chain"] == chain}

@@ -1,4 +1,4 @@
-# Phase 4 — `hook-probe` detection kit and precision calibration
+# Phase 4. `hook-probe` detection kit and precision calibration
 
 > Status: DONE, with an uninformative precision matrix (see below) · Gate: `make phase-4`
 
@@ -40,23 +40,23 @@ And on the top 40 hooks by pool count, tracing narrows it much further:
 
 Three of the four statically-flagged hooks contain `ORIGIN`, `PREVRANDAO` or `GASLIMIT`
 and **never execute one on the swap path**. One genuinely reads `ORIGIN` three times, by
-the hook itself, while pricing a swap. That gap — 4 down to 1 — is what the trace method
+the hook itself, while pricing a swap. That gap. 4 down to 1. Is what the trace method
 is for, and it is why `METRICS.md` requires execution rather than presence.
 
 ## How each method works
 
-**static** — walks the instruction stream, skipping PUSH immediates. This detail is
+**static**. Walks the instruction stream, skipping PUSH immediates. This detail is
 load-bearing: a naive `0x3a in code` scan reports `GASPRICE` in nearly every contract,
 because that byte appears constantly inside pushed constants. A fixture whose constant is
 deliberately made of `0x3a` and `0x41` bytes is in the gate.
 
-**differential** — quotes the same swap under four environments (gas price 0, 1 gwei,
+**differential**. Quotes the same swap under four environments (gas price 0, 1 gwei,
 100 gwei, and half gas) and compares. State is identical across permutations, so anything
 that moves is environment sensitivity by definition. The quoter is injected with an
 `eth_call` state override rather than looked up on-chain, so probing never depends on a
 deployed `V4Quoter` and always uses the version pinned here.
 
-**trace** — `debug_traceCall`, reconstructing which contract executed each opcode from the
+**trace**. `debug_traceCall`, reconstructing which contract executed each opcode from the
 call stack, so a read by the `PoolManager` or a library is not attributed to the hook.
 
 ## Precision matrix: reported, and uninformative
@@ -72,8 +72,7 @@ call stack, so a read by the `PoolManager` or a library is not attributed to the
   settled_trade    0   0   0   8       0.00    0.00
 ```
 
-**Precision and recall here are undefined, not zero.** The scored set contains no positives
-— Phase 3 found no divergent hooks in its volume-weighted sample — so there is nothing for
+**Precision and recall here are undefined, not zero.** The scored set contains no positives. Phase 3 found no divergent hooks in its volume-weighted sample, so there is nothing for
 a detector to be right or wrong about. The pipeline prints that in as many words rather
 than letting a table of `0.00`s read as "every detector failed", and the number needing
 fixing is the eight-hook overlap, not the detectors.
@@ -93,7 +92,7 @@ that the labelled set contains hooks that actually charge.
 ```
 
 The third check asserts trace flags **no more** hooks than static presence. If it ever did,
-something is wrong by construction — a hook cannot execute an opcode its bytecode does not
+something is wrong by construction: a hook cannot execute an opcode its bytecode does not
 contain.
 
 ## Decisions and deviations from the plan
@@ -105,7 +104,7 @@ contain.
 - **The struct logger, not a custom JS tracer.** The plan implies a JS tracer; QuickNode
   returns "JS Tracer is not enabled". `debug_traceCall` with `disableMemory` and
   `disableStorage` works everywhere `debug_traceCall` does, at ~35,000 log entries and
-  16 MB per trace — heavy, but fine for the hundreds of hooks a precision matrix needs.
+  16 MB per trace. Heavy, but fine for the hundreds of hooks a precision matrix needs.
 - **Repeat probing was not implemented.** The plan notes it can detect state-independent
   randomness, and then notes that counters revert inside `eth_call` so it mostly cannot.
   The settled-trade method is the only reliable detector for dice-roll hooks, which is

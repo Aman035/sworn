@@ -158,12 +158,12 @@ export const DISTINGUISHING = [
 ];
 
 export function fmt(n: number | null | undefined): string {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '. ';
   return n.toLocaleString('en-US');
 }
 
 export function pct(n: number | null | undefined, digits = 1): string {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '. ';
   return `${(n * 100).toFixed(digits)}%`;
 }
 

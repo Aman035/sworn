@@ -60,8 +60,7 @@ ok "divergent-hook count reported across thresholds"
 
 step "divergence discloses its hookData coverage"
 # Hooked re-quotes are made with whatever hookData we could recover. When that is none,
-# a hook which prices on hookData is being measured against a call it never received —
-# and the result must say so rather than present the number bare.
+# a hook which prices on hookData is being measured against a call it never received. # and the result must say so rather than present the number bare.
 "$PY" - <<'PYEOF' || fail "divergence.json does not disclose hookData coverage"
 import json, sys
 doc = json.load(open("data/results/divergence.json"))

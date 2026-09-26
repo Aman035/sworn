@@ -31,7 +31,7 @@ def test_probe_gas_is_linear_after_the_first_candidate() -> None:
     assert probe_gas(0) == 0
     assert probe_gas(1) == PROBE_GAS_FIRST
     assert probe_gas(2) == PROBE_GAS_FIRST + PROBE_GAS_EACH
-    # The first probe pays for the machinery — an extra unlock frame, the self-call and
+    # The first probe pays for the machinery: an extra unlock frame, the self-call and
     # the delta comparison. Every one after is just another swap that reverts.
     assert probe_gas(4) - probe_gas(3) == probe_gas(3) - probe_gas(2)
 
@@ -230,7 +230,7 @@ def test_amounts_beyond_int64_survive_the_frame() -> None:
 
 
 def test_an_implausible_candidate_is_cut_and_counted() -> None:
-    """The largest "protection" in the real run was 10,090,820 bps — a thousandfold, from a
+    """The largest "protection" in the real run was 10,090,820 bps: a thousandfold, from a
     mispriced dust pool. Counting that is the easiest way to fabricate an ROI figure, so it
     is excluded; dropping it silently would be the second easiest."""
     rows = [

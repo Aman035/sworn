@@ -3,7 +3,7 @@
 Providers disagree wildly about what they will serve: some cap the block range, some cap
 the result count, some just time out. A fixed chunk size is therefore either too small
 (Base's census is ~26M blocks) or too large (an immediate 400). This module starts
-optimistic, halves on refusal, and grows back after sustained success — and writes every
+optimistic, halves on refusal, and grows back after sustained success, and writes every
 chunk to disk as it goes so a six-hour pull survives a dropped connection.
 """
 
@@ -82,7 +82,7 @@ def looks_like_range_limit(exc: Exception) -> bool:
     if isinstance(exc, RpcError):
         return bool(_TOO_BIG.search(exc.rpc_message))
     if isinstance(exc, httpx.HTTPStatusError):
-        # 413 is unambiguous — the *response* was too big, regardless of the body, which
+        # 413 is unambiguous: the *response* was too big, regardless of the body, which
         # for some providers is HTML rather than JSON-RPC. This is the common case on
         # QuickNode: 10k blocks is fine until a dense stretch blows the size cap.
         if exc.response.status_code == 413:
@@ -120,7 +120,7 @@ class LogFetcher:
         self.stats = FetchStats()
         self._clean_run = 0
         # Widths at or above this were refused once already. Without it the fetcher
-        # grows, gets refused, halves, grows again — paying one wasted request per
+        # grows, gets refused, halves, grows again. Paying one wasted request per
         # `GROWTH_AFTER` chunks forever, which over 26M blocks is thousands of calls.
         self._ceiling = MAX_CHUNK
 
@@ -152,7 +152,7 @@ class LogFetcher:
             hi = min(lo + self.chunk - 1, to_block)
             try:
                 logs = self._request(lo, hi)
-            except Exception as exc:  # noqa: BLE001 — classified immediately below
+            except Exception as exc:  # noqa: BLE001. Classified immediately below
                 if is_transient(exc):
                     if transient_retries >= MAX_TRANSIENT_RETRIES:
                         raise
@@ -198,7 +198,7 @@ class LogFetcher:
                 self._clean_run = 0
 
 
-def _open_text(path: Path, mode: str):  # noqa: ANN202 — returns a text file object
+def _open_text(path: Path, mode: str):  # noqa: ANN202. Returns a text file object
     """Open plain or gzipped JSONL transparently.
 
     A full-history census pull is hundreds of megabytes of raw logs per chain. Gzip cuts
@@ -213,7 +213,7 @@ def _open_text(path: Path, mode: str):  # noqa: ANN202 — returns a text file o
 def progress_path(out: Path) -> Path:
     """Sidecar recording how far a pull got, independent of the raw file.
 
-    A full-history pull is far larger than the decoded result — Base's raw `Initialize`
+    A full-history pull is far larger than the decoded result. Base's raw `Initialize`
     logs are ~14 GB against a parquet of a few hundred MB. Compaction decodes the raw
     file into a parquet shard and deletes it, and this marker is what lets the next run
     resume even though the evidence of progress is gone.

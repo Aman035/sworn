@@ -2,17 +2,17 @@
   Sworn dashboard.
 
   The idea: this is an evidence document, not a crypto dashboard. Every figure was produced
-  by a pipeline from a hashed snapshot, so each section states its receipt — hash, block
-  range, row count — in monospace directly under its heading, the way a paper cites its
+  by a pipeline from a hashed snapshot, so each section states its receipt. Hash, block
+  range, row count, in monospace directly under its heading, the way a paper cites its
   source. Provenance is furniture, not a footnote.
 
-  One theme across every page. The landing sets the register — a near-black instrument
-  ground with a faint grid — and the data pages continue it rather than switching to a
+  One theme across every page. The landing sets the register: a near-black instrument
+  ground with a faint grid, and the data pages continue it rather than switching to a
   light document halfway through the site. Colour carries exactly one meaning:
 
     signal   value a hook took from someone
     ink      measured, nothing taken
-    faint    not measured — which must never be mistaken for zero
+    faint    not measured, which must never be mistaken for zero
 
   Because the accent appears nowhere else, a page that is almost entirely ink sends the
   eye straight to the harm.
@@ -380,7 +380,7 @@ main:has(.pagehead) .sheet {
    compare, then the gap between them as the largest thing on the page. */
 /* Constrained, and the two deltas set side by side: spread across the full page the
    number ended up a thousand pixels from its own label, and the comparison the section
-   exists to make — taken against recovered — could not be seen in one glance. */
+   exists to make. Taken against recovered. Could not be seen in one glance. */
 .gap-figure {
   display: grid;
   grid-template-columns: 1fr;
@@ -397,7 +397,7 @@ main:has(.pagehead) .sheet {
   }
 
   /* Reserve two lines for both labels so the two figures share a baseline. One label
-     wraps and the other does not, which set them 24px apart — and the whole point of
+     wraps and the other does not, which set them 24px apart, and the whole point of
      putting them side by side is that they can be compared at a glance. */
   .gap-row.delta .what {
     min-height: calc(2 * 1.55em);
@@ -648,7 +648,7 @@ main:has(.pagehead) .sheet {
    gap between them opens in the signal colour. That sequence is the argument, so it gets
    the page's whole motion budget and every other section merely appears once as you
    reach it. Everything is legible with motion disabled, before hydration, and with
-   JavaScript off — the animation is emphasis, never the message.
+   JavaScript off: the animation is emphasis, never the message.
    ===================================================================== */
 
 /* The landing runs full-bleed: `main` constrains the data pages to a reading measure,
@@ -1163,7 +1163,7 @@ html.js .reveal.in {
   height: 0.78em;
 }
 
-/* A table caption is a label for the table, not a title centred over it — the browser
+/* A table caption is a label for the table, not a title centred over it: the browser
    default centres it, which read as a stray heading floating above the card. */
 .grid caption {
   padding: 12px 16px;
@@ -1175,7 +1175,7 @@ html.js .reveal.in {
 }
 
 /* A muted table cell. Not `.mark`, which is `display: inline-block` and pulls a `<td>`
-   out of table layout — that produced stray rules across the "blind to" column. */
+   out of table layout: that produced stray rules across the "blind to" column. */
 .grid td.dim {
   color: var(--faint);
   white-space: normal;
@@ -1186,7 +1186,7 @@ html.js .reveal.in {
 
 /* The public exchange this work answers. Figures here are *cited*, not measured, so they
    are visually separated from every other number on the site and each carries a link to
-   its source — the project's credibility rests on that line never blurring. */
+   its source: the project's credibility rests on that line never blurring. */
 .origin {
   background: var(--sheet);
 }
@@ -1258,7 +1258,7 @@ html.js .reveal.in {
 }
 
 /* Links inside content take the page's ink with a quiet underline, rather than the
-   browser's blue — which broke the palette wherever an address was linkable. */
+   browser's blue, which broke the palette wherever an address was linkable. */
 .grid a,
 .panel-inner p a,
 .caveat a,
@@ -1299,4 +1299,61 @@ html.js .reveal.in {
 
 .origin-named b.bad {
   color: var(--signal);
+}
+
+/* --------------------------------------------------------------- code + defeat */
+
+.code {
+  margin: 26px 0;
+  padding: 20px 22px;
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: var(--t-s);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.code code {
+  font: inherit;
+  white-space: pre;
+  /* JetBrains Mono ligates `!=` into a single glyph, which is charming in an editor and
+     wrong here: this block claims to be the source, so it has to be the characters that
+     are actually in the file. */
+  font-variant-ligatures: none;
+}
+
+/* The attacker's options, and why each one closes. A two-column list rather than a table
+   because the right side is prose, and a table would force it to one line. */
+.defeat {
+  margin: 28px 0 0;
+  max-width: 900px;
+}
+
+.defeat > div {
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) 1fr;
+  gap: 8px 32px;
+  padding: 16px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.defeat dt {
+  font-size: var(--t-s);
+  color: var(--ink);
+}
+
+.defeat dd {
+  margin: 0;
+  font-size: var(--t-s);
+  color: var(--ink-2);
+}
+
+@media (max-width: 640px) {
+  .defeat > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
 }

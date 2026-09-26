@@ -1,7 +1,7 @@
 # Feedback on building with Uniswap v4
 
-I built [Sworn](README.md) — a router that verifies hook behaviour inside the transaction
-that settles — over about a week. This is what cost me time, roughly in the order it cost
+I built [Sworn](README.md): a router that verifies hook behaviour inside the transaction
+that settles. Over about a week. This is what cost me time, roughly in the order it cost
 it. Everything here has something in the repo behind it.
 
 ## Time to first success
@@ -30,7 +30,7 @@ Error: Yul exception: Variable memPtr_1 is 1 too deep in the stack
 
 That error names a Yul internal and gives you nothing to search for. I went looking for a
 bug in my own contracts first. The fix is that v4-core's own `foundry.toml` uses
-`optimizer_runs = 44444444` and you have to match it — it is effectively a hard
+`optimizer_runs = 44444444` and you have to match it: it is effectively a hard
 requirement for compiling core, and I could not find it stated in any integration guide.
 
 Either put the required compiler settings in the integration docs, or fail with a message
@@ -46,7 +46,7 @@ and `ModifyLiquidityParams` have moved out of `IPoolManager` into `types/PoolOpe
 so `V4Quoter` will not compile against released core.
 
 You cannot keep both. If you do, the compiler has two distinct `IPoolManager` types and a
-`PoolKey` built from one cannot be passed to a quoter built from the other — which is a
+`PoolKey` built from one cannot be passed to a quoter built from the other, which is a
 confusing error to read at 1am. I gave up on the release tag and pinned the same core
 commit periphery pins.
 
@@ -63,7 +63,7 @@ Tagging periphery releases, and saying which core each one builds against, would
 /// @param amount0 The delta of the currency0 balance of the pool
 ```
 
-but `PoolManager.sol:241` emits `delta.amount0()`, which is the _swapper's_ delta — the
+but `PoolManager.sol:241` emits `delta.amount0()`, which is the _swapper's_ delta: the
 opposite sign. Build an indexer from the docs and every fill comes out backwards, silently,
 because the amounts still look plausible. I only settled it by reading the emission site.
 
@@ -100,22 +100,22 @@ Read from the event, that hook looks like it is handing users an extra percent. 
 charging them one.
 
 I lost most of a day to this. My pipeline was reporting a systematic −101 bps "take"
-across unrelated hooks — users apparently getting _more_ than they were quoted. I checked
+across unrelated hooks. Users apparently getting _more_ than they were quoted. I checked
 fee tiers first, which was wrong; hooks on fee-0 pools showed the same offset. Then I
 built a whole `hookData` recovery module on the theory that I was quoting hooks with the
-wrong calldata, which was also wrong — `hookData` is non-empty on 4.4% of swaps. Then I
+wrong calldata, which was also wrong. `hookData` is non-empty on 4.4% of swaps. Then I
 read `PoolManager.swap` line by line and found the emission order.
 
 The general version of this: **anything built on `Swap` events under-reports exactly the
 hooks that take the most**, because taking in `afterSwap` is invisible there. And building
-on the event is the obvious thing to do — it is what I did.
+on the event is the obvious thing to do: it is what I did.
 
 There is a smaller sibling bug in the same event: the sign pattern cannot tell exact-input
 on token0 from exact-output on token1. They are identical. 13% of the fills I had
 classified as exact-input from the event turned out to be exact-output, which means I was
 re-quoting a swap that never happened.
 
-Both are recoverable from `debug_traceTransaction` — calldata for `amountSpecified` and
+Both are recoverable from `debug_traceTransaction`. Calldata for `amountSpecified` and
 `hookData`, return value for the real delta. It works, and costs about 0.01s per
 transaction. But it needs an archive node with the debug namespace, which puts honest
 measurement out of reach of anyone working from logs.
@@ -124,7 +124,7 @@ Two ways out, either would do:
 
 1. Document on `IPoolManager.Swap` that the amounts are pre-`afterSwap` and are not what
    the swapper received, and point at where to get that instead.
-2. Better, emit the caller's final delta — a `SwapSettled(id, sender, amount0, amount1)`
+2. Better, emit the caller's final delta: a `SwapSettled(id, sender, amount0, amount1)`
    after `_accountPoolBalanceDelta`, or an `afterSwap` delta field on the existing event.
 
 Without one of those, "how much did this hook charge" is not answerable from logs, which
@@ -137,7 +137,7 @@ did, and a first-party feed would erase it.
 
 Pulling one 30-day census I hit five different failures that look similar and need
 opposite responses: a `413` on response size (shrink the window), Alchemy's 10-block
-`eth_getLogs` cap on the free tier (shrink, or pay), a `429` (wait — do _not_ shrink, or
+`eth_getLogs` cap on the free tier (shrink, or pay), a `429` (wait. Do _not_ shrink, or
 you make it worse), a `503` mid-pull (retry, do not shrink), and `failed to get logs for
 block #N`, which for one Polygon block was simply permanent.
 
@@ -160,7 +160,7 @@ helper, and including decoded permissions in `hooklist.json`, would cost almost 
 
 **A hook has no way to prove it behaves, and a router has no cheap way to find out.**
 
-`hooklist` records provenance — name, deployer, verified source, upgradeability — and
+`hooklist` records provenance. Name, deployer, verified source, upgradeability, and
 nothing about behaviour. The predictable result is that routers who get burned drop hooked
 pools wholesale, which punishes exactly the builders you want. On Base 98.5% of pools
 carry a hook, so "avoid hooks" is not a strategy anyone can actually adopt.
@@ -181,7 +181,7 @@ stopped trying to detect.
 
 **Put behavioural fields in the hooklist schema and expose them in the Trading API.**
 
-Three would be enough: `divergenceScore`, `envSensitive`, `intermittent` — each with the
+Three would be enough: `divergenceScore`, `envSensitive`, `intermittent`, each with the
 block it was measured at and a hash of the dataset behind it, so a reader can re-derive
 the number instead of trusting it. I publish exactly that shape on-chain in `HookBook`
 (`0x8A4470f7DDa8525b484527b21B19c3bc876A04c3`, Base Sepolia), and the generator that fills
@@ -200,7 +200,7 @@ unprofitable. You want both, and neither replaces the other.
 
 ## What worked well
 
-**Address-encoded permissions**, as above — unforgeable, free to check, and correct in
+**Address-encoded permissions**, as above. Unforgeable, free to check, and correct in
 every one of the 4,961 entries I tested.
 
 **Flash accounting.** Probing several routes inside one `unlock` and letting the losing

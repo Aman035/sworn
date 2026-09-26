@@ -12,7 +12,7 @@ import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
 /// @notice Hooks that record what they observed somewhere a revert cannot reach.
 ///
 /// @dev Why this exists. `SwornRouter`'s probe reverts, and a revert rolls back every
-///      state change the hook made — including its own bookkeeping. That is precisely the
+///      state change the hook made, including its own bookkeeping. That is precisely the
 ///      property being tested, and it also makes the property impossible to observe from
 ///      on-chain storage: after a swap, a hook's counter shows the execution only.
 ///
@@ -28,7 +28,7 @@ abstract contract RecordingHook is SkimmingHook {
     ///      An earlier version of this used `vm.setEnv`, which is wrong: forge runs test
     ///      functions in parallel and the env cheatcode mutates process environment,
     ///      which is not thread-safe. Two tests recording concurrently lost each other's
-    ///      writes and the suite failed a different subset on every run — a flaky test,
+    ///      writes and the suite failed a different subset on every run: a flaky test,
     ///      which is worse than a failing one. Per-path file I/O has no such race.
     function _path() internal view returns (string memory) {
         return string.concat("out/sworn-obs-", vm.toString(address(this)), ".txt");
@@ -112,7 +112,7 @@ contract RecordingCallbackSniffHook is RecordingHook {
 ///      invocation count host-side, where the probe's revert cannot reach it, so it can
 ///      quote free and then charge.
 ///
-///      No deployed hook can do this — it requires cheatcodes. That is the point. The
+///      No deployed hook can do this: it requires cheatcodes. That is the point. The
 ///      `Divergence` assertion exists for the case where the reasoning in
 ///      docs/THREAT_MODEL.md is *wrong*, and this fixture manufactures exactly that case
 ///      so the last line of defence is tested rather than merely argued for.

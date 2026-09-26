@@ -1,4 +1,4 @@
-# Phase 8 — `sworn-sdk`
+# Phase 8. `sworn-sdk`
 
 > Status: DONE · Gate: `make phase-8`
 
@@ -19,7 +19,7 @@ caching and freshness, and `explain()` to render a score in words.
 ## The part worth defending: candidate validation
 
 `SwornRouter` compares probed outputs as raw numbers. It has no way to know that two
-routes ended in _different tokens_ — it would simply pick the larger number. That makes a
+routes ended in _different tokens_: it would simply pick the larger number. That makes a
 malformed candidate set the most dangerous input the router can receive, and it is the
 integrator who constructs it.
 
@@ -29,8 +29,8 @@ test.
 
 ## Two deliberate behaviours
 
-**The default hook margin is 5 bps, not 0.** A hooked route carries more ways to fail — a
-revert, a griefing hook, more gas — so equal pricing should not win it the route.
+**The default hook margin is 5 bps, not 0.** A hooked route carries more ways to fail: a
+revert, a griefing hook, more gas, so equal pricing should not win it the route.
 Integrators who disagree pass `hookMarginBps: 0`.
 
 **A stale score is treated as no score.** Falling back to "last known good" is precisely
@@ -69,7 +69,7 @@ Two checks in there exist because of specific risks:
   interface widens to `string` and breaks. The looseness is contained: this package owns
   the ABI, the function names and the decoding.
 - **Quote adapters are not built.** The plan lists a Uniswap Trading API adapter. Deriving
-  candidates from the index is the more important path — Phase 6 showed that of 17
+  candidates from the index is the more important path. Phase 6 showed that of 17
   hookless pools for a pair, only 5 had any liquidity, so a candidate set built from an
   external quote or from fee tiers alone hands the router routes that cannot trade. That
   belongs with the index in Phase 9.

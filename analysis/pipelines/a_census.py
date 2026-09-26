@@ -1,4 +1,4 @@
-"""Pipeline A — hook and pool census.
+"""Pipeline A. Hook and pool census.
 
 Pulls every `Initialize` log from the chain's `PoolManager` deployment block to a pinned
 end block, decodes it, and writes a snapshot plus per-chain aggregates. This is the
@@ -226,7 +226,7 @@ def main(argv: list[str] | None = None) -> int:
                     known[name], confirmations=args.confirmations, start_chunk=args.start_chunk
                 )
             )
-        except Exception as exc:  # noqa: BLE001 — one chain must not take down the run
+        except Exception as exc:  # noqa: BLE001, one chain must not take down the run
             # Provider errors embed the full RPC URL, and the URL embeds the API key.
             detail = scrub(str(exc), os.environ.get(known[name].rpc_env, ""))
             failures.append(f"{name}: {type(exc).__name__}: {detail}")

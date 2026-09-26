@@ -1,4 +1,4 @@
-"""Pipeline A3 — assemble `data/results/census.json`.
+"""Pipeline A3. Assemble `data/results/census.json`.
 
 Joins three inputs into the one file the README, the dashboard and the attestor read:
 
@@ -6,7 +6,7 @@ Joins three inputs into the one file the README, the dashboard and the attestor 
 * per-hook metadata (`a_hook_metadata`: code hash, proxy slots, verification),
 * Uniswap's hooklist (the `allowlisted` column).
 
-Everything here is counting. No thresholds are applied and no hook is judged — that is
+Everything here is counting. No thresholds are applied and no hook is judged: that is
 Phase 3's job. The census is the denominator, so its only obligation is to be complete
 and honest about what it does not know.
 

@@ -41,7 +41,7 @@ def test_redact_handles_empty_input() -> None:
 
 
 def test_scrub_removes_full_url_and_bare_key() -> None:
-    message = f"Client error '400 Bad Request' for url '{URL}' — key {KEY} rejected"
+    message = f"Client error '400 Bad Request' for url '{URL}'. Key {KEY} rejected"
     out = scrub(message, URL)
     assert KEY not in out
     assert URL not in out

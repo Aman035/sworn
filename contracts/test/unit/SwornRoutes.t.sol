@@ -13,7 +13,7 @@ import {SwornTestBase} from "./SwornTestBase.sol";
 ///
 /// @dev These are the paths where the sign conventions are easy to get wrong. Exact-out
 ///      walks the route backwards, chaining each hop's required input into the previous
-///      hop's desired output, and compares on the *input* side — so `minOut` becomes a
+///      hop's desired output, and compares on the *input* side, so `minOut` becomes a
 ///      maximum rather than a minimum.
 contract SwornRoutesTest is SwornTestBase {
     PoolKey internal toxicKey;
@@ -97,7 +97,7 @@ contract SwornRoutesTest is SwornTestBase {
 
         // A maxIn of 1 wei cannot possibly buy 1e14 out. The error carries what the route
         // would actually have cost, so the caller learns the real price rather than just
-        // that their bound was missed — hence try/catch rather than `expectRevert`, which
+        // that their bound was missed. Hence try/catch rather than `expectRevert`, which
         // would swallow the arguments.
         try sworn.swornSwap(cands, _exactOutParams(wantOut, 1)) returns (uint256) {
             revert("should have reverted on maxIn");

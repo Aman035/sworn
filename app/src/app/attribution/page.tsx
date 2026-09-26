@@ -8,7 +8,7 @@ export default function Attribution() {
 
   // The column that matters is fills into hooks *measured as charging more than they
   // quote*. "Into hooked pools" is close to meaningless on Base, where 98.5% of pools
-  // carry a hook — showing it beside a named company implied a harm the data did not.
+  // carry a hook. Showing it beside a named company implied a harm the data did not.
   const labelled = products
     .filter((p) => p.product !== 'unlabeled')
     .sort((x, y) => y.fills_into_divergent - x.fills_into_divergent)
@@ -67,10 +67,10 @@ export default function Attribution() {
                     {labelled.map((p) => (
                       <tr key={p.router}>
                         <td>{p.product}</td>
-                        <td className="addr">{p.router ? short(p.router) : '—'}</td>
+                        <td className="addr">{p.router ? short(p.router) : '. '}</td>
                         <td className="n">{fmt(p.fills_total)}</td>
                         <td className={p.fills_into_divergent > 0 ? 'n bad' : 'n'}>
-                          {p.fills_into_divergent > 0 ? fmt(p.fills_into_divergent) : '—'}
+                          {p.fills_into_divergent > 0 ? fmt(p.fills_into_divergent) : '. '}
                         </td>
                         <td>
                           <span className={p.confidence >= 1 ? 'mark on' : 'mark'}>
@@ -91,7 +91,7 @@ export default function Attribution() {
                 </p>
                 <p>
                   {pct(a.unlabeled_share)} of fills come from routers nobody has identified, and
-                  that share is reported rather than dropped — an attribution table that hides its
+                  that share is reported rather than dropped: an attribution table that hides its
                   own coverage is not evidence.
                 </p>
               </div>

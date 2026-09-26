@@ -62,7 +62,7 @@ export default function Detection() {
                   <td>Settled trades</td>
                   <td>What did users actually receive?</td>
                   <td className="n">{fmt(positives)}</td>
-                  <td className="dim">nothing — but only after the fact</td>
+                  <td className="dim">nothing, but only after the fact</td>
                 </tr>
               </tbody>
             </table>
@@ -82,7 +82,7 @@ export default function Detection() {
             <div className="caveat">
               <p>
                 No hook in the scored set is labelled divergent, so precision and recall are
-                undefined here — not zero. There is nothing for a detector to be right or wrong
+                undefined here, not zero. There is nothing for a detector to be right or wrong
                 about.
               </p>
               <p>

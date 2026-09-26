@@ -113,7 +113,7 @@ contract SwornInvariantsTest is SwornTestBase {
         uint256 second = sworn.swornSwap(candidates(honestKey, toxicKey, true), p);
 
         // Selection must depend on probed output, not on the order the caller happened to
-        // list candidates in — otherwise an integrator's ordering becomes an attack surface.
+        // list candidates in. Otherwise an integrator's ordering becomes an attack surface.
         assertEq(first, second, "candidate order changed the result");
     }
 
@@ -201,7 +201,7 @@ contract SwornInvariantsTest is SwornTestBase {
         vm.txGasPrice(1 gwei);
 
         // Only the first candidate is probed, so the toxic route is all that is on offer
-        // and the user gets its real (bad) price — not a spoofed one.
+        // and the user gets its real (bad) price, not a spoofed one.
         Candidate[] memory cands = candidates(toxicKey, honestKey, true);
         uint256 out = sworn.swornSwap(cands, p);
         assertGt(out, 0);

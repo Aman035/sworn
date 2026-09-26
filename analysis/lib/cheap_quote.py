@@ -2,11 +2,11 @@
 
 `docs/METRICS.md` defines two ways to compute `expected_output`:
 
-* **exact** — `vm.rollFork(txHash)`, which gives the state after every earlier transaction
+* **exact**. `vm.rollFork(txHash)`, which gives the state after every earlier transaction
   in the fill's own block. Correct whenever another swap in the same block moved the pool,
   and it costs roughly 33 seconds per fill because the fork downloads the state the swap
   touches.
-* **approx** — `eth_call` against a quoter at the end of block `N-1`. Wrong by exactly the
+* **approx**. `eth_call` against a quoter at the end of block `N-1`. Wrong by exactly the
   amount that earlier same-block transactions moved the pool, and about 600 times faster.
 
 At 33 s/fill a ten-thousand-fill study is four days of wall time, so the exact method

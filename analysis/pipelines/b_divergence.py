@@ -1,4 +1,4 @@
-"""Pipeline B — settled-trade divergence.
+"""Pipeline B. Settled-trade divergence.
 
 For every sampled fill in a hooked pool: re-quote the identical swap against the state
 immediately before it, compare with what was actually delivered, and attribute the
@@ -7,7 +7,7 @@ difference to the hook. Aggregate per hook into `data/results/divergence.json`.
 `docs/METRICS.md` defines every term. Three population rules are enforced here because
 they make the comparison well-posed rather than merely convenient:
 
-* a fill is identified by `(txHash, logIndex)` — a Base transaction can carry 126 `Swap`
+* a fill is identified by `(txHash, logIndex)`: a Base transaction can carry 126 `Swap`
   events and 37.8% of fills share one;
 * only fills that are the sole fill for their pool in their transaction are measured,
   because `vm.rollFork(txHash)` rolls to before the *whole* transaction and a second fill
@@ -102,7 +102,7 @@ def confirmed_sample(
 ) -> pd.DataFrame:
     """`confirm_against_traces`, memoised on disk.
 
-    Reaching the sample costs a full pass over the fills index — minutes, and gigabytes of
+    Reaching the sample costs a full pass over the fills index. Minutes, and gigabytes of
     resident memory. Losing that to one dropped connection during tracing is why this
     exists: the confirmed frame is written once and reused, so a failed run resumes at the
     quoting step instead of the beginning.
@@ -157,9 +157,9 @@ def confirm_against_traces(chain: str, sample: pd.DataFrame) -> pd.DataFrame:
         confirmed.append(True), reason.append("")
 
     out = sample.copy()
-    # Amounts routinely exceed 2^63 — a single fill in the sample is 1.9e25 raw units —
-    # so they travel as decimal strings. Parquet has no int128, and an int64 column would
-    # not fail loudly here, it would fail at write time after the expensive part is done.
+    # Amounts routinely exceed 2^63. A single fill in the sample is 1.9e25 raw units, so
+    # they travel as decimal strings: parquet has no int128, and an int64 column would not
+    # fail loudly here, it would fail at write time after the expensive part is done.
     out["req_amount"] = [str(v) for v in req]
     out["hook_data"] = hdata
     out["realized"] = [str(v) for v in realized]
@@ -310,7 +310,7 @@ def measure(
     if reuse_quotes:
         # Re-aggregating with different thresholds must not cost another hour of forked
         # state fetches. The quotes are a pure function of (fill, chain state), so a
-        # cached batch is as good as a fresh one — and re-running would produce identical
+        # cached batch is as good as a fresh one, and re-running would produce identical
         # numbers at 30s per fill.
         results = load_cached_batch(f"{batch_name}-{chain}")
         print(f"  reusing {len(results)} cached quotes", flush=True)
@@ -376,7 +376,7 @@ def aggregate(
     """Per-hook rollup, with the measurement's own error subtracted.
 
     **A hook cannot deliver more than it quoted.** Any fill measured as over-delivering by
-    more than the threshold is therefore pure measurement error — and because that error is
+    more than the threshold is therefore pure measurement error, and because that error is
     symmetric, the size of the negative tail estimates how many of the positive tail are
     false. Counting the positives alone is how an earlier run of this pipeline reported 15
     divergent hooks when only 6 survived their own noise floor, including two whose
@@ -384,7 +384,7 @@ def aggregate(
 
     So `charged` keeps its plain meaning, and a hook is only called divergent when its
     positive tail beats its negative tail by more than the counting error on that negative
-    tail — two standard deviations of a Poisson count, which is the weakest test that can
+    tail. Two standard deviations of a Poisson count, which is the weakest test that can
     still reject a hook whose excess is symmetric noise.
     """
     out: list[dict[str, Any]] = []
@@ -491,7 +491,7 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     # Keyed on the arguments rather than on the result, so a cache hit skips the index scan
-    # entirely — that scan is minutes of wall time and gigabytes of resident memory before
+    # entirely: that scan is minutes of wall time and gigabytes of resident memory before
     # anything is quoted.
     shape = (
         f"uniform-{args.n}"

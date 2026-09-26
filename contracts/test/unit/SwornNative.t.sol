@@ -16,7 +16,7 @@ import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.so
 ///
 /// @dev Native pools use `currency0 == address(0)` and settle with `settle{value:}`
 ///      rather than a `sync` + `transferFrom` pair. It is a genuinely different code
-///      path — and the one where leftover value would sit in the router — so it gets its
+///      path, and the one where leftover value would sit in the router, so it gets its
 ///      own fixture rather than a flag on the ERC20 tests.
 contract SwornNativeTest is Test, Deployers {
     SwornRouter internal sworn;

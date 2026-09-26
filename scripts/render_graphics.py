@@ -42,7 +42,7 @@ SANS = "'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
 def _load(name: str) -> Any:
     path = RESULTS / name
     if not path.is_file():
-        raise SystemExit(f"{name} missing — run its pipeline first")
+        raise SystemExit(f"{name} missing. Run its pipeline first")
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -112,7 +112,7 @@ def attack() -> str:
 
     # left: the simulation
     p.append(_box(28, 84, 300, 176))
-    p.append(_text(48, 112, "eth_call — the quote", size=13, family=MONO, fill=INK))
+    p.append(_text(48, 112, "eth_call: the quote", size=13, family=MONO, fill=INK))
     p.append(_text(48, 140, "tx.gasprice == 0", size=12.5, family=MONO, fill=INK))
     p.append(_text(48, 162, "no state is written", size=12.5, family=MONO, fill=FAINT))
     p.append(_box(48, 182, 260, 56, stroke=INK))
@@ -185,7 +185,7 @@ def mechanism() -> str:
         (
             "2",
             "probe each candidate",
-            "run the real route, then revert — state and transient storage roll back",
+            "run the real route, then revert. State and transient storage roll back",
             INK,
         ),
         (
@@ -451,7 +451,7 @@ def census_chart() -> str:
 #
 # The mark is `[=]`.
 #
-# `SwornRouter` reduces to a single assertion — `executedDelta == probed[chosen]` — so the
+# `SwornRouter` reduces to a single assertion. `executedDelta == probed[chosen]`, so the
 # logo is that assertion: equality, enforced inside a boundary. The brackets are the
 # transaction the probe happens inside; the two bars are the two deltas that have to match.
 # It is drawn rather than lettered so it survives being 16px in a browser tab, and it uses
@@ -462,7 +462,7 @@ def census_chart() -> str:
 def _mark(size: int = 64, ink: str = INK, stroke: float = 6.2) -> str:
     """The bare `[=]` mark on a transparent ground, sized to a `size` box.
 
-    Proportions are set for the smallest place it appears — a 16px browser tab — so the
+    Proportions are set for the smallest place it appears: a 16px browser tab, so the
     strokes are heavier and the bracket feet shorter than they would be if this were only
     ever going to be seen large.
     """

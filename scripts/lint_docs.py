@@ -4,7 +4,7 @@ Checks, in order:
 
 1. `docs/METRICS.md` and `analysis/config.yaml` describe the same set of metrics.
 2. Every metric section names its parameters and its result fields, and every one of
-   those resolves — in `config.yaml` by dotted path, in `results.schema.json` by field
+   those resolves, in `config.yaml` by dotted path, in `results.schema.json` by field
    path (`divergence.hooks[].charged_rate`).
 3. Every result file declared in the schema is produced by some documented phase.
 4. `docs/STORY.md`'s claim table has five rows and no empty cells.

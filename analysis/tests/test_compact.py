@@ -2,7 +2,7 @@
 
 The dangerous property is that compaction *deletes data*. If the progress marker is not
 written first, or is not honoured on resume, the next run silently re-pulls from the
-deployment block — or worse, skips a range and quietly shrinks the census.
+deployment block, or worse, skips a range and quietly shrinks the census.
 """
 
 from __future__ import annotations
@@ -182,7 +182,7 @@ def test_shard_writes_are_atomic(tmp_path: Path) -> None:
     """A killed process must never leave a half-written parquet behind.
 
     Parquet stores its footer last, so a truncated file is unreadable rather than
-    partially readable — exactly the failure that cost a 6.5M-row compaction run.
+    partially readable. Exactly the failure that cost a 6.5M-row compaction run.
     """
     raw = tmp_path / "initialize.jsonl"
     _write_pull(raw, [(0, 99, [_log(10, 0), _log(20, 1)])])
@@ -202,7 +202,7 @@ def test_stray_tmp_file_is_not_treated_as_a_shard(tmp_path: Path) -> None:
 
 def test_batching_bounds_memory_by_writing_several_shards(tmp_path: Path) -> None:
     """Flushing happens on chunk boundaries, so memory is bounded by
-    `batch_rows + one chunk's logs` — not by the size of the whole pull."""
+    `batch_rows + one chunk's logs`, not by the size of the whole pull."""
     raw = tmp_path / "initialize.jsonl"
     chunks = [(i * 100, i * 100 + 99, [_log(i * 100 + j, j) for j in range(10)]) for i in range(5)]
     _write_pull(raw, chunks)

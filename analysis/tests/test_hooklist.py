@@ -3,7 +3,7 @@
 v4 derives a hook's permissions from its address. The hooklist records the same
 permissions as booleans, produced by Uniswap's own tooling. Comparing the two across
 every entry is a far stronger check on `hookflags` than any fixture we could write
-ourselves — and if it ever diverges, one of the two is wrong about what a hook can do.
+ourselves, and if it ever diverges, one of the two is wrong about what a hook can do.
 """
 
 from __future__ import annotations
@@ -90,6 +90,6 @@ def test_registry_records_no_behaviour(entries: list[HooklistEntry]) -> None:
     recorded = set(vars(sample))
     behavioural = {"divergence_score", "charged_rate", "env_sensitive", "intermittent"}
     assert not (recorded & behavioural), (
-        "hooklist now carries behavioural fields — update docs/STORY.md claim 4 "
+        "hooklist now carries behavioural fields. Update docs/STORY.md claim 4 "
         "and the Phase 10 schema PR"
     )

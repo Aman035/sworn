@@ -154,7 +154,7 @@ def test_unknown_flag_raises() -> None:
 def test_context_flags_carry_no_weight() -> None:
     """Being allowlisted, verified, dynamic-fee or returns-delta is not behaviour.
 
-    These set flags so a reader can see them, but they must not move the score — a hook
+    These set flags so a reader can see them, but they must not move the score: a hook
     cannot buy a better number by getting listed, and cannot be punished for holding a
     permission it uses honestly.
     """

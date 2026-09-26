@@ -15,16 +15,16 @@ Measured on Base: a hook taking 1% in `afterSwap` shows an event `amount1` of
 the event, that hook looks like it *gave* the user 1% extra. It took 1%.
 
 The consequence is not a rounding detail. Anyone measuring hook behaviour from `Swap`
-events — the obvious approach, and the one this repo started with — systematically
+events: the obvious approach, and the one this repo started with. Systematically
 under-reports exactly the hooks that take the most, because taking in `afterSwap` is
 invisible to the event.
 
 What this module recovers instead, from `debug_traceTransaction` at ~0.01 s per
 transaction:
 
-* `amount_specified` — what the router asked for, before any hook touched it
-* `hook_data` — what the hook was actually handed
-* `delta0` / `delta1` — the swap's **return value**, after `afterSwap`
+* `amount_specified`. What the router asked for, before any hook touched it
+* `hook_data`. What the hook was actually handed
+* `delta0` / `delta1`: the swap's **return value**, after `afterSwap`
 
 Those three are the identical-swap definition `docs/METRICS.md` requires.
 """
@@ -93,7 +93,7 @@ class SwapCall:
         """`keccak256(abi.encode(poolKey))`, the same id the `Swap` event carries.
 
         The five key fields are all static, so their ABI encoding is exactly the first
-        five words of the swap calldata — matching a traced call to an indexed fill needs
+        five words of the swap calldata. Matching a traced call to an indexed fill needs
         no guessing about trace ordering.
         """
         head = bytes.fromhex(self._key_words)
@@ -166,7 +166,7 @@ def recover(rpc: RpcClient, tx_hash: str, *, attempts: int = 4) -> list[SwapCall
 
     Never raises. A run covering ten thousand transactions will meet a DNS hiccup or a
     dropped connection somewhere, and losing twelve minutes of indexing to one of them is
-    not acceptable — so transport failures are retried, and a transaction that still
+    not acceptable, so transport failures are retried, and a transaction that still
     cannot be traced comes back as an unusable `SwapCall` that the caller drops.
     """
     trace = None

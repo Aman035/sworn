@@ -1,4 +1,4 @@
-"""Pipeline A2 — per-hook metadata: bytecode, proxy pattern, verification.
+"""Pipeline A2. Per-hook metadata: bytecode, proxy pattern, verification.
 
 The census says which hooks exist. This says what they *are*: how big the code is, what
 it hashes to, whether it is a proxy (and therefore whether today's bytecode is any guide
@@ -7,9 +7,9 @@ verified.
 
 Two sources, with very different costs:
 
-* **RPC** — `eth_getCode` plus the EIP-1967 storage slots. Parallel, cheap, and covers
+* **RPC**. `eth_getCode` plus the EIP-1967 storage slots. Parallel, cheap, and covers
   every hook. This is where `upgradeable` really comes from.
-* **Etherscan** — `verified`, the contract name, and Etherscan's own proxy verdict. Rate
+* **Etherscan**. `verified`, the contract name, and Etherscan's own proxy verdict. Rate
   limited to a few calls a second, so it runs over the highest-impact hooks by default
   and is cached on disk forever after.
 
@@ -102,13 +102,13 @@ def fetch_one(url: str, chain_name: str, address: str, pool_count: int) -> HookM
             meta.eip1822_proxiable = _slot(rpc, address, EIP1822_PROXIABLE)
 
             # A hook is upgradeable if it delegates to code it can point elsewhere. A
-            # minimal proxy is *not* upgradeable — its target is baked into the bytecode.
+            # minimal proxy is *not* upgradeable: its target is baked into the bytecode.
             meta.upgradeable = bool(
                 meta.eip1967_implementation or meta.eip1967_beacon or meta.eip1822_proxiable
             )
     except (RpcError, ValueError) as exc:
         meta.error = f"{type(exc).__name__}: {exc}"[:160]
-    except Exception as exc:  # noqa: BLE001 — one hook must not abort the sweep
+    except Exception as exc:  # noqa: BLE001, one hook must not abort the sweep
         meta.error = f"{type(exc).__name__}"[:160]
     return meta
 
@@ -181,7 +181,7 @@ def _add_etherscan(frame: pd.DataFrame, chain: Chain, top: int) -> pd.DataFrame:
             for i, address in enumerate(targets, start=1):
                 try:
                     info = es.source(chain.chain_id, address)
-                except (EtherscanError, Exception):  # noqa: BLE001 — skip and continue
+                except (EtherscanError, Exception):  # noqa: BLE001. Skip and continue
                     continue
                 verified[address] = {
                     "verified": info.verified,
@@ -233,7 +233,7 @@ def main(argv: list[str] | None = None) -> int:
                 limit=args.limit,
                 etherscan_top=args.etherscan_top,
             )
-        except Exception as exc:  # noqa: BLE001 — continue to the next chain
+        except Exception as exc:  # noqa: BLE001. Continue to the next chain
             failures.append(f"{name}: {type(exc).__name__}: {exc}")
             print(f"  FAIL {name}: {exc}", file=sys.stderr)
             continue

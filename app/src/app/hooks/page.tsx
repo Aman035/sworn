@@ -26,7 +26,7 @@ export default function Hooks() {
     <>
       <PageHead eyebrow="Hook explorer" title="The hooks that charge more than they quote">
         Measured against settled trades and named, so anyone can check them. Below the named four,
-        the busiest hooks on Base — where no measurement exists, the row says so rather than reading
+        the busiest hooks on Base. Where no measurement exists, the row says so rather than reading
         as clean.
       </PageHead>
       <div className="sheet">
@@ -70,7 +70,7 @@ export default function Hooks() {
                         {listed.has(h.address) ? (
                           <span className="mark on">hooklist</span>
                         ) : (
-                          <span className="mark off">—</span>
+                          <span className="mark off">. </span>
                         )}
                       </td>
                     </tr>
@@ -81,7 +81,7 @@ export default function Hooks() {
             <div className="caveat">
               <p>
                 &ldquo;Over-delivered&rdquo; counts fills that came out <em>better</em> than quoted.
-                A hook cannot do that, so those are measurement error — and because the error is
+                A hook cannot do that, so those are measurement error, and because the error is
                 symmetric, their count estimates the false positives in the column beside them. A
                 hook only appears here if its charged fills beat its own over-delivered tail.
               </p>

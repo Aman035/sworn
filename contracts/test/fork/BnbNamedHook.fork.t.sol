@@ -18,8 +18,8 @@ import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.so
 /// @notice The second hook 0x named, on a fork of BNB Smart Chain.
 ///
 /// @dev USDT/WBNB, fee range 0-12.8%, $18,592 charged (0x, 14 Sep 2026). Unlike the Base
-///      hook, this one carries **no returns-delta permission** — its address bits are
-///      0x0880 (BEFORE_ADD_LIQUIDITY | BEFORE_SWAP) — so it can only override the fee.
+///      hook, this one carries **no returns-delta permission**: its address bits are
+///      0x0880 (BEFORE_ADD_LIQUIDITY | BEFORE_SWAP), so it can only override the fee.
 ///      Two different mechanisms, which is why a census that counts returns-delta hooks
 ///      as "the dangerous ones" would miss this one entirely.
 contract BnbNamedHookForkTest is Test {

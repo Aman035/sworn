@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from 'react';
  * Both figures are real: they come from `SwornRouterTest` against `GaspriceSniffHook`,
  * the same values the README and the dashboard quote.
  *
- * Nothing here is load-bearing for comprehension — with reduced motion, or before
+ * Nothing here is load-bearing for comprehension, with reduced motion, or before
  * hydration, the final state renders immediately.
  */
 const QUOTED = 996_999_005_991_991;

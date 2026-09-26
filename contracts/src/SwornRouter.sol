@@ -52,10 +52,10 @@ struct SwornParams {
 ///      the same call context. Everything a hook can read is identical between the probe and
 ///      the execution:
 ///
-///        * block and tx environment — literally the same transaction;
-///        * chain state — the probe reverts, and a revert rolls back storage *and* transient
+///        * block and tx environment. Literally the same transaction;
+///        * chain state: the probe reverts, and a revert rolls back storage *and* transient
 ///          storage (EIP-1153), so both calls start from the same state;
-///        * call context — both go through the same external self-call, at the same depth,
+///        * call context. Both go through the same external self-call, at the same depth,
 ///          with the same explicit gas stipend, from the same `msg.sender`.
 ///
 ///      And if that enumeration is ever incomplete, the final equality assertion still holds:
@@ -70,8 +70,8 @@ contract SwornRouter is IUnlockCallback {
     ISignatureTransfer public immutable permit2;
 
     /// @dev Transient unlock guard. Set for the entire `unlockCallback`, so a hook that reads
-    ///      it (it cannot — there is no getter) would see the same value in both phases.
-    ///      `uint256(keccak256("sworn.unlocked.v1")) - 1` — derived rather than hand-picked, so
+    ///      it (it cannot. There is no getter) would see the same value in both phases.
+    ///      `uint256(keccak256("sworn.unlocked.v1")) - 1`. Derived rather than hand-picked, so
     ///      it cannot collide with slot 0 or with a field added later. Inline assembly only
     ///      accepts literal constants, so the value is written out and checked by a test.
     uint256 private constant UNLOCKED_SLOT = 0xaba2d26fe25f66fb1e00c04443832ed11f90ad4e0dbe8d62978c0ffc8e2a51d9;
@@ -190,7 +190,7 @@ contract SwornRouter is IUnlockCallback {
     }
 
     // -------------------------------------------------------------------------------------
-    // probe / execute — the two calls a hook must not be able to tell apart
+    // probe / execute: the two calls a hook must not be able to tell apart
     // -------------------------------------------------------------------------------------
 
     /// @notice Runs a route. Called only by this contract, once to probe and once to execute.
@@ -231,7 +231,7 @@ contract SwornRouter is IUnlockCallback {
                 (amountIn, amountOut) = abi.decode(reason, (uint128, uint128));
                 ok = true;
             }
-            // Anything else — a griefing revert, out of gas, a hook panic — marks the
+            // Anything else: a griefing revert, out of gas, a hook panic. Marks the
             // candidate UNAVAILABLE. The swap proceeds on another route.
         }
     }
@@ -326,7 +326,7 @@ contract SwornRouter is IUnlockCallback {
     // -------------------------------------------------------------------------------------
 
     /// @dev Best hookless route is the baseline. A hooked route wins only if it beats that
-    ///      baseline by `marginBps` — a hook has to be *usefully* better, not marginally, to
+    ///      baseline by `marginBps`: a hook has to be *usefully* better, not marginally, to
     ///      be worth the extra risk surface. With no hookless candidate, the best hooked one
     ///      is taken on its probed merits, which are real by construction.
     function _select(

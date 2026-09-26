@@ -7,7 +7,7 @@
 #   scripts/mark-phase.sh --selftest         prove a failing gate is never marked DONE
 #
 # The gate is run *by this script*. There is no way to hand it a pre-computed
-# "it passed" — that is the whole point of the phase ledger.
+# "it passed": that is the whole point of the phase ledger.
 
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
@@ -86,12 +86,12 @@ echo "running gate for phase $PHASE ..."
 if run_gate "$PHASE" "$GATE" "$LOG"; then
   summary="$(grep -c '^  ok' "$LOG" || true)"
   append_row "$PHASE" "DONE" "$(current_commit)" \
-    "\`make phase-$PHASE\` — ${summary} checks ok" \
+    "\`make phase-$PHASE\`. ${summary} checks ok" \
     "[gate log](docs/phases/gate-logs/phase-$PHASE.log), [notes](docs/phases/PHASE-$PHASE.md)"
   printf '\n%sphase %s: DONE%s (recorded in PHASES.md)\n' "$C_GREEN" "$PHASE" "$C_OFF"
 else
   rc=$?
-  printf '\n%sphase %s: gate failed (exit %s)%s — PHASES.md not modified\n' \
+  printf '\n%sphase %s: gate failed (exit %s)%s. PHASES.md not modified\n' \
     "$C_RED" "$PHASE" "$rc" "$C_OFF" >&2
   echo "see $LOG" >&2
   exit "$rc"

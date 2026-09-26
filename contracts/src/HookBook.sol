@@ -6,7 +6,7 @@ pragma solidity 0.8.26;
 ///
 /// @dev Why this exists. `SwornRouter` makes quote spoofing impossible for anyone routing
 ///      through it, but it says nothing to the rest of the ecosystem. Today the only
-///      signal about a hook is whether somebody curated it into a list — provenance, not
+///      signal about a hook is whether somebody curated it into a list. Provenance, not
 ///      behaviour. An honest hook builder has no way to *prove* honesty, so routers that
 ///      get burned respond by dropping hooked pools wholesale, which punishes exactly the
 ///      builders the ecosystem needs.
@@ -26,7 +26,7 @@ pragma solidity 0.8.26;
 ///        staleness protection in one: an old signed score can never overwrite a newer one.
 contract HookBook {
     // ---------------------------------------------------------------------------------
-    // flags — bit positions are frozen; see `flags:` in analysis/config.yaml
+    // flags. Bit positions are frozen; see `flags:` in analysis/config.yaml
     // ---------------------------------------------------------------------------------
 
     uint32 public constant FLAG_DIVERGENT = 1 << 0;
@@ -113,7 +113,7 @@ contract HookBook {
     // ---------------------------------------------------------------------------------
 
     /// @notice The hook's divergence score, 0 (clean) to 100 (avoid).
-    /// @dev An unscored hook returns 0 — check `hasScore` or the `INSUFFICIENT_DATA`
+    /// @dev An unscored hook returns 0. Check `hasScore` or the `INSUFFICIENT_DATA`
     ///      flag before reading this as a clean bill of health.
     function score(
         address hook
@@ -228,7 +228,7 @@ contract HookBook {
         ScoreProof storage stored = _proofs[hook];
         // Monotonic in `asOfBlock`: replay protection and staleness protection at once.
         // A re-broadcast of an old signature is rejected for the same reason a late
-        // arrival is — it describes a world that has already been superseded.
+        // arrival is: it describes a world that has already been superseded.
         if (stored.updatedAt != 0 && asOfBlock <= stored.asOfBlock) {
             revert StaleUpdate(asOfBlock, stored.asOfBlock);
         }

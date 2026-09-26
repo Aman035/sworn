@@ -27,7 +27,7 @@ need() {
 # The repo pins its Python deps in a local venv; gates must not use a stray system python.
 venv_python() {
   local py="$REPO_ROOT/.venv/bin/python"
-  [ -x "$py" ] || fail "missing .venv — run 'make install'"
+  [ -x "$py" ] || fail "missing .venv. Run 'make install'"
   printf '%s' "$py"
 }
 

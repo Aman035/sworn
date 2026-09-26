@@ -1,6 +1,6 @@
 """Uniswap's `hooklist` registry: the allowlist Sworn measures itself against.
 
-The hooklist is the answer the ecosystem ships today — curation. It records what a hook
+The hooklist is the answer the ecosystem ships today. Curation. It records what a hook
 *is* (name, deployer, verified source, upgradeable) but nothing about how it *behaves*.
 Joining it to the census gives the `allowlisted` column, and its per-hook permission
 booleans double as an independent check on decoding permissions from the address bits.

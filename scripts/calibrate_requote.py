@@ -129,8 +129,8 @@ def main() -> int:
             rows.append((r.tx_hash, None, r.a1, None, q.error if q else "no result"))
             continue
         # Calibration measures *disagreement in either direction*, not the published
-        # `excess_take_bps`. Excess is clipped at zero by design — it answers "how much
-        # was taken from the user" — so a quote that comes back far too LOW scores a
+        # `excess_take_bps`. Excess is clipped at zero by design: it answers "how much
+        # was taken from the user", so a quote that comes back far too LOW scores a
         # perfect 0.000 and hides a broken engine. How far the ratio sits from 1 is the
         # question that can actually fail.
         deviation_bps = abs(q.expected - r.a1) / r.a1 * 10_000
@@ -168,7 +168,7 @@ def main() -> int:
         print(f"  unusable                : {len(unusable)} (reported, not hidden)")
 
     if rate < required:
-        print("\n  CALIBRATION FAILED — the re-quote engine is wrong.", file=sys.stderr)
+        print("\n  CALIBRATION FAILED: the re-quote engine is wrong.", file=sys.stderr)
         return 1
     print("\n  calibration passed: hookless pools show no excess take")
     return 0

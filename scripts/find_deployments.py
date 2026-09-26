@@ -51,14 +51,14 @@ def main() -> int:
 
                 if name in existing:
                     print(
-                        f"  ok   {name:<9} block {existing[name].deployment_block:,} (cached) — {detail}"
+                        f"  ok   {name:<9} block {existing[name].deployment_block:,} (cached). {detail}"
                     )
                     continue
 
                 block = find_deployment_block(rpc, address)
                 found[name] = Deployment(name, address, block, code_size(rpc, address))
-                print(f"  ok   {name:<9} deployed at block {block:,} — {detail}")
-        except Exception as exc:  # noqa: BLE001 — one bad endpoint must not stop the rest
+                print(f"  ok   {name:<9} deployed at block {block:,}. {detail}")
+        except Exception as exc:  # noqa: BLE001, one bad endpoint must not stop the rest
             # scrub: provider errors embed the full URL, and the URL embeds the API key.
             failures.append(f"{name}: {type(exc).__name__}: {scrub(str(exc), url)}")
             print(f"  FAIL {name:<9} {redact(url)}: {type(exc).__name__}")

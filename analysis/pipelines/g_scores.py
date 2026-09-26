@@ -1,12 +1,12 @@
-"""Pipeline G — compute per-hook divergence scores into `data/results/scores.json`.
+"""Pipeline G. Compute per-hook divergence scores into `data/results/scores.json`.
 
 Inputs, in order of how much they say:
 
-* **Divergence** (`divergence.json`, Phase 3) — charged rate and median excess. This is
+* **Divergence** (`divergence.json`, Phase 3). Charged rate and median excess. This is
   the behavioural evidence and carries 55% of the weight.
-* **Intermittency** (`intermittency.json`, Phase 3) — regime switching.
-* **Probe** (`probe.json`, Phase 4) — environment sensitivity.
-* **Census + hook metadata** (Phase 2) — upgradeability, permissions, allowlisting.
+* **Intermittency** (`intermittency.json`, Phase 3). Regime switching.
+* **Probe** (`probe.json`, Phase 4). Environment sensitivity.
+* **Census + hook metadata** (Phase 2). Upgradeability, permissions, allowlisting.
 
 Only the last of these exists before Phase 3 completes, so most hooks come out
 `INSUFFICIENT_DATA` with no score. That is the correct answer, not a degraded one: a hook

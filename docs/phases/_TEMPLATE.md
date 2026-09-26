@@ -1,4 +1,4 @@
-# Phase N — <title>
+# Phase N. <title>
 
 > Status: <NOT STARTED | IN PROGRESS | DONE | BLOCKED> · Gate: `make phase-N`
 
@@ -8,7 +8,7 @@
 
 ## What was built
 
-- <artifact> — <path> — <one line on what it does>
+- <artifact>. <path>. <one line on what it does>
 
 ## Gate output
 

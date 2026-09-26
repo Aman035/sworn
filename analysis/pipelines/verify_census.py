@@ -5,7 +5,7 @@ implementation that shares as little as possible with the first:
 
 * it re-requests logs straight from the node rather than reading the snapshot;
 * it decodes the hook address by **byte offset** into the log data, not through
-  `eth_abi` — so a mistake in the ABI decoder cannot be reproduced identically here;
+  `eth_abi`, so a mistake in the ABI decoder cannot be reproduced identically here;
 * it samples random block windows across the whole range rather than trusting the
   contiguity of the pull.
 
@@ -177,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         try:
             result = reconcile(name, windows=args.windows, window_blocks=args.window_blocks)
-        except Exception as exc:  # noqa: BLE001 — report and continue to the next chain
+        except Exception as exc:  # noqa: BLE001. Report and continue to the next chain
             failures.append(f"{name}: {type(exc).__name__}: {exc}")
             print(f"  FAIL {name}: {type(exc).__name__}: {exc}", file=sys.stderr)
             continue

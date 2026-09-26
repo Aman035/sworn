@@ -1,4 +1,4 @@
-"""Pipeline B (part 1) — pull settled fills.
+"""Pipeline B (part 1). Pull settled fills.
 
 Every `Swap` event on the target chain over a fixed window. This is the raw material for
 divergence (what was actually delivered), intermittency (when), and attribution (who
@@ -127,7 +127,7 @@ def pull_fills(
 
         # Resume only extends forward. A larger `--days` moves the window's *start*
         # earlier, and continuing from the old high-water mark would leave that earlier
-        # stretch unpulled while the manifest claimed the full window — a snapshot that
+        # stretch unpulled while the manifest claimed the full window: a snapshot that
         # lies about its own coverage. Refuse instead.
         covered_from = _coverage_start(directory)
         if already is not None and covered_from is not None and from_block < covered_from:
@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
                 start_chunk=args.start_chunk,
             )
             print(f"  {r.chain}: {r.fills:,} fills in blocks {r.block_from:,}-{r.block_to:,}")
-        except Exception as exc:  # noqa: BLE001 — continue to the next chain
+        except Exception as exc:  # noqa: BLE001. Continue to the next chain
             detail = scrub(str(exc), os.environ.get(known[name].rpc_env, ""))
             failures.append(f"{name}: {type(exc).__name__}: {detail}")
             print(f"  FAIL {name}: {detail}", file=sys.stderr)

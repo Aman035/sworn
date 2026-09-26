@@ -14,7 +14,7 @@ import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
 ///         and check the result against a slippage bound.
 ///
 /// @dev This is the control for every comparison in this repo, and it is deliberately
-///      *not* a strawman — it does exactly what a competent router does. The point is
+///      *not* a strawman: it does exactly what a competent router does. The point is
 ///      that `minOut` cannot distinguish "the market moved" from "the hook lied": both
 ///      arrive as less output than expected, and a bound loose enough to tolerate normal
 ///      volatility is loose enough to let an 18% skim through.

@@ -18,7 +18,7 @@ import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.so
 ///
 /// @dev The fixtures in `test/unit` model attacks we designed. These are the real
 ///      deployed contracts from the 14 Sep 2026 report, on the real pool, at a pinned
-///      block — which is the only way to find out whether the mechanism survives contact
+///      block, which is the only way to find out whether the mechanism survives contact
 ///      with code nobody in this repo wrote.
 ///
 ///      Skips rather than fails when `BASE_RPC_ARCHIVE` is unset, so the default `forge

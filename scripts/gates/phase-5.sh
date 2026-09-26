@@ -68,7 +68,7 @@ ok "line coverage >= 90%"
 step "gas table"
 # Deliberately a dedicated benchmark rather than `forge test --gas-report`: gas
 # instrumentation interferes with `vm.txGasPrice`, which silently disarms the
-# spoofing fixtures — the benchmark would still pass while measuring nothing.
+# spoofing fixtures: the benchmark would still pass while measuring nothing.
 (cd contracts && forge test --match-contract SwornGasTest -vv > /tmp/sworn-gas.txt 2>&1) \
   || fail "gas benchmark failed"
 grep -q "overhead vs naive" /tmp/sworn-gas.txt || fail "gas benchmark produced no overhead figures"

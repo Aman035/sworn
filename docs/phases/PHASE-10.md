@@ -1,4 +1,4 @@
-# Phase 10 — README, feedback, and the numbers behind them
+# Phase 10. README, feedback, and the numbers behind them
 
 > Status: DONE · Gate: `make phase-10`
 
@@ -8,7 +8,7 @@ Tell the story with only numbers this repo produced.
 
 ## The mechanism
 
-`README.md` is generated from `README.template.md`. The template contains no digits — every
+`README.md` is generated from `README.template.md`. The template contains no digits. Every
 figure is a placeholder:
 
 ```
@@ -39,7 +39,7 @@ commit would leave the published README stale while every check passed. The gate
 
 **3. The headline needed an honest denominator.** The gate requires
 `divergence.totals.eligible_hooks` and `divergence.noise_floor` to exist. "4 of 1,404" and
-"4 of 25" are very different claims and only one of them is true — the eligible set is the
+"4 of 25" are very different claims and only one of them is true: the eligible set is the
 hooks with enough measured fills to classify at all.
 
 ## The numbers as published

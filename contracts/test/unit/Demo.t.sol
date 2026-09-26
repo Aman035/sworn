@@ -14,7 +14,7 @@ import {SwornTestBase} from "./SwornTestBase.sol";
 /// @notice The demo, as an executable script rather than a recording.
 ///
 /// @dev `docs/DEMO.md` storyboards this; `scripts/demo.sh` runs it. Every number printed
-///      below is produced live by the EVM during the run — there is no narration string
+///      below is produced live by the EVM during the run. There is no narration string
 ///      containing a figure, because a demo whose numbers are typed in is a slideshow.
 ///
 ///      It is written as a test so that the demo cannot rot: if the story stops being

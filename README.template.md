@@ -4,7 +4,7 @@
   Tables marked {{table:...}} are generated from the same files.
 -->
 
-[![Sworn — execution integrity for Uniswap v4](docs/assets/landing.png)](https://aman035.github.io/sworn/)
+[![Sworn. Execution integrity for Uniswap v4](docs/assets/landing.png)](https://aman035.github.io/sworn/)
 
 **[Live dashboard](https://aman035.github.io/sworn/)** ·
 **[Feedback for Uniswap](FEEDBACK.md)** ·
@@ -19,15 +19,15 @@ They analysed {{cite:0x.org:84,163}} hooks across six chains and reported **{{ci
 
 They named one. [`0x800cef53…`](https://basescan.org/address/0x800cef53c3fd41109dffec62e5251bdd7acba5c7)
 on Base, an ETH/NVDAc pool: a median fee of {{cite:0x.org:18%}} when it charged, and
-**{{cite:0x.org:$143,037}}** taken. That pool is still live — this repo forks Base at it in
+**{{cite:0x.org:$143,037}}** taken. That pool is still live: this repo forks Base at it in
 `NamedHooks.fork.t.sol`.
 
 **Hayden Adams [replied](https://x.com/haydenzadams/status/2099711270115013085):**
-*"Skill issue, don't route to bad hooks"* — and pointed integrators at the Uniswap API,
+*"Skill issue, don't route to bad hooks"*, and pointed integrators at the Uniswap API,
 which *"avoids malicious hooks"*.
 
 He is right. *Don't route to bad hooks* is exactly the correct advice, and this repo is
-an attempt to make it executable — because the question it leaves open is the one an
+an attempt to make it executable, because the question it leaves open is the one an
 integrator actually faces: **how do you know which ones are bad, at the moment you
 route?**
 
@@ -37,7 +37,7 @@ Three questions, answered with tooling anyone can run.
 
 No. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **on Uniswap's official hooklist with verified source**, and takes a median {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].median_charged_excess_bps|bps}} above its stated fee on {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].net_charged_rate|pct0}} of its fills, worst observed take {{result:divergence.json:hooks[address=0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc].max_charged_excess_bps|bpspct}}.
 
-An allowlist is a check on identity at a point in time. This is behaviour, now — and
+An allowlist is a check on identity at a point in time. This is behaviour, now, and
 {{result:census.json:chains[chain=base].upgradeable|int}} hooks on Base sit behind a proxy, so the code that was reviewed is not
 necessarily the code that runs.
 
@@ -49,15 +49,15 @@ dashboard and hook-scoring tool built on `Swap` events under-reports exactly the
 that take the most. This repo did it that way first, and spent a day chasing the
 resulting offset before reading the emission order.
 
-Measured properly — from the traced call rather than the event, with the measurement's
-own error subtracted — **{{result:divergence.json:totals.divergent_hooks|int}} of {{result:divergence.json:totals.eligible_hooks|int}}** hooks with enough fills to classify are
+Measured properly, from the traced call rather than the event, with the measurement's
+own error subtracted. **{{result:divergence.json:totals.divergent_hooks|int}} of {{result:divergence.json:totals.eligible_hooks|int}}** hooks with enough fills to classify are
 charging more than they quote.
 
 ## 3. Can it be closed at execution time?
 
 Yes, and not by detecting anything: static, differential and trace analysis all scored
 **zero recall** against ground truth here. `SwornRouter` moves the quote **inside the
-transaction that settles it** — probe every candidate for real, revert, take the best,
+transaction that settles it**. Probe every candidate for real, revert, take the best,
 and assert that what executed equals what was probed. A hook that lies makes those two
 disagree, and the trade does not happen.
 
@@ -68,7 +68,7 @@ disagree, and the trade does not happen.
 A v4 hook runs inside `PoolManager.swap`. In `beforeSwap` it can reduce the amount being
 swapped or override the fee; in `afterSwap` it can take a further delta out of the result.
 Both hook calls receive the same arguments whether the caller is a simulator or a
-transaction — but the *environment* differs, and the hook can read it:
+transaction, but the *environment* differs, and the hook can read it:
 
 - `tx.gasprice` is `0` under `eth_call` and non-zero in a transaction
 - `tx.origin` is commonly the zero address in a simulator
@@ -76,7 +76,7 @@ transaction — but the *environment* differs, and the hook can read it:
 
 A hook that branches on any of them is honest to every quoting engine that exists and
 dishonest to the person paying. **The cost to build one is a modifier.** No privileged
-position, no capital, no race to win — the hook is already inside every swap that touches
+position, no capital, no race to win: the hook is already inside every swap that touches
 its pool.
 
 ![How a quote-spoofing hook behaves differently under simulation](docs/assets/attack.svg)
@@ -88,12 +88,12 @@ all with reproductions in the feedback write-up:
 
 1. The [`Swap` event natspec](https://github.com/Uniswap/v4-core/blob/main/src/interfaces/IPoolManager.sol)
    documents `amount0` as *"the delta of the currency0 balance of the pool"*. The code
-   emits the **swapper's** delta — the opposite sign. Every indexer built from the docs is
+   emits the **swapper's** delta: the opposite sign. Every indexer built from the docs is
    inverted.
 2. The **"Access msg.sender"** guide teaches hooks to read the caller, without noting that
    routers therefore cannot trust a quote.
 3. The Trading API defaults to **hooks-inclusive** routing, and allowlisting is the only
-   defence anyone ships — a defence against *identity*, not against *behaviour*.
+   defence anyone ships: a defence against *identity*, not against *behaviour*.
 
 ## Measured on mainnet
 
@@ -125,11 +125,11 @@ the sha256 of the snapshot it was computed from.
 ### Half the signal is noise, and that is published too
 
 A hook cannot deliver **more** than it quoted, so any fill measured as over-delivering is a
-known false positive — and because the error is symmetric, its count estimates the false
+known false positive, and because the error is symmetric, its count estimates the false
 positives among the charged fills:
 
 - **{{result:divergence.json:noise_floor.charged_fills|int}}** charged fills
-- **{{result:divergence.json:noise_floor.overdelivered_fills|int}}** over-delivered — impossible from hook behaviour, so pure error
+- **{{result:divergence.json:noise_floor.overdelivered_fills|int}}** over-delivered. Impossible from hook behaviour, so pure error
 - **{{result:divergence.json:noise_floor.estimated_false_positive_share|pct}}** estimated false-positive share
 - **{{result:divergence.json:noise_floor.hooks_failing_the_floor|int}}** eligible hooks failed the floor and were dropped
 
@@ -145,13 +145,13 @@ exactly one percent:
 | --------------------- | ---------------------------------------------: |
 | `Swap` event          |                    `3,941,355,102,139,778,949` |
 | `swap()` return value |                    `3,901,941,551,118,381,160` |
-| difference            | `39,413,551,021,397,789` — exactly one percent |
+| difference            | `39,413,551,021,397,789`. Exactly one percent |
 
 A second, independent defect: the event's sign pattern cannot distinguish exact-input on
 token0 from exact-output on token1. They are identical, and **{{result:divergence.json:trace_confirmation.dropped.exact-output|int}}** of the sampled fills
 turned out to be exact-output swaps the event had disguised.
 
-So every fill here is confirmed against its own transaction trace — `amountSpecified`,
+So every fill here is confirmed against its own transaction trace. `amountSpecified`,
 `hookData` and the realized output all come from the traced `PoolManager.swap` call. Of
 {{result:divergence.json:trace_confirmation.sampled|int}} sampled fills, {{result:divergence.json:trace_confirmation.confirmed|int}} survived confirmation.
 
@@ -165,7 +165,7 @@ trades:
 ![Precision and recall of each hook detection method](docs/assets/precision.svg)
 
 **No static, differential or trace detector caught either divergent hook** among those both
-probed and measured. Only re-quoting settled trades did — and that is retrospective by
+probed and measured. Only re-quoting settled trades did, and that is retrospective by
 construction: it works after someone has already been paid less than they were quoted.
 
 A score tells you what a hook did last week. It cannot tell you what it is doing to your
@@ -178,36 +178,66 @@ Attribution covers every fill and publishes its own blind spot.
 {{table:attribution}}
 
 **{{result:attribution.json:unlabeled_share|pct}} of fills are unattributed**, reported rather than dropped, because a table
-that hides its coverage is not evidence. The products above are not doing anything wrong —
-they are doing the normal thing, which is to trust a quote.
+that hides its coverage is not evidence. The products above are not doing anything wrong: they are doing the normal thing, which is to trust a quote.
 
 ---
 
 # The solution
 
-`SwornRouter` moves the quote **inside the transaction that settles it**. Every candidate
-route is executed for real and then reverted, the best is taken, and the router asserts
-that what executed equals what it probed.
+Every router today asks a hook a question off-chain, then acts on the answer on-chain.
+Those are two different calls, and a hook can answer them differently.
+
+**Sworn asks once.** The quote and the trade become the same call.
+
+```solidity
+// SwornRouter.sol:176 — the assertion the whole design rests on
+if (execIn != amountsIn[chosen] || execOut != amountsOut[chosen]) {
+    revert Divergence(chosen, probed, executed);
+}
+```
+
+Both sides are checked, so a hook cannot take more input either. That is the entire
+product. Everything else exists to make those four lines meaningful.
 
 ![How SwornRouter probes candidates inside the transaction](docs/assets/mechanism.svg)
 
-Three details carry the guarantee:
+## Why a hook cannot tell it is being probed
 
-- **Probe and execution share one entry point.**
-  [`runRoute(hops, amountSpecified, probing)`](contracts/src/SwornRouter.sol#L201) is the
-  same external self-call either way, so a hook observes identical gas and call context.
-  `probing` is read only *after* every externally observable call.
-- **A probe reverts, so state rolls back** — including EIP-1153 transient storage
-  ([`UNLOCKED_SLOT`](contracts/src/SwornRouter.sol#L77)). A hook cannot leave itself a note
-  saying "that was a probe".
-- **The assertion is the product.**
-  [`revert Divergence(chosen, probed, executed)`](contracts/src/SwornRouter.sol#L178) fires
-  when execution disagrees with the probe. The user does not get a worse fill; the user
-  gets no fill.
+For a hook to cheat Sworn it would have to answer the probe honestly and the execution
+dishonestly. To do that it has to tell them apart. Here is everything it could try, and
+why each fails:
 
-Because the probe *is* the real environment, there is nothing left for a hook to
-distinguish. It cannot answer the probe honestly and the execution dishonestly, because
-they are the same call, in the same transaction, at the same gas price.
+| It could look at | But |
+| ---------------- | --- |
+| `tx.gasprice`, `tx.origin`, `block.*` | The probe runs in the same transaction, so every one of these is identical |
+| `msg.sender`, call depth, calldata shape | Probe and execution go through the same external self-call, [`runRoute`](contracts/src/SwornRouter.sol#L201). The `probing` flag is read only *after* the last externally observable call |
+| `gasleft()` | Both get the same stipend, enforced by [`_assertStipend`](contracts/src/SwornRouter.sol#L251) against EIP-150's `63/64` rule |
+| A counter in storage | The probe reverts, so its own bookkeeping rolls back with it |
+| A counter in *transient* storage | EIP-1153 slots do not survive the revert either. Tested in `test_gasSniff_probeStateIsRolledBack` |
+| Refusing to be probed | A reverting candidate is skipped and the swap still settles through another |
+
+There is no remaining signal. A hook that wants to overcharge you has to overcharge the
+probe by the same amount, at which point Sworn routes around it and the hook earns
+nothing.
+
+This is not an argument, it is a test suite: twelve attacker capabilities from
+`THREAT_MODEL.md`, each with a working fixture in
+[`ToxicHooks.sol`](contracts/test/fixtures/ToxicHooks.sol) that tries the attack and
+fails.
+
+## What it looks like when it works
+
+Same pool, same block, same swap. The only difference is the router:
+
+```
+a hook that charges only when tx.gasprice > 0
+
+  quoted to a simulator          996,999,005,991,991
+  naive router, trusting it      817,539,331,628,894   -17.99%
+  sworn router, probing in-tx    996,999,005,991,991        0%
+```
+
+Produced live by `DemoTest`, not typed in. Run `./scripts/demo.sh` to watch it happen.
 
 ## Verified against live mainnet hooks
 
@@ -237,7 +267,7 @@ above a trade size and not below it:
 
 A router should not probe a two-dollar swap, and `maxProbes` and `hookMarginBps` exist so an
 integrator can set that line. Gross dollars across the priceable subset were
-${{result:replay.json:totals.protected_usd_gross|f2}} protected against ${{result:replay.json:totals.probe_gas_usd|f2}} of gas — a real sum and a
+${{result:replay.json:totals.protected_usd_gross|f2}} protected against ${{result:replay.json:totals.probe_gas_usd|f2}} of gas: a real sum and a
 misleading one, since a uniform sample of Base fills is mostly dust and
 {{result:replay.json:totals.gas_cost_top10_share|pct0}} of that gas came from ten transactions.
 
@@ -256,7 +286,7 @@ Measured probe overhead, verbatim from `forge test --match-contract SwornGasTest
 scheduled attestor. Its load-bearing property is how it handles **absence**:
 
 - an unscored hook returns `hasScore() == false` and `FLAG_INSUFFICIENT_DATA`
-  ([`flags`](contracts/src/HookBook.sol#L124)) — **never a clean zero**
+  ([`flags`](contracts/src/HookBook.sol#L124)). **never a clean zero**
 - a hook with too few measured fills gets `score = null`; a good rating has to be earned
 - updates are monotonic in `asOfBlock` ([`StaleUpdate`](contracts/src/HookBook.sol#L83)),
   which is replay and staleness protection in one
@@ -266,7 +296,7 @@ scheduled attestor. Its load-bearing property is how it handles **absence**:
 | Network      | `HookBook`                                                                                                                                  | Status                                    |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | Base Sepolia | [`0x8A4470f7DDa8525b484527b21B19c3bc876A04c3`](https://sepolia.basescan.org/address/0x8A4470f7DDa8525b484527b21B19c3bc876A04c3) | Live, attestor authorised, scores written |
-| Base mainnet | —                                                                                                                                             | Not deployed; `1,643,224` gas to do so    |
+| Base mainnet |. | Not deployed; `1,643,224` gas to do so    |
 
 The attestor wrote {{result:divergence.json:totals.eligible_hooks|int}} scores; a second scheduled run correctly wrote nothing,
 because the registry already held that block. Scoring is fully specified, with a worked example the test suite reproduces exactly.
@@ -280,7 +310,7 @@ because the registry already held that block. Scoring is fully specified, with a
 ```
 
 Three acts, ordered by how hard each is to fake. No manual steps, and every figure is
-produced by the EVM during the run — the gate greps the source to prove no `console.log`
+produced by the EVM during the run: the gate greps the source to prove no `console.log`
 string contains a number.
 
 | Act | What runs                                                     | What it shows                                                                    |
@@ -302,66 +332,81 @@ README is:
 
 ---
 
-# Project outline
+# Components
 
-```
-contracts/src         SwornRouter (probe-and-assert), HookBook (on-chain scores)
-contracts/test        unit, fuzz, invariant, toxic fixtures, mainnet fork
-analysis/lib          RPC, log fetching, compaction, re-quoting, trace recovery, scoring
-analysis/pipelines    census -> fills -> divergence -> intermittency -> attribution -> replay -> scores
-app                   Next.js dashboard, static export
-attestor              scheduled job that writes HookBook
-sdk                   buildSwornCall: calldata from a quote, viem action
-docs                  METRICS.md defines every term *before* it is measured
-scripts/gates         one script per phase; `make phase-N` is the only way a phase closes
-```
+| | | |
+| --- | --- | --- |
+| **`contracts/src`** | Solidity | [`SwornRouter`](contracts/src/SwornRouter.sol), the probe-and-assert router. [`HookBook`](contracts/src/HookBook.sol), the on-chain score registry. |
+| **`contracts/test`** | Solidity | Unit, fuzz and invariant tests, twelve toxic-hook fixtures, and fork tests against live Base hooks. |
+| **`analysis/lib`** | Python | RPC with adaptive log fetching, parquet compaction, re-quoting, trace recovery, scoring, on-chain pricing. |
+| **`analysis/pipelines`** | Python | `census` → `fills` → `divergence` → `intermittency` → `attribution` → `replay` → `precision` → `scores`. Each writes one file to `data/results`. |
+| **`app`** | Next.js | The [dashboard](https://aman035.github.io/sworn/). Static export, reads the committed result files at build time. |
+| **`attestor`** | TypeScript | Scheduled job that signs scores and writes them to `HookBook`. |
+| **`sdk`** | TypeScript | `buildSwornCall`: turns a quote into router calldata. viem action included. |
+| **`scripts/gates`** | bash | One gate per phase. `make phase-N` is the only thing that can mark a phase done. |
 
-## Where to verify the integration
+## Run it locally
 
-| What                                                     | Where                                                                      |
-| -------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Entry point, validates candidates and opens the v4 lock   | [`swornSwap` · SwornRouter.sol#L121](contracts/src/SwornRouter.sol#L121)    |
-| `IUnlockCallback`; all routing happens inside the lock    | [`unlockCallback` · #L140](contracts/src/SwornRouter.sol#L140)              |
-| **The guarantee**: execution must equal the probe         | [`revert Divergence` · #L178](contracts/src/SwornRouter.sol#L178)           |
-| One entry point for probe and execution                   | [`runRoute` · #L201](contracts/src/SwornRouter.sol#L201)                    |
-| A probe must revert; reaching the end means the EVM lied  | [`ProbeMustRevert` · #L228](contracts/src/SwornRouter.sol#L228)             |
-| Probe isolation via a derived transient slot (EIP-1153)   | [`UNLOCKED_SLOT` · #L77](contracts/src/SwornRouter.sol#L77)                 |
-| EIP-150 `63/64` rule, so a griefing hook cannot starve it | [`_assertStipend` · #L251](contracts/src/SwornRouter.sol#L251)              |
-| Recovering what a swap actually did, from its trace       | [`analysis/lib/swapcalls.py`](analysis/lib/swapcalls.py)                    |
-| Every modelled attacker capability, as a fixture          | [`ToxicHooks.sol`](contracts/test/fixtures/ToxicHooks.sol)                  |
-
-## Reproduce everything
+You need Node `20`, Python `3.11+`, and Foundry. Nothing else, and no RPC key for the parts
+that matter most.
 
 ```bash
-cp .env.sample .env          # archive RPC per chain; keys never leave the file
+git clone https://github.com/Aman035/sworn && cd sworn
+git submodule update --init --recursive
 make install
-make test                    # forge + pytest + vitest
-make phase-3                 # the gate that produced divergence.json
-make phase-6                 # fork tests against live Base hooks, then replay
-make readme                  # re-render this file and its diagrams from data/results
 ```
+
+**The dashboard**, entirely from committed data, no network:
+
+```bash
+cd app && npm run dev          # http://localhost:3100
+```
+
+**The tests**, including the twelve attacker fixtures:
+
+```bash
+make test                      # forge + pytest + vitest
+forge test --root contracts --match-contract ToxicHooksTest -vv
+```
+
+**The demo**, three acts, nothing manual:
+
+```bash
+./scripts/demo.sh
+```
+
+The last two acts fork Base, so they need an archive RPC. Copy `.env.sample` to `.env` and set
+`BASE_RPC_ARCHIVE`. Keys stay in that file, which is gitignored and never read into a log
+or an error message.
+
+**Re-derive the measurements** (hours, and an archive node with `debug_traceTransaction`):
+
+```bash
+make phase-3                   # the gate that produced divergence.json
+make phase-6                   # fork tests against live Base hooks, then replay
+make readme                    # re-render this file and its diagrams from data/results
+```
+
+## Where to check the claims
+
+The mechanism is four places in one file.
+[`swornSwap`](contracts/src/SwornRouter.sol#L121) opens the v4 lock,
+[`runRoute`](contracts/src/SwornRouter.sol#L201) is the single entry point probe and
+execution share, [`ProbeMustRevert`](contracts/src/SwornRouter.sol#L228) enforces that a
+probe cannot complete, and [`Divergence`](contracts/src/SwornRouter.sol#L178) is the
+assertion above. Probe isolation is the transient slot at
+[`UNLOCKED_SLOT`](contracts/src/SwornRouter.sol#L77), and
+[`HookBook.flags`](contracts/src/HookBook.sol#L124) is where an unmeasured hook reads as
+`INSUFFICIENT_DATA` rather than zero. The measurement side starts at
+[`analysis/lib/swapcalls.py`](analysis/lib/swapcalls.py).
 
 Every result file carries `meta.snapshots[]` with a sha256 of its input snapshot and the
 commit of the script that produced it. A number that cannot be traced to a snapshot is a
-number this repo will not print — enforced by
-[`verify_readme_numbers.py`](scripts/verify_readme_numbers.py), which fails the build on any
-digit in this file that did not come from a result.
+number this repo will not print, enforced by
+[`verify_readme_numbers.py`](scripts/verify_readme_numbers.py), which fails the build on
+any digit in this file that did not come from a result.
 
 ---
-
-# What Uniswap should change
-
-1. **Emit the caller's final delta.** A `SwapSettled` event after
-   `_accountPoolBalanceDelta`, or an `afterSwap` delta field on the existing event. Without
-   it, "how much did this hook charge" is not answerable from logs at all.
-2. **Fix the `Swap` natspec.** It documents the pool's delta; the code emits the swapper's.
-3. **Carry behaviour in the hooklist**, not just identity: `divergenceScore`,
-   `envSensitive`, `intermittent`, `upgradeable`. Proposal with data in
-   [HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
-4. **Point the "Access msg.sender" guide at in-transaction verification.**
-5. **Expose per-route hook scores in the Trading API.**
-6. **Document the required compiler settings.** `optimizer_runs = 800` cannot compile
-   `PoolManager`, and the error names a Yul internal.
 
 # Threat model and limits
 
@@ -378,8 +423,18 @@ digit in this file that did not come from a result.
 
 ---
 
-**[FEEDBACK.md](FEEDBACK.md)** — three defects found in v4 while building this, with
-reproductions. Written for the Uniswap developer feedback form.
+## Three things that would fix this upstream
+
+1. **Emit the caller's final delta.** A `SwapSettled` event after
+   `_accountPoolBalanceDelta`, or an `afterSwap` delta field on the existing one. Without
+   it, "how much did this hook charge" is not answerable from logs at all.
+2. **Fix the `Swap` natspec.** It documents the pool's delta; the code emits the
+   swapper's, which is the opposite sign.
+3. **Carry behaviour in the hooklist**, not just identity. Proposal with data in
+   [HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
+
+All three, with reproductions and the rest of the build notes, are in
+**[FEEDBACK.md](FEEDBACK.md)**, written for the Uniswap developer feedback form.
 
 If you want to go deeper: [METRICS.md](docs/METRICS.md) defines every term before it is
 measured, [THREAT_MODEL.md](docs/THREAT_MODEL.md) has the full attacker model, and

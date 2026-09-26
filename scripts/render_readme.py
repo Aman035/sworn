@@ -11,7 +11,7 @@ rendered file contains no numbers the template invented.
 
 Why the indirection: a README is the one file where a stale number is most damaging and
 least likely to be noticed. Writing "15.3M pools" by hand means it is wrong the next time
-the census runs, and nobody finds out. A placeholder cannot go stale — it either resolves
+the census runs, and nobody finds out. A placeholder cannot go stale: it either resolves
 or the build fails.
 """
 
@@ -31,7 +31,7 @@ OUTPUT = ROOT / "README.md"
 # Whitespace-tolerant on purpose: prettier pads `|` inside markdown table cells, turning
 # `{{result:x|int}}` into `{{result:x | int}}`. A stricter pattern silently stopped
 # matching and shipped a README full of raw placeholders, because nothing checked for them.
-# `{{cite:<source>:<text>}}` — a figure this repo did **not** measure, quoted from an
+# `{{cite:<source>:<text>}}`: a figure this repo did **not** measure, quoted from an
 # external source. The source key must appear in docs/SOURCES.md or the build fails, so
 # an external number cannot reach the README without a documented, dated provenance entry.
 CITE = re.compile(r"\{\{\s*cite\s*:\s*([^:}]+?)\s*:\s*([^}]+?)\s*\}\}")
@@ -54,7 +54,7 @@ def _load(filename: str) -> Any:
     path = RESULTS / filename
     if not path.is_file():
         raise RenderError(
-            f"{filename} does not exist — run the pipeline that produces it"
+            f"{filename} does not exist. Run the pipeline that produces it"
         )
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -146,7 +146,7 @@ def table_divergent_hooks() -> str:
             f"| {h['fills']:,} | {h['charged_fills']:,} | {h['overdelivered_fills']:,} "
             f"| {h['net_charged_rate'] * 100:.0f}% "
             f"| {h.get('median_charged_excess_bps', 0):,.0f} bps "
-            f"| {scores.get(h['address'], {}).get('score', '—')} |"
+            f"| {scores.get(h['address'], {}).get('score', '. ')} |"
         )
     return "\n".join(rows)
 

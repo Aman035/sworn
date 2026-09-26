@@ -33,7 +33,7 @@ export default function Landing() {
           </h1>
           <p className="hero-sub">
             The quote comes from <code>eth_call</code>. The charge happens in a transaction. A hook
-            is arbitrary code that runs in both — and can tell them apart.
+            is arbitrary code that runs in both, and can tell them apart.
           </p>
 
           <SpoofHero />
@@ -88,11 +88,11 @@ export default function Landing() {
                 >
                   <code>0x800cef53…</code>
                 </a>{' '}
-                on Base, an ETH/NVDAc pool — a median fee of <b>18%</b> when it charged, and{' '}
+                on Base, an ETH/NVDAc pool: a median fee of <b>18%</b> when it charged, and{' '}
                 <b className="bad">$143,037</b> taken.
               </p>
               <p className="fineprint">
-                Their analysis, their numbers — cited, not reproduced here.
+                Their analysis, their numbers. Cited, not reproduced here.
               </p>
             </article>
 
@@ -108,7 +108,7 @@ export default function Landing() {
               <blockquote>Skill issue, don&rsquo;t route to bad hooks</blockquote>
               <p>
                 Pointing integrators at the Uniswap API, which &ldquo;avoids malicious hooks&rdquo;.
-                He is right — and this repo is an attempt to make that advice executable, because it
+                He is right, and this repo is an attempt to make that advice executable, because it
                 leaves open the question an integrator actually faces:{' '}
                 <strong>how do you know which ones are bad, at the moment you route?</strong>
               </p>
@@ -171,7 +171,7 @@ export default function Landing() {
             </div>
             <div className="delta">
               <dt>difference</dt>
-              <dd>39,413,551,021,397,789 — exactly one percent</dd>
+              <dd>39,413,551,021,397,789. Exactly one percent</dd>
             </div>
           </dl>
           <p>
@@ -221,7 +221,7 @@ export default function Landing() {
                         {listed.has(h.address) ? (
                           <span className="mark on">hooklist</span>
                         ) : (
-                          <span className="mark off">—</span>
+                          <span className="mark off">. </span>
                         )}
                       </td>
                     </tr>
@@ -245,7 +245,7 @@ export default function Landing() {
               Static bytecode analysis, differential <code>eth_call</code>, and{' '}
               <code>debug_traceCall</code> were each scored against what hooks actually did to
               settled trades. Every one of them scored zero recall. Only re-quoting settled trades
-              caught anything — and that works after someone has already been paid less than they
+              caught anything, and that works after someone has already been paid less than they
               were quoted.
             </p>
             <p className="pull">
@@ -258,12 +258,26 @@ export default function Landing() {
 
       <Reveal as="section" className="panel solution">
         <div className="panel-inner">
-          <h2>So stop quoting. Probe.</h2>
+          <p className="hero-eyebrow">The solution</p>
+          <h2>Ask once.</h2>
           <p>
-            <code>SwornRouter</code> moves the quote inside the transaction that settles it. Every
-            candidate route is executed for real and then reverted, the best is taken, and the
-            router asserts that what executed equals what it probed.
+            Every router today asks a hook a question off-chain, then acts on the answer on-chain.
+            Those are two different calls, and a hook can answer them differently. Sworn makes the
+            quote and the trade the <em>same call</em>.
           </p>
+
+          <pre className="code">
+            <code>{`// SwornRouter.sol:176 - the assertion the whole design rests on
+if (execIn != amountsIn[chosen] || execOut != amountsOut[chosen]) {
+    revert Divergence(chosen, probed, executed);
+}`}</code>
+          </pre>
+
+          <p>
+            Both sides are checked, so a hook cannot quietly take more input either. That is the
+            entire product. Everything below exists to make those four lines mean something.
+          </p>
+
           <ol className="steps">
             <li>
               <b>unlock</b>
@@ -272,7 +286,7 @@ export default function Landing() {
             <li>
               <b>probe</b>
               <span>
-                run each candidate for real, then revert — state and transient storage roll back
+                run each candidate for real, then revert. State and transient storage roll back
               </span>
             </li>
             <li>
@@ -285,13 +299,61 @@ export default function Landing() {
             </li>
             <li className="assert">
               <b>assert</b>
-              <span>executedDelta == probed[chosen], or the whole transaction reverts</span>
+              <span>executed == probed, or the whole transaction reverts</span>
             </li>
           </ol>
+        </div>
+      </Reveal>
+
+      <Reveal as="section" className="panel">
+        <div className="panel-inner">
+          <h2>Why a hook cannot tell it is being probed</h2>
           <p>
-            The probe sees the same <code>tx.gasprice</code>, the same <code>tx.origin</code>, the
-            same everything a hook could key on, because it <em>is</em> the real environment. There
-            is no separate quote left to lie to.
+            To cheat Sworn a hook would have to answer the probe honestly and the execution
+            dishonestly, which means telling them apart. Here is everything it could try.
+          </p>
+          <dl className="defeat">
+            <div>
+              <dt>
+                <code>tx.gasprice</code>, <code>tx.origin</code>, <code>block.*</code>
+              </dt>
+              <dd>The probe runs in the same transaction. Every one of these is identical.</dd>
+            </div>
+            <div>
+              <dt>
+                <code>msg.sender</code>, call depth, calldata
+              </dt>
+              <dd>
+                Probe and execution go through the same external self-call. The <code>probing</code>{' '}
+                flag is read only after the last externally observable call.
+              </dd>
+            </div>
+            <div>
+              <dt>
+                <code>gasleft()</code>
+              </dt>
+              <dd>Both get the same stipend, enforced against EIP-150&rsquo;s 63/64 rule.</dd>
+            </div>
+            <div>
+              <dt>A counter in storage</dt>
+              <dd>The probe reverts, so its own bookkeeping rolls back with it.</dd>
+            </div>
+            <div>
+              <dt>A counter in transient storage</dt>
+              <dd>EIP-1153 slots do not survive the revert either.</dd>
+            </div>
+            <div>
+              <dt>Refusing to be probed</dt>
+              <dd>A reverting candidate is skipped, and the swap settles through another.</dd>
+            </div>
+          </dl>
+          <p className="pull">
+            A hook that wants to overcharge you has to overcharge the probe by the same amount, at
+            which point Sworn routes around it and the hook earns nothing.
+          </p>
+          <p className="fineprint">
+            Twelve attacker capabilities, each with a working fixture in <code>ToxicHooks.sol</code>{' '}
+            that tries the attack and fails.
           </p>
         </div>
       </Reveal>

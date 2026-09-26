@@ -3,7 +3,7 @@ import { Nav } from '@/components/Nav';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Sworn — execution integrity for Uniswap v4',
+  title: 'Sworn. Execution integrity for Uniswap v4',
   description:
     'Measured hook divergence across Uniswap v4 on mainnet, and a router that makes quote spoofing structurally impossible.',
 };

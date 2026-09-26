@@ -70,7 +70,7 @@ def swap_row(event: SwapEvent) -> dict[str, Any]:
     """One settled fill.
 
     `amount0`/`amount1` are the pool's signed deltas from the swapper's perspective, and
-    `fee` is the fee actually applied to this swap — which for a dynamic-fee pool is the
+    `fee` is the fee actually applied to this swap, which for a dynamic-fee pool is the
     hook's choice at that moment, not a property of the pool key.
     """
     return {

@@ -1,4 +1,4 @@
-"""Pipeline C — intermittency: hooks that are toxic only some of the time.
+"""Pipeline C. Intermittency: hooks that are toxic only some of the time.
 
 This is the pattern allowlists structurally cannot catch. Enso observed a pool toxic for
 roughly 423 of 718 hours and toggled 26 times across 48 windows; a registry refreshed on
@@ -6,7 +6,7 @@ human timescales is always one toggle behind.
 
 Reads the per-fill measurements Phase B produced, buckets them by hour, and counts how
 often a hook's charged rate crosses the threshold. An hour with too few fills cannot count
-as a crossing — otherwise a single fill flips the regime.
+as a crossing. Otherwise a single fill flips the regime.
 
     python -m sworn_analysis.pipelines.c_intermittency --chain base
 """
@@ -35,7 +35,7 @@ def _block_to_epoch(chain: str):  # noqa: ANN202
     Anchored on the fills snapshot: its manifest records the block it ended at and when it
     was taken, and the chain's block time is a measured constant. Fetching a timestamp per
     block would be millions of extra RPC calls to gain a precision that hourly buckets
-    cannot use — but the approximation is real, so results say so.
+    cannot use, but the approximation is real, so results say so.
     """
     from ..lib.snapshot import read_manifest
     from .b_fills import BLOCK_SECONDS

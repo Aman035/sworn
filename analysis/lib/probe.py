@@ -1,14 +1,14 @@
-"""hook-probe — differential and trace-based detection of spoof-capable hooks.
+"""hook-probe. Differential and trace-based detection of spoof-capable hooks.
 
 Three methods, with very different failure modes, which is the point: Phase 4's job is to
 report where each one *fails*, not to produce a single verdict.
 
-* **static** (`lib/evm.py`) — does the bytecode contain an environment opcode? Cheap,
+* **static** (`lib/evm.py`). Does the bytecode contain an environment opcode? Cheap,
   complete, and nearly useless alone: 99.2% of Base hooks contain one.
-* **differential** — quote the same swap under different `tx.gasprice`, caller and gas,
+* **differential**. Quote the same swap under different `tx.gasprice`, caller and gas,
   and see whether the answer moves. State is identical across permutations, so anything
   that changes is environment sensitivity by definition.
-* **trace** — `debug_traceCall` with a tracer that records only environment opcodes and
+* **trace**. `debug_traceCall` with a tracer that records only environment opcodes and
   the contract that executed them. This is what turns "contains ORIGIN" into "the hook
   reads ORIGIN while pricing the swap".
 
@@ -65,7 +65,7 @@ class Permutation:
 
 
 DEFAULT_PERMUTATIONS = (
-    # Zero gas price is what an `eth_call` looks like — the canonical simulator tell.
+    # Zero gas price is what an `eth_call` looks like: the canonical simulator tell.
     Permutation("simulator", 0, PROBE_CALLER_EOA, 30_000_000),
     Permutation("real-1gwei", 1_000_000_000, PROBE_CALLER_EOA, 30_000_000),
     Permutation("real-100gwei", 100_000_000_000, PROBE_CALLER_EOA, 30_000_000),

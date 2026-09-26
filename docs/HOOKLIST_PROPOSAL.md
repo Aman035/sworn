@@ -4,8 +4,7 @@ A proposal for [Uniswap/hooklist](https://github.com/Uniswap/hooklist), with dat
 
 ## The gap
 
-The hooklist describes a hook by **who made it** — deployer, verified source, audit link —
-and by the **static permissions** encoded in its address. Both are checkable and both are
+The hooklist describes a hook by **who made it**. Deployer, verified source, audit link, and by the **static permissions** encoded in its address. Both are checkable and both are
 useful. Neither answers the question an integrator turning on hooks-inclusive routing is
 actually asking: _what does this hook do to my users?_
 
@@ -14,7 +13,7 @@ Two specific failures follow:
 1. **Listing is permanent; bytecode is not.** 10,430 of the 69,242 hooks on
    Base sit behind a proxy. An address-keyed allowlist cannot express that a listed hook
    changed after it was listed. Of the 25 hooks measured here, 0 are
-   upgradeable — a fact about which hooks carry the most volume, not a reason to drop the
+   upgradeable: a fact about which hooks carry the most volume, not a reason to drop the
    field.
 2. **Permissions are capability, not behaviour.** `beforeSwapReturnsDelta` says a hook
    _can_ alter the amounts. Almost every interesting hook has it. It says nothing about
@@ -92,7 +91,7 @@ path. The highest score is 40, at `0x0469a4bd3724dc86c9542f4694c976da13c450c0`.
 
 The same values are published on-chain by [`HookBook`](../contracts/src/HookBook.sol), so a
 generator can fill this section of the hooklist from a contract call rather than from a
-file anyone can edit — and `HookBook` already refuses to report an unmeasured hook as
+file anyone can edit, and `HookBook` already refuses to report an unmeasured hook as
 clean, returning `hasScore() == false` and `INSUFFICIENT_DATA` instead of a zero.
 
 ## What this proposal does not claim

@@ -1,4 +1,4 @@
-"""Pipeline D — which products routed users into which hooks.
+"""Pipeline D, which products routed users into which hooks.
 
 `Swap.sender` is the contract that called `PoolManager.swap`, never the user. Mapping it
 to a product turns "a toxic hook exists" into "this product routed users into it", which

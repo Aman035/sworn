@@ -1,7 +1,7 @@
 """Etherscan V2 client: verified source and proxy metadata for hook contracts.
 
 One key covers every supported chain via `?chainid=`. The census needs three things from
-it — is the source verified, is the contract a proxy, and what is it called — and none of
+it. Is the source verified, is the contract a proxy, and what is it called, and none of
 them are available from an RPC node.
 
 Rate limits are the operative constraint: the free tier allows a few calls per second and
@@ -165,7 +165,7 @@ def _parse(body: dict[str, Any], chain_id: int, address: str) -> ContractInfo:
     )
 
     # `Proxy` is not a boolean. Etherscan returns "0" for no proxy, "1" for a verified
-    # proxy, and "2" for one it detected on an *unverified* contract — which is exactly
+    # proxy, and "2" for one it detected on an *unverified* contract, which is exactly
     # the case for the Base hook 0x named. Testing `== "1"` silently misses those, so
     # anything non-zero counts, and a populated `Implementation` counts on its own.
     proxy_field = str(entry.get("Proxy", "0")).strip()

@@ -1,8 +1,8 @@
 """Adaptive log fetching: back off on provider limits, resume after a crash.
 
 A census pull is hours long and spans tens of millions of blocks. Both failure modes here
-are silent and catastrophic — a skipped range quietly shrinks the denominator for every
-downstream number — so they are tested rather than observed.
+are silent and catastrophic: a skipped range quietly shrinks the denominator for every
+downstream number, so they are tested rather than observed.
 """
 
 from __future__ import annotations
@@ -205,7 +205,7 @@ def test_fetcher_does_not_retry_a_width_already_refused() -> None:
     """Growth must remember the ceiling.
 
     Without this the fetcher pays one refused request every GROWTH_AFTER chunks for the
-    whole run — thousands of wasted calls across a 26M-block census.
+    whole run. Thousands of wasted calls across a 26M-block census.
     """
     rpc = LimitedRpc(max_span=10_000)
     fetcher = LogFetcher(rpc, "0xpm", [], start_chunk=10_000)  # type: ignore[arg-type]

@@ -36,7 +36,7 @@ contract ReadsManyEnv {
     }
 }
 
-/// @dev `tx.origin` used for access control — a benign-looking pattern that is still a
+/// @dev `tx.origin` used for access control: a benign-looking pattern that is still a
 ///      simulation signal, so it must be detected and then judged, not ignored.
 contract ReadsOrigin {
     function isDirect() external view returns (bool) {

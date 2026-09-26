@@ -4,14 +4,14 @@ The external work that motivates this repo. Two rules:
 
 1. **We reproduce, we do not reuse.** Every number Sworn publishes is computed by a
    script in this repo from a pinned snapshot. Figures below are context and a sanity
-   check on our own pipeline — never a substitute for it. Where our number differs from
+   check on our own pipeline. Never a substitute for it. Where our number differs from
    theirs, both are printed side by side and the difference is explained, not tuned away.
 2. **Every figure here is quoted, dated and attributed.** A figure whose source we have
    not opened is marked `unverified` and may not be cited in the README.
 
 ---
 
-### 0x — "Uniswap v4 hooks were a mistake"
+### 0x. "Uniswap v4 hooks were a mistake"
 
 - **URL.** <https://0x.org/post/uniswap-v4-hooks-were-a-mistake>
 - **Date.** 14 September 2026
@@ -33,12 +33,12 @@ The external work that motivates this repo. Two rules:
 
 **What we reproduce.** The census (Phase 2) and the malicious share (Phase 3), with our
 own thresholds published and swept. The two named hooks are the fixtures our Phase 3
-tests and Phase 6 fork tests must reproduce behaviour for — we report our charged rate
+tests and Phase 6 fork tests must reproduce behaviour for. We report our charged rate
 next to theirs and do **not** tune parameters to match.
 
 ### Hayden Adams' response
 
-- **URL.** <https://x.com/haydenzadams/status/2099711270115013085> — a reply to 0x's
+- **URL.** <https://x.com/haydenzadams/status/2099711270115013085>: a reply to 0x's
   15 September post.
 - **Status.** Verified (primary source, read 26 September 2026). Also covered by
   [Crypto Briefing](https://cryptobriefing.com/0x-criticizes-uniswap-v4-hooks-malicious/)
@@ -66,11 +66,11 @@ route?** Three findings here say the available answers are not sufficient:
 
 Sworn's answer is to stop needing the list: verify inside the transaction, where a hook
 has no separate quote left to lie to. That is compatible with the advice, not opposed to
-it — it is what makes the advice executable.
+it: it is what makes the advice executable.
 
 ---
 
-### Enso — "Toxic Pools: How Manipulated Quotes Create Execution, UX, and Liability Risk in DeFi"
+### Enso. "Toxic Pools: How Manipulated Quotes Create Execution, UX, and Liability Risk in DeFi"
 
 - **URL.** <https://blog.enso.build/toxic-pools/>
 - **Date.** 16 July 2026
@@ -91,8 +91,8 @@ it — it is what makes the advice executable.
 | Succeeded but underfilled     | 129,070                                                                                            |
 | MetaMask exposure             | 6,625 swaps routed; 4,420 single-hop USDT→USDC completed; ~$5.88M USDC volume during toxic periods |
 
-**What we reproduce.** Intermittency (Phase 3, pipeline C) — the toggling regime is the
-part allowlists structurally cannot catch — and front-end attribution (pipeline D), which
+**What we reproduce.** Intermittency (Phase 3, pipeline C): the toggling regime is the
+part allowlists structurally cannot catch, and front-end attribution (pipeline D), which
 is what turns "a bad pool exists" into "this product routed users into it".
 
 **Note on scope.** The Curve case is not a v4 hook. It is the reason Phase 11 generalises
@@ -100,14 +100,14 @@ probe-and-select to non-v4 venues: the vulnerability is quote-vs-execution, not 
 
 ---
 
-### Uniswap — `hooklist` registry
+### Uniswap. `hooklist` registry
 
 - **URL.** <https://github.com/Uniswap/hooklist>
 - **Date.** Continuously updated; accessed 25 September 2026, and re-read at Phase 2 snapshot time (the exact commit goes in the snapshot manifest).
 - **Status.** Verified (repository exists; `hooklist.json`, per-chain files under
   `hooks/`, and `schema.json` define the format).
 
-**Figures we cite.** None — this is a _join key_, not a measurement. Phase 2 joins it on
+**Figures we cite.** None: this is a _join key_, not a measurement. Phase 2 joins it on
 `(chain, address)` to mark `allowlisted`, and Phase 10 opens a schema PR proposing
 `divergenceScore`, `envSensitive` and `intermittent` fields generated from `HookBook`.
 
@@ -118,27 +118,27 @@ verification rather than per-hook reputation.
 
 ---
 
-### Uniswap — "Access `msg.sender` inside a hook" guide
+### Uniswap. "Access `msg.sender` inside a hook" guide
 
 - **URL.** <https://docs.uniswap.org/contracts/v4/guides/hooks/msg-sender>
 - **Date.** Undated docs page; recorded 25 September 2026.
-- **Status.** `unverified` — recorded from `SWORN_PLAN.md`; the URL has not been fetched
+- **Status.** `unverified`. Recorded from `SWORN_PLAN.md`; the URL has not been fetched
   in-repo, so it may not be cited in the README until Phase 10 re-checks it.
 
 **Figures we cite.** None.
 
 **Why it matters.** The guide shows a hook how to learn who the real swapper is. The same
-mechanism is what lets a hook whitelist a router or an address — including, in principle,
+mechanism is what lets a hook whitelist a router or an address, including, in principle,
 `SwornRouter` itself. Phase 5's `RouterWhitelistHook` fixture models exactly this, and
 Phase 10 proposes the guide point at in-transaction verification for execution integrity.
 
 ---
 
-### Uniswap — Trading API `hooksOptions`
+### Uniswap. Trading API `hooksOptions`
 
 - **URL.** <https://docs.uniswap.org/api/trading/overview>
 - **Date.** Undated docs page; recorded 25 September 2026.
-- **Status.** `unverified` — recorded from `SWORN_PLAN.md`; not fetched in-repo.
+- **Status.** `unverified`. Recorded from `SWORN_PLAN.md`; not fetched in-repo.
 
 **Figures we cite.** None.
 

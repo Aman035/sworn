@@ -52,7 +52,7 @@ import json, sys
 doc = json.load(open("data/results/replay.json"))
 t = doc["totals"]
 if "price_confidence" not in t:
-    print("    price_confidence absent — a USD total with unknown coverage is not evidence")
+    print("    price_confidence absent: a USD total with unknown coverage is not evidence")
     sys.exit(1)
 if t.get("protected_usd") is not None and t["price_confidence"] == 0:
     print("    a USD total was published with zero priceable fills")

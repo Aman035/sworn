@@ -86,7 +86,7 @@ contract SwornGasTest is SwornTestBase {
 
         assertGt(used[2], used[1], "second candidate was free");
         assertGt(used[3], used[2], "third candidate was free");
-        // Allow a wide band — the point is that it is not super-linear.
+        // Allow a wide band: the point is that it is not super-linear.
         assertLt(secondStep, firstStep * 2, "per-candidate cost is growing");
     }
 }

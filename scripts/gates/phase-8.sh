@@ -60,7 +60,7 @@ ok "SDK ABI matches the compiled SwornRouter"
 
 step "agent quickstart compiles"
 # The quickstart is the first thing an integrator copies. If it does not typecheck against
-# a real viem client, the SDK's own client interface is wrong — which is how the loose
+# a real viem client, the SDK's own client interface is wrong, which is how the loose
 # `ReadClient` typing was found.
 pnpm --filter sworn-sdk exec tsc --noEmit examples/agent-swap.ts --module esnext \
   --moduleResolution bundler --target es2022 --strict --skipLibCheck \

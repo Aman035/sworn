@@ -6,7 +6,7 @@ import { HOOK_FLAGS, type Address, type HookFlagName } from './types.js';
  *
  * Typed loosely on purpose. viem declares `readContract` with a generic constrained to
  * the ABI and the function name, so a narrow structural interface cannot be satisfied by
- * a real `PublicClient` — the `functionName: string` widens and the call fails to
+ * a real `PublicClient`: the `functionName: string` widens and the call fails to
  * typecheck at the consumer, which is exactly backwards.
  *
  * The looseness is contained: this package owns the ABI, the function names and the
@@ -21,7 +21,7 @@ export interface HookScore {
   hook: Address;
   score: number;
   flags: number;
-  /** False when the hook has never been measured — which is *not* the same as clean. */
+  /** False when the hook has never been measured, which is *not* the same as clean. */
   scored: boolean;
   ageSeconds: bigint;
 }
@@ -45,7 +45,7 @@ export function explainFlags(flags: number): HookFlagName[] {
 /** A one-line, human-readable verdict for a hook. */
 export function explain(result: HookScore): string {
   if (!result.scored) {
-    return 'never measured — absence of a score is not evidence of honesty';
+    return 'never measured. Absence of a score is not evidence of honesty';
   }
   const names = explainFlags(result.flags).filter((n) => n !== 'INSUFFICIENT_DATA');
   const suffix = names.length > 0 ? ` (${names.join(', ')})` : '';
@@ -101,7 +101,7 @@ export class HookBookReader {
    *
    * Unscored hooks are rejected when a ceiling is set: the caller asked for evidence, and
    * there is none. A stale score is likewise treated as no score rather than as the last
-   * known good value — that is the failure mode an attacker would aim for.
+   * known good value: that is the failure mode an attacker would aim for.
    */
   async isAcceptable(hook: Address, maxScore: number): Promise<{ ok: boolean; reason: string }> {
     const result = await this.get(hook);

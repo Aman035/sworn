@@ -3,7 +3,7 @@
 The rule: every figure in `README.md` comes from `data/results/*.json` via a
 `{{result:...}}` placeholder in `README.template.md`. A digit typed directly into the
 template is a number with no provenance, and that is exactly the failure mode this whole
-repo is built to avoid — it would be a claim about mainnet that nothing can reproduce.
+repo is built to avoid: it would be a claim about mainnet that nothing can reproduce.
 
 Exempt, because they are not measurements: version numbers, chain ids, contract addresses,
 years, list markers, gas constants quoted from the test that produced them, and anything
@@ -25,7 +25,7 @@ RENDERED = ROOT / "README.md"
 PLACEHOLDER = re.compile(r"\{\{\s*result\s*:[^}]+\}\}")
 # A figure quoted from an external source rather than measured here. The renderer refuses
 # to print one whose source is not documented in docs/SOURCES.md, so exempting them here
-# does not weaken the rule — it makes it "measured by us, or attributed to a source".
+# does not weaken the rule: it makes it "measured by us, or attributed to a source".
 CITED = re.compile(r"\{\{\s*cite\s*:[^}]+\}\}")
 TABLE_DIRECTIVE = re.compile(r"\{\{\s*table\s*:[^}]+\}\}")
 CODE_BLOCK = re.compile(r"```.*?```", re.S)
@@ -126,7 +126,7 @@ def main() -> int:
         for item in sorted(set(leftover))[:8]:
             print(f"    {item}", file=sys.stderr)
         print(
-            "\n  The renderer did not match them — check the placeholder pattern.",
+            "\n  The renderer did not match them. Check the placeholder pattern.",
             file=sys.stderr,
         )
         return 1

@@ -18,7 +18,7 @@ import {ModifyLiquidityParams} from "v4-core/src/types/PoolOperation.sol";
 ///         bits actually grant the permissions the fixture needs.
 ///
 /// @dev v4 derives a hook's permissions from its address, so a fixture cannot simply be
-///      deployed anywhere — `deployHook` mines the address by construction using
+///      deployed anywhere. `deployHook` mines the address by construction using
 ///      `deployCodeTo`, which is how these tests stay honest about permissions.
 abstract contract SwornTestBase is Test, Deployers {
     SwornRouter internal sworn;

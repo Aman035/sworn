@@ -38,7 +38,7 @@ class RpcError(RuntimeError):
 
 
 def redact(url: str) -> str:
-    """Host plus a short path fingerprint — never the API key.
+    """Host plus a short path fingerprint. Never the API key.
 
     Every diagnostic in this repo prints endpoints through here, because RPC URLs embed
     credentials in the path and these strings end up in logs and phase docs.

@@ -54,7 +54,7 @@ function hooksOf(candidates: Candidate[]): Address[] {
  *
  * This is a gas optimisation and a policy knob, **not** a safety mechanism. `SwornRouter`
  * already guarantees that what executes equals what was probed, whatever the score says.
- * Filtering here only avoids paying to probe hooks already known to be bad — and an
+ * Filtering here only avoids paying to probe hooks already known to be bad, and an
  * unscored or stale hook is rejected rather than waved through, because a caller who asks
  * for evidence and gets none has not been given a reason to proceed.
  */

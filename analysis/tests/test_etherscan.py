@@ -2,7 +2,7 @@
 
 The `Proxy` field is the trap: it is not a boolean. Etherscan returns "2" for a proxy it
 detected on an *unverified* contract, which is precisely the case for the Base hook 0x
-named — so a `== "1"` test reports the most interesting hook in the dataset as
+named, so a `== "1"` test reports the most interesting hook in the dataset as
 non-upgradeable.
 """
 

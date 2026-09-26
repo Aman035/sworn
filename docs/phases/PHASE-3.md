@@ -1,4 +1,4 @@
-# Phase 3 — Settled-trade divergence
+# Phase 3. Settled-trade divergence
 
 > Status: DONE, with a stated limitation on what the numbers mean · Gate: `make phase-3`
 
@@ -8,14 +8,13 @@ The headline numbers: which hooks charge, how much, when, and who routed users i
 
 ## What was built
 
-- **Fill pull** (`analysis/pipelines/b_fills.py`) — 12,855,496 `Swap` events on Base over a
+- **Fill pull** (`analysis/pipelines/b_fills.py`). 12,855,496 `Swap` events on Base over a
   30-day window, resumable, with a guard that refuses to write a snapshot claiming a wider
   window than it covers.
-- **Re-quote engine** (`contracts/script/Requote.s.sol` + `analysis/lib/requote.py`) —
-  `vm.rollFork(txHash)` then a `V4Quoter` deployed _on the fork_, so the quote comes from
+- **Re-quote engine** (`contracts/script/Requote.s.sol` + `analysis/lib/requote.py`). `vm.rollFork(txHash)` then a `V4Quoter` deployed _on the fork_, so the quote comes from
   the pinned periphery rather than a looked-up address. Records the block it quoted at and
   the pool's `sqrtPriceX96` there, so a surprising answer is falsifiable.
-- **Calibration harness** (`scripts/calibrate_requote.py`) — the gate on everything else.
+- **Calibration harness** (`scripts/calibrate_requote.py`): the gate on everything else.
 
 ## Resolution
 
@@ -23,13 +22,13 @@ The blocker was a JSON parsing bug in the re-quote script, not a data problem.
 
 `stdJson.parseRaw` returns the ABI encoding of whatever the JSON value is. Amounts were
 encoded as JSON **strings** (they exceed int64 on the Python side), so that encoding is a
-dynamic `bytes` and `abi.decode(…, (uint256))` read its **offset word — 32**. Every fill
+dynamic `bytes` and `abi.decode(…, (uint256))` read its **offset word. 32**. Every fill
 was re-quoted with an input of 32, and every quote came back with the same tiny answer.
 
 It survived a long investigation because it looked exactly like a pool with no liquidity,
 and every other explanation checked out: pool key correct, fork at the right block,
 pre-state price matching the event's to 2e-7, liquidity genuinely 5.5e14. The tell was
-that **the output was 31 regardless of input size** — which read as "one-sided pool" but
+that **the output was 31 regardless of input size**, which read as "one-sided pool" but
 actually meant the input never varied. Having the script echo back what it parsed
 (`sent 118308819, parsed 32`) settled it in one run.
 
@@ -66,14 +65,14 @@ Each of these was tested, not assumed:
 
 | Hypothesis              | Verdict                                                                           |
 | ----------------------- | --------------------------------------------------------------------------------- |
-| Wrong pool key          | **No** — the reconstructed `PoolKey` hashes to the fill's `poolId` exactly        |
-| Fork not rolling        | **No** — `quotedAtBlock` equals the fill's block for every sample                 |
-| Wrong pre-state         | **No** — quoted-state `sqrtPriceX96` matches the fill's event price to 2e-7       |
-| Same-block interference | **No** — zero PoolManager events touched the pool earlier in the block            |
-| JIT liquidity in the tx | **No** — the failing transactions emit no `ModifyLiquidity`                       |
-| Direction inverted      | **No** — quoting the flipped direction returns 30 instead of 31                   |
-| Batch state leakage     | **No** — quoting a failing fill alone returns the same answer                     |
-| Amount-dependent bug    | **No** — the quote returns **31 for every input size**, from 1,000 to 118,308,819 |
+| Wrong pool key          | **No**: the reconstructed `PoolKey` hashes to the fill's `poolId` exactly        |
+| Fork not rolling        | **No**. `quotedAtBlock` equals the fill's block for every sample                 |
+| Wrong pre-state         | **No**. Quoted-state `sqrtPriceX96` matches the fill's event price to 2e-7       |
+| Same-block interference | **No**. Zero PoolManager events touched the pool earlier in the block            |
+| JIT liquidity in the tx | **No**: the failing transactions emit no `ModifyLiquidity`                       |
+| Direction inverted      | **No**. Quoting the flipped direction returns 30 instead of 31                   |
+| Batch state leakage     | **No**. Quoting a failing fill alone returns the same answer                     |
+| Amount-dependent bug    | **No**: the quote returns **31 for every input size**, from 1,000 to 118,308,819 |
 
 That last row is the shape of the answer: the pool is one-sided at the pre-fill state and
 can only deliver 31 units in that direction. The quoter is correct _about the state it is
@@ -88,7 +87,7 @@ Both would have produced confident, wrong headline numbers.
    events and **37.8% of fills share a transaction**, so quotes were matched against other
    fills' realized amounts. A fill's identity is now `(txHash, logIndex)`.
 2. **The calibration could only fail in one direction.** It used `excess_take_bps`, which
-   is clipped at zero by design — it answers "how much was taken from the user" — so a
+   is clipped at zero by design: it answers "how much was taken from the user", so a
    quote that came back far too _low_ scored a perfect 0.000 and passed. It reported
    "10/10 within 1 bps, calibration passed" while half the ratios were 1e-6. It now
    measures `|expected/realized − 1|`, which is what the config's
@@ -112,7 +111,7 @@ is not an artefact of a threshold choice, because there is no headline to be an 
 
 **This is a finding, not a null result.** 0x reported 54.2% malicious across all 84,163
 hooks. We sampled the _busiest_ hooks by fill count, which on Base are largely allowlisted
-infrastructure — the largest holds 8,170,323 pools, 54% of the chain. Toxicity, if it is
+infrastructure: the largest holds 8,170,323 pools, 54% of the chain. Toxicity, if it is
 where 0x found it, lives in the long tail rather than in the hooks carrying volume. A
 sample drawn by volume and a sample drawn uniformly answer different questions, and the
 difference is itself worth reporting.
@@ -134,8 +133,7 @@ its own coverage is not evidence.
 
 An earlier run of this pipeline reported a median take of about **-101 bps** on several
 hooks: users apparently receiving 1% _more_ than they were quoted. The obvious explanation
-was that the re-quote applied a fee the real swap did not. That was tested and fails —
-hooks on pools with fee **0** showed the same -101 bps as hooks on fee-3000 pools. A
+was that the re-quote applied a fee the real swap did not. That was tested and fails. Hooks on pools with fee **0** showed the same -101 bps as hooks on fee-3000 pools. A
 systematic offset across unrelated fee tiers is not a fee-tier bug.
 
 The cause was in what "realized" meant. It was being read from the `Swap` event, and
@@ -165,7 +163,7 @@ systematically under-reports exactly the hooks that take the most**, because tak
 and it is the way this repo built it first.
 
 Chasing that also exposed a second event defect. The sign pattern of `Swap` cannot
-distinguish exact-input-token0 from exact-output-token1 — they are identical. **13% of the
+distinguish exact-input-token0 from exact-output-token1: they are identical. **13% of the
 fills this pipeline had selected as "exact-input" were exact-output swaps**, re-quoted as a
 swap that never happened.
 
@@ -173,7 +171,7 @@ swap that never happened.
 
 Every sampled fill is confirmed against its own transaction trace before it is measured.
 `amountSpecified`, `hookData` and the realized output all come from the traced
-`PoolManager.swap` call — its calldata and its return value. The event is used only to
+`PoolManager.swap` call: its calldata and its return value. The event is used only to
 locate candidates. Matching an indexed fill to a traced call needs no ordering assumption:
 the first five words of the swap calldata are the ABI encoding of the pool key, so
 `keccak256` of them is the same `PoolId` the event carries.
@@ -194,7 +192,7 @@ dropped and why.
 A median of **+0.0 bps** is the strong result here: on the median fill the re-quote
 predicts the delivered output exactly, including hooks that take 1% in `afterSwap`. The
 hook charges, the quoter sees the charge, and the swapper gets what the quote said. That is
-what Sworn calls honest — and it is only visible once the measurement stops trusting the
+what Sworn calls honest, and it is only visible once the measurement stops trusting the
 event.
 
 ## What these numbers support, and what they do not

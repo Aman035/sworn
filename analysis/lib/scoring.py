@@ -1,7 +1,7 @@
 """The divergence score: seven measured inputs, weighted, decayed, clipped to 0-100.
 
 `docs/METRICS.md` defines the formula and carries a worked example; the weights and
-normalisation constants live in `analysis/config.yaml`. Nothing here invents a number —
+normalisation constants live in `analysis/config.yaml`. Nothing here invents a number:
 every input comes from a pipeline and every constant comes from config, so a score can be
 re-derived by anyone holding the same snapshot.
 
@@ -91,7 +91,7 @@ def decay_factor(days: float, half_life_days: float) -> float:
     """Evidence ages out.
 
     A hook that stopped charging a month ago should not score the same as one charging
-    today — but it should not immediately score zero either, because the operator can
+    today, but it should not immediately score zero either, because the operator can
     turn it back on. Exponential decay is the honest middle.
     """
     if half_life_days <= 0:
@@ -135,7 +135,7 @@ def score_hook(inputs: ScoreInputs) -> ScoreResult:
     flags = compute_flags(inputs)
 
     if inputs.fills < min_fills:
-        # Not "clean" — unmeasured. The distinction is the whole point of the flag.
+        # Not "clean". Unmeasured. The distinction is the whole point of the flag.
         return ScoreResult(
             score=None,
             flags=flags | flags_word({"INSUFFICIENT_DATA"}),

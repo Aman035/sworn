@@ -5,7 +5,7 @@
 ```
 
 No manual steps, no pre-recorded output. Every figure the script prints is produced by the
-EVM during the run — there is no narration string in
+EVM during the run. There is no narration string in
 [`Demo.t.sol`](../contracts/test/unit/Demo.t.sol) that contains a number, because a demo
 whose numbers are typed in is a slideshow.
 
@@ -16,12 +16,12 @@ fails.
 
 Ordered by how hard each is to fake.
 
-### Act 1 — the spoof, on a local chain (~20 s)
+### Act 1: the spoof, on a local chain (~20 s)
 
 `forge test --match-contract DemoTest -vv`
 
 Two pools for the same pair: one hookless, one hooked by `GaspriceSniffHook`, a fixture
-that reads `tx.gasprice` and charges only when it is non-zero — exactly the branch that
+that reads `tx.gasprice` and charges only when it is non-zero. Exactly the branch that
 distinguishes `eth_call` from a transaction.
 
 | Beat | What is shown                                        | Why it matters                                                |
@@ -36,10 +36,10 @@ Beat 4 is the mechanism. The probe runs in the same transaction at the same
 `tx.gasprice`, so the hook has no branch left to take: it cannot answer the probe honestly
 and the execution dishonestly, because they are the same call.
 
-The assertions are the story — `assertGt(swornOut, naiveOut)` is what makes this a demo
+The assertions are the story. `assertGt(swornOut, naiveOut)` is what makes this a demo
 rather than a claim.
 
-### Act 2 — the same router against real Base hooks (~60 s)
+### Act 2: the same router against real Base hooks (~60 s)
 
 `anvil --fork-url $BASE_RPC_ARCHIVE --fork-block-number 51700000`, then
 [`RealSwap.fork.t.sol`](../contracts/test/fork/RealSwap.fork.t.sol) against the local node.
@@ -53,7 +53,7 @@ through hooks that are live on Base right now and asserts the harder thing:
 - the divergence check held, so the probe matched the execution on real hook code.
 
 It runs on anvil rather than against the provider directly so the chain is still there
-afterwards — you can poke at it, replay the swap, change the amount.
+afterwards. You can poke at it, replay the swap, change the amount.
 
 > **A pool worth knowing about.** An earlier version of this test routed into a token at
 > `0xb200…108C` whose entire deployed code is the single byte `0xef`, an invalid opcode.
@@ -61,7 +61,7 @@ afterwards — you can poke at it, replay the swap, change the amount.
 > then reverts inside `transfer` for every router that has ever existed. A demo that picks
 > its pools carelessly measures that instead of the router.
 
-### Act 3 — the dashboard (~30 s)
+### Act 3: the dashboard (~30 s)
 
 Builds `app/` and serves the static export. Every figure renders from the same
 `data/results/*.json` the README does, with a provenance rail showing the snapshot hash and
@@ -74,7 +74,7 @@ block range behind each panel.
 - **Mainnet `HookBook`.** Scores are published to Base Sepolia. The mainnet registry is
   deployed by the same script and needs only funding.
 - **The full analysis.** The pipelines take hours over a 30-day window and are gated
-  separately — `make phase-3`, `make phase-6`. The demo consumes their output.
+  separately. `make phase-3`, `make phase-6`. The demo consumes their output.
 
 ## Recording it
 
@@ -83,5 +83,5 @@ asciinema rec sworn-demo.cast -c ./scripts/demo.sh
 ```
 
 Or any screen recorder. Keep act 1's output on screen long enough to read the two numbers
-in beats 2 and 3 side by side — that contrast is the entire argument, and it is the one
+in beats 2 and 3 side by side: that contrast is the entire argument, and it is the one
 thing a viewer should leave with.

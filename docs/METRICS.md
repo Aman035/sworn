@@ -23,8 +23,8 @@ hooked pool. All windows are UTC.
 
 ### `expected_output`
 
-**Definition.** The output of the _identical_ swap — same pool, same direction, same
-`amountSpecified`, same `sqrtPriceLimitX96`, same `hookData` — evaluated against the pool
+**Definition.** The output of the _identical_ swap. Same pool, same direction, same
+`amountSpecified`, same `sqrtPriceLimitX96`, same `hookData`. Evaluated against the pool
 state immediately **before** the fill's transaction.
 
 Two methods produce it:
@@ -59,7 +59,7 @@ traced `PoolManager.swap` call** for the fill.
 **Not from the `Swap` event.** `PoolManager` emits that event between `beforeSwap` and
 `afterSwap`, so its amounts exclude anything the hook takes in `afterSwap`. On Base, a
 hook taking one percent there produced an event `amount1` of `3,941,355,102,139,778,949`
-against a returned `3,901,941,551,118,381,160` — reading the event, the hook appears to
+against a returned `3,901,941,551,118,381,160`. Reading the event, the hook appears to
 _pay_ the user one percent. An earlier version of this document specified the event, and
 the resulting -101 bps median take took a day to run down.
 
@@ -68,7 +68,7 @@ transaction, and transfer-based accounting double-counts that. Native ETH pools
 (`currency0 == address(0)`) use the same delta convention.
 
 The same trace supplies `amountSpecified` and `hookData`, because the event cannot
-distinguish exact-input on token0 from exact-output on token1 — 13% of fills selected as
+distinguish exact-input on token0 from exact-output on token1. 13% of fills selected as
 exact-input by event sign were exact-output. Fills whose call cannot be recovered are
 dropped, never estimated.
 
@@ -85,7 +85,7 @@ signed. Positive means the user received less than the pre-trade state implied. 
 values are kept, not clipped: a hook that pays out _more_ than quoted is evidence about
 the engine's accuracy and must stay visible.
 
-For exact-output fills the comparison is made on the input side — the user's loss shows
+For exact-output fills the comparison is made on the input side: the user's loss shows
 up as paying more, not receiving less.
 
 **Parameters.** `metrics.shortfall.clip_negative`
@@ -126,7 +126,7 @@ twice: against its own nominal fee, and against the nearest static tier.
 ### `excess_take_bps`
 
 **Definition.** `max(0, take_bps − nominal_fee_bps)`. The part of the shortfall that is
-not explained by the fee the pool advertises — the "hook take".
+not explained by the fee the pool advertises: the "hook take".
 
 Clipped at zero so that ordinary rounding and favourable price movement do not produce
 negative "excess" that nets off real extraction in an average.
@@ -165,7 +165,7 @@ almost every simulated trade a little, the dice-roller charges a few trades enor
 A single-arm rule misses one of them.
 
 `min_fills` exists so that a hook with three fills cannot reach the README. The honest
-denominator for any headline is `totals.eligible_hooks`, the hooks that clear it — not
+denominator for any headline is `totals.eligible_hooks`, the hooks that clear it, not
 every hook that appeared in the sample.
 
 #### The noise floor
@@ -183,7 +183,7 @@ The margin is two standard deviations of a Poisson count on the negative tail: t
 test that still rejects a hook whose excess is symmetric noise.
 
 This is not a refinement. On the 10,000-fill uniform Base sample, 354 fills over-delivered
-against 732 charged — **roughly half of all charged fills are measurement error** — and
+against 732 charged. **roughly half of all charged fills are measurement error**, and
 counting positives alone reported 15 divergent hooks where 4 survive the floor. Two of the
 discarded 15 had a _larger_ negative tail than positive.
 
@@ -200,8 +200,8 @@ Every result therefore publishes `divergence.noise_floor` next to the headline.
 **Definition.** The hook's behaviour changes with the transaction environment rather than
 with pool state. Established when either:
 
-- differential probes — the same swap simulated under different `tx.gasprice`, caller
-  kind and gas limit — disagree by more than `probe_disagreement_bps`; or
+- differential probes: the same swap simulated under different `tx.gasprice`, caller
+  kind and gas limit. Disagree by more than `probe_disagreement_bps`; or
 - a `debug_traceCall` shows an environment opcode (`GASPRICE`, `ORIGIN`, `COINBASE`,
   `BASEFEE`, `PREVRANDAO`, `GASLIMIT`, `GAS`) actually **executing on the swap path**.
 
@@ -233,13 +233,12 @@ single fill cannot flip the regime.
 
 ### `frontend_attribution`
 
-**Definition.** `Swap.sender` is the contract that called `PoolManager.swap` — a router,
+**Definition.** `Swap.sender` is the contract that called `PoolManager.swap`: a router,
 not the user. Mapping it to a product (a wallet, an aggregator, a filler) is how the
 exposure question gets answered: _which front-end routed users into this hook?_
 
 The map is hand-curated in `analysis/data/routers.csv` with a source URL and a confidence
-per row. Anything unmapped goes to `unlabeled` and the unlabeled share is published —
-an attribution table that hides its own coverage is not evidence.
+per row. Anything unmapped goes to `unlabeled` and the unlabeled share is published: an attribution table that hides its own coverage is not evidence.
 
 **Parameters.** `metrics.frontend_attribution.router_map`, `metrics.frontend_attribution.unlabeled_bucket`, `metrics.frontend_attribution.min_confidence`
 
@@ -291,7 +290,7 @@ decay = 0.5 ^ (days_since_last_evidence / half_life_days)
 | `revert_gated`   | 0.05   | 0.25 asymmetry | griefing is a cost even without extraction  |
 
 A hook with fewer than `min_fills_for_score` fills gets `score = null` and the
-`INSUFFICIENT_DATA` flag — **not** a zero. Absence of evidence is reported as absence of
+`INSUFFICIENT_DATA` flag. **not** a zero. Absence of evidence is reported as absence of
 evidence, which is also what makes a low score meaningful for honest builders.
 
 **Worked example.** A hook with charged rate 0.42, median charged excess 1,800 bps,
@@ -312,7 +311,7 @@ score           round(100 × 0.7720 × 0.8620)      = 67
 ```
 
 The flags word is a `uint32` whose bit positions are frozen in `config.yaml` under
-`flags:` — `HookBook` stores it verbatim, so bits are appended, never renumbered.
+`flags:`. `HookBook` stores it verbatim, so bits are appended, never renumbered.
 
 **Parameters.** `metrics.divergence_score.min_fills_for_score`, `metrics.divergence_score.weights`, `metrics.divergence_score.full_at`, `metrics.divergence_score.half_life_days`
 
