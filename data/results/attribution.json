@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_at": "2026-09-25T21:30:41Z",
-    "script_commit": "1acbece-dirty",
+    "generated_at": "2026-09-26T03:09:59Z",
+    "script_commit": "ccb5b9a",
     "config_version": 1,
     "pipeline": "d_attribution",
     "snapshots": [
@@ -30,7 +30,7 @@
       "chain": "base",
       "router": "0x6ff5693b99212da76ad316178a184ab56d299b43",
       "fills_total": 3220269,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 200677,
       "share_of_product_v4_volume": 0.3089015234441595,
       "confidence": 1.0,
       "sources": [
@@ -42,7 +42,7 @@
       "chain": "base",
       "router": "0xfdf682f51fe81aa4898f0ae2163d8a55c127fbc7",
       "fills_total": 1602197,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 32754,
       "share_of_product_v4_volume": 0.44733450380945666,
       "confidence": 1.0,
       "sources": [
@@ -54,7 +54,7 @@
       "chain": "base",
       "router": "0x8f10b468b06c6fd214b65f87778827f7d113f996",
       "fills_total": 892068,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 127126,
       "share_of_product_v4_volume": 0.6087248954115606,
       "confidence": 0.0,
       "sources": []
@@ -64,7 +64,7 @@
       "chain": "base",
       "router": "0x5cdc0f0fa28e0bb05893a4558c988e2bdce438e1",
       "fills_total": 471867,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 13665,
       "share_of_product_v4_volume": 0.07437477085704235,
       "confidence": 0.6,
       "sources": [
@@ -76,7 +76,7 @@
       "chain": "base",
       "router": "0x7747f8d2a76bd6345cc29622a946a929647f2359",
       "fills_total": 458339,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 76134,
       "share_of_product_v4_volume": 0.4534525754954302,
       "confidence": 1.0,
       "sources": [
@@ -88,7 +88,7 @@
       "chain": "base",
       "router": "0x111116053f09d34a7eae8102887004445176ca11",
       "fills_total": 408744,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 385,
       "share_of_product_v4_volume": 0.002593310238193099,
       "confidence": 0.0,
       "sources": []
@@ -108,7 +108,7 @@
       "chain": "base",
       "router": "0x4f6f91599858bf0d19fabcf2c5d591fe13f7c059",
       "fills_total": 350231,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 28509,
       "share_of_product_v4_volume": 0.4358551927156648,
       "confidence": 1.0,
       "sources": [
@@ -120,7 +120,7 @@
       "chain": "base",
       "router": "0xd8ba9d1a99fc21f0eca24e9b85737c28a194a4e2",
       "fills_total": 348311,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 174822,
       "share_of_product_v4_volume": 0.9071691677839632,
       "confidence": 0.0,
       "sources": []
@@ -142,7 +142,7 @@
       "chain": "base",
       "router": "0x85e36791f02fb9b93ee614eac1becaa9ff529c00",
       "fills_total": 225924,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 13486,
       "share_of_product_v4_volume": 0.06326021139852339,
       "confidence": 0.0,
       "sources": []
@@ -152,7 +152,7 @@
       "chain": "base",
       "router": "0xce4da59f7858105418216274415a5a6f10d5bb70",
       "fills_total": 212249,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 6666,
       "share_of_product_v4_volume": 0.10012768022464182,
       "confidence": 0.0,
       "sources": []
@@ -172,7 +172,7 @@
       "chain": "base",
       "router": "0xfd78ba0f717223bebe555a777b70b86667837ff6",
       "fills_total": 171888,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 80178,
       "share_of_product_v4_volume": 0.9970562226566136,
       "confidence": 0.0,
       "sources": []
@@ -192,7 +192,7 @@
       "chain": "base",
       "router": "0x5692193a40e908d94bddbc988356cd7f1679eab4",
       "fills_total": 122702,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 2784,
       "share_of_product_v4_volume": 0.36805431044318754,
       "confidence": 0.0,
       "sources": []
@@ -262,7 +262,7 @@
       "chain": "base",
       "router": "0x8c84f82e10bb371fa840d47024211576c513179d",
       "fills_total": 82573,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 5422,
       "share_of_product_v4_volume": 0.171932714083296,
       "confidence": 0.0,
       "sources": []
@@ -272,7 +272,7 @@
       "chain": "base",
       "router": "0x37903bfc76aaaabccb71425bd6767fcd70ad67b1",
       "fills_total": 79707,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 7516,
       "share_of_product_v4_volume": 0.30333596798273676,
       "confidence": 0.0,
       "sources": []
@@ -282,7 +282,7 @@
       "chain": "base",
       "router": "0xcdbdc59a5eeb54027f8b45b118e3cd1f675d79c5",
       "fills_total": 73375,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 9493,
       "share_of_product_v4_volume": 0.34554003407155026,
       "confidence": 0.0,
       "sources": []
@@ -292,7 +292,7 @@
       "chain": "base",
       "router": "0x8407699e359ae158bd7ec0668600cc19a79f17c3",
       "fills_total": 69744,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 2782,
       "share_of_product_v4_volume": 0.3864991970635467,
       "confidence": 0.0,
       "sources": []
@@ -322,7 +322,7 @@
       "chain": "base",
       "router": "0x182b51037a9085a1532b63e5aac63bed0789e49c",
       "fills_total": 60193,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 10903,
       "share_of_product_v4_volume": 0.36278304786270826,
       "confidence": 0.0,
       "sources": []
@@ -332,7 +332,7 @@
       "chain": "base",
       "router": "0x399adb74bd93ba9beb8ffd4841128cdf76f759d8",
       "fills_total": 59625,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 1076,
       "share_of_product_v4_volume": 0.06752201257861636,
       "confidence": 0.0,
       "sources": []
@@ -342,7 +342,7 @@
       "chain": "base",
       "router": "0x0ce14aeebb7ad6625585979f4c1846946e248e02",
       "fills_total": 59007,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 2380,
       "share_of_product_v4_volume": 0.24261528293253343,
       "confidence": 0.0,
       "sources": []
@@ -382,7 +382,7 @@
       "chain": "base",
       "router": "0x1c9637f9103d51e257b38712e514dfcdd4a55812",
       "fills_total": 50387,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 762,
       "share_of_product_v4_volume": 0.12269037648599837,
       "confidence": 0.0,
       "sources": []
@@ -392,7 +392,7 @@
       "chain": "base",
       "router": "0x4c838db6d66d8bcb1ef12e24e4d3a10caf432645",
       "fills_total": 48795,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 1,
       "share_of_product_v4_volume": 0.1916999692591454,
       "confidence": 0.0,
       "sources": []
@@ -402,7 +402,7 @@
       "chain": "base",
       "router": "0x86d23b889d0e303c97a7a3401387e06f1db5023b",
       "fills_total": 46217,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 409,
       "share_of_product_v4_volume": 0.30612112426163535,
       "confidence": 0.0,
       "sources": []
@@ -412,7 +412,7 @@
       "chain": "base",
       "router": "0xa9595ef01554ff0de2ba6b5dc23e05a670c371f3",
       "fills_total": 46158,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 24459,
       "share_of_product_v4_volume": 0.929199705359851,
       "confidence": 0.0,
       "sources": []
@@ -422,7 +422,7 @@
       "chain": "base",
       "router": "0x08c61873dc64c5131758ae27cb4d84e773d66d82",
       "fills_total": 44596,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 1281,
       "share_of_product_v4_volume": 0.15801865638173826,
       "confidence": 0.0,
       "sources": []
@@ -452,7 +452,7 @@
       "chain": "base",
       "router": "0xbc1d9760bd6ca468ca9fb5ff2cfbeac35d86c973",
       "fills_total": 40202,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 3684,
       "share_of_product_v4_volume": 0.376424058504552,
       "confidence": 0.0,
       "sources": []
@@ -462,7 +462,7 @@
       "chain": "base",
       "router": "0xc7827556424769df987a55464f22e0390e70b29a",
       "fills_total": 39870,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 18792,
       "share_of_product_v4_volume": 0.9223225482819162,
       "confidence": 0.0,
       "sources": []
@@ -472,7 +472,7 @@
       "chain": "base",
       "router": "0x7cd3372e7e3a5a3e51387980f265db33e5c8f5dd",
       "fills_total": 39656,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 2000,
       "share_of_product_v4_volume": 0.35535606213435544,
       "confidence": 0.0,
       "sources": []
@@ -482,7 +482,7 @@
       "chain": "base",
       "router": "0xe992cd3becef37655fb277997511869aa2885967",
       "fills_total": 38719,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 2,
       "share_of_product_v4_volume": 0.22805341047031175,
       "confidence": 0.0,
       "sources": []
@@ -502,7 +502,7 @@
       "chain": "base",
       "router": "0x7cd2ce5e5c82956c743cbe6160f0e173c8d295cd",
       "fills_total": 32158,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 126,
       "share_of_product_v4_volume": 0.2341252565458051,
       "confidence": 0.0,
       "sources": []
@@ -532,7 +532,7 @@
       "chain": "base",
       "router": "0xd6145b2d3f379919e8cdeda7b97e37c4b2ca9c40",
       "fills_total": 26945,
-      "fills_into_divergent": 0,
+      "fills_into_divergent": 1177,
       "share_of_product_v4_volume": 0.28220449062905917,
       "confidence": 0.0,
       "sources": []

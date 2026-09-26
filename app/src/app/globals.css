@@ -1256,3 +1256,28 @@ html.js .reveal.in {
   line-height: 1.35;
   color: var(--ink);
 }
+
+/* Links inside content take the page's ink with a quiet underline, rather than the
+   browser's blue — which broke the palette wherever an address was linkable. */
+.grid a,
+.panel-inner p a,
+.caveat a,
+.colophon a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule-hard);
+  padding-bottom: 1px;
+  transition: border-color 120ms ease;
+}
+
+.grid a:hover,
+.panel-inner p a:hover,
+.caveat a:hover,
+.colophon a:hover {
+  border-bottom-color: var(--signal);
+}
+
+.grid td.bad a,
+.grid a:visited {
+  color: inherit;
+}
