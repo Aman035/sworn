@@ -40,7 +40,7 @@ export default function Landing() {
           <SpoofHero />
 
           <div className="hero-cta">
-            <Link className="btn" href="/hooks">
+            <Link className="btn" href="/evidence">
               See what hooks actually do
             </Link>
             <a
@@ -140,12 +140,6 @@ export default function Landing() {
               </span>
             </div>
           ) : null}
-          {r?.totals.breakeven_notional_usd ? (
-            <div className="strip-fig">
-              <b>${r.totals.breakeven_notional_usd.toFixed(2)}</b>
-              <span>trade size above which verifying pays for itself</span>
-            </div>
-          ) : null}
         </div>
       </Reveal>
 
@@ -232,7 +226,8 @@ export default function Landing() {
             </div>
             <p className="fineprint">
               Roughly half of all charged fills in this sample are measurement error, quantified and
-              published beside the result rather than left for a reader to find.
+              published beside the result rather than left for a reader to find.{' '}
+              <Link href="/evidence">Charged and over-delivered counts per hook</Link>.
             </p>
           </div>
         </Reveal>
@@ -252,6 +247,9 @@ export default function Landing() {
             <p className="pull">
               A score tells you what a hook did last week. It cannot tell you what it is doing to
               your transaction right now.
+            </p>
+            <p className="fineprint">
+              <Link href="/evidence">The full matrix, and the small ground truth it rests on</Link>.
             </p>
           </div>
         </Reveal>
@@ -450,7 +448,7 @@ if (execIn != amountsIn[chosen] || execOut != amountsOut[chosen]) {
               </p>
             </div>
             <div className="hero-cta">
-              <Link className="btn" href="/hooks">
+              <Link className="btn" href="/evidence">
                 Browse the evidence
               </Link>
             </div>

@@ -32,9 +32,7 @@ const SCALE = 2;
 const SHOTS = [
   { path: '/', file: 'landing.png', clipHeight: 1560 },
   { path: '/', file: 'landing-value.png', section: 'What the guarantee is worth' },
-  { path: '/hooks/', file: 'dashboard-hooks.png', clipHeight: 1180 },
-  { path: '/detection/', file: 'dashboard-detection.png', clipHeight: 1180 },
-  { path: '/attribution/', file: 'dashboard-attribution.png', clipHeight: 1100 },
+  { path: '/evidence/', file: 'dashboard-evidence.png', clipHeight: 1300 },
 ];
 
 async function waitForServer(url, attempts = 40) {

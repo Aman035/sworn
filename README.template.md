@@ -63,7 +63,7 @@ positives sitting in the charged column beside them. Roughly {{result:divergence
 in this sample are error, and a hook is only named once its charged fills beat its own
 over-delivered tail. That is why the headline is {{result:divergence.json:totals.divergent_hooks|int}} and not a larger number. Every
 hook, fill and snapshot hash is on the
-[dashboard](https://aman035.github.io/sworn/hooks/).
+[evidence page](https://aman035.github.io/sworn/evidence/).
 
 **And you cannot see any of this in the logs.** `PoolManager` emits `Swap` *before*
 `afterSwap`, so the event excludes whatever the hook takes there. Every indexer, dashboard
@@ -105,7 +105,7 @@ and `debug_traceCall` were each scored against what hooks actually did to settle
 All three found **none** of the hooks that were demonstrably charging. Only re-quoting
 settled trades caught them, and that works after someone has already been paid less than
 they were quoted. The full matrix, and the small ground truth it rests on, are on the
-[detection page](https://aman035.github.io/sworn/detection/).
+[evidence page](https://aman035.github.io/sworn/evidence/).
 
 A score tells you what a hook did last week. It cannot tell you what it is doing to your
 transaction right now.
@@ -291,7 +291,7 @@ is the one to watch, and the only act that is neither a fixture nor a happy path
 Storyboard, including what the demo deliberately does **not** show, in
 [DEMO.md](docs/DEMO.md).
 
-[![The Sworn hook explorer](docs/assets/dashboard-hooks.png)](https://aman035.github.io/sworn/hooks/)
+[![The Sworn evidence page](docs/assets/dashboard-evidence.png)](https://aman035.github.io/sworn/evidence/)
 
 ---
 

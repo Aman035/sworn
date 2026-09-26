@@ -21,7 +21,7 @@ const ROOT = resolve(__dirname, '..', '..');
 const OUT = resolve(ROOT, 'app', 'out');
 
 /**
- * `trailingSlash: true` emits `hooks/index.html` rather than `hooks.html`, because a plain
+ * `trailingSlash: true` emits `evidence/index.html` rather than `evidence.html`, because a plain
  * static host (GitHub Pages) does no extensionless-path rewriting. Both shapes are accepted
  * so these tests describe the pages rather than the current export setting.
  */
@@ -38,7 +38,7 @@ function result(name: string): Record<string, unknown> {
   return JSON.parse(readFileSync(resolve(ROOT, 'data', 'results', name), 'utf8'));
 }
 
-const PAGES = ['index', 'hooks', 'detection', 'attribution'];
+const PAGES = ['index', 'evidence'];
 
 describe('static export', () => {
   it.each(PAGES)('%s is built', (name) => {
@@ -88,33 +88,33 @@ describe('static export', () => {
     expect(page('index')).toContain(base!.pools_total.toLocaleString('en-US'));
   });
 
-  it('the hook explorer lists the hooks the census found', () => {
+  it('the evidence page states how many hooks the census found', () => {
     const census = result('census.json') as { chains: { chain: string; hooks_total: number }[] };
     const base = census.chains.find((c) => c.chain === 'base')!;
-    expect(page('hooks')).toContain(base.hooks_total.toLocaleString('en-US'));
+    expect(page('evidence')).toContain(base.hooks_total.toLocaleString('en-US'));
   });
 
-  it('the detection page names every method scored', () => {
+  it('the evidence page names every detection method scored', () => {
     const precision = result('precision.json') as { methods: { method: string }[] };
-    const html = page('detection');
+    const html = page('evidence');
     for (const m of precision.methods) {
-      expect(html, `detection page omits ${m.method}`).toContain(m.method);
+      expect(html, `evidence page omits ${m.method}`).toContain(m.method);
     }
   });
 
-  it('the attribution page publishes its unlabeled share', () => {
+  it('the evidence page publishes the unlabeled attribution share', () => {
     const attribution = result('attribution.json') as { unlabeled_share: number };
     expect(attribution.unlabeled_share).toBeGreaterThan(0);
     // Assert the figure, not the wording. A coverage gap that can be dropped silently is
     // one nobody will notice missing, but the sentence around it is free to change.
     const shown = `${(attribution.unlabeled_share * 100).toFixed(1)}%`;
-    expect(page('attribution'), `attribution page does not show ${shown}`).toContain(shown);
+    expect(page('evidence'), `evidence page does not show ${shown}`).toContain(shown);
   });
 
   it('no page claims a hook is clean without a measurement', () => {
     // `HookBook`'s central property, mirrored in the UI: absence must never read as a
     // clean bill of health.
-    const html = page('hooks');
+    const html = page('evidence');
     expect(html).toMatch(/not measured|unmeasured|insufficient/i);
   });
 });

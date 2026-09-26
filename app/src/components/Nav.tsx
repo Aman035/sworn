@@ -3,11 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const NAV = [
-  ['/hooks', 'Hooks'],
-  ['/detection', 'Detection'],
-  ['/attribution', 'Attribution'],
-] as const;
+const NAV = [['/evidence', 'Evidence']] as const;
 
 /**
  * The mark: a seal with an equals struck into it.
