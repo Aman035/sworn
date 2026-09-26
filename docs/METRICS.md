@@ -183,7 +183,7 @@ The margin is two standard deviations of a Poisson count on the negative tail: t
 test that still rejects a hook whose excess is symmetric noise.
 
 This is not a refinement. On the 10,000-fill uniform Base sample, 354 fills over-delivered
-against 732 charged. **roughly half of all charged fills are measurement error**, and
+against 732 charged, so **roughly half of all charged fills are measurement error**, and
 counting positives alone reported 15 divergent hooks where 4 survive the floor. Two of the
 discarded 15 had a _larger_ negative tail than positive.
 
@@ -290,7 +290,7 @@ decay = 0.5 ^ (days_since_last_evidence / half_life_days)
 | `revert_gated`   | 0.05   | 0.25 asymmetry | griefing is a cost even without extraction  |
 
 A hook with fewer than `min_fills_for_score` fills gets `score = null` and the
-`INSUFFICIENT_DATA` flag. **not** a zero. Absence of evidence is reported as absence of
+`INSUFFICIENT_DATA` flag, **not** a zero. Absence of evidence is reported as absence of
 evidence, which is also what makes a low score meaningful for honest builders.
 
 **Worked example.** A hook with charged rate 0.42, median charged excess 1,800 bps,

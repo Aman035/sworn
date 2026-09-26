@@ -14,7 +14,7 @@ Solidity dependencies are git submodules under `contracts/lib/`. `make install` 
 | `Uniswap/v4-core`          | `59d3ecf` (2025-05-13)                       | `PoolManager`, `Hooks`, `PoolKey`, delta accounting           |
 | `Uniswap/v4-periphery`     | `9969eec` (no release tags exist)            | `V4Quoter`, `BaseHook`, router base classes                   |
 | `Uniswap/permit2`          | `cc56ad0` (only tag is the deployed address) | `permitTransferFrom` path in `SwornRouter`                    |
-| `Uniswap/universal-router` | `v1.6.0`. **referenced, not vendored**       | read-only reference for the Phase 11 UR-compatible entrypoint |
+| `Uniswap/universal-router` | `v1.6.0`, **referenced, not vendored**       | read-only reference for the Phase 11 UR-compatible entrypoint |
 
 `v4-core` transitively pins `solmate` and `openzeppelin-contracts`; both are remapped
 through `contracts/lib/v4-core/lib/` so there is exactly one copy of each in the build.

@@ -1,6 +1,7 @@
 # Scoring
 
-How a hook's `divergenceScore` is computed, why each input is weighted the way it is, and: the section that matters most to an honest builder. **how to get your hook to 0**.
+How a hook's `divergenceScore` is computed, why each input is weighted the way it is, and
+the section that matters most to an honest builder: **how to get your hook to 0**.
 
 The formula lives in `analysis/lib/scoring.py`, its constants in `analysis/config.yaml`,
 its definition in [`METRICS.md`](METRICS.md), and its on-chain home in

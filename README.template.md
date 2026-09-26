@@ -283,7 +283,7 @@ Measured probe overhead, verbatim from `forge test --match-contract SwornGasTest
 scheduled attestor. Its load-bearing property is how it handles **absence**:
 
 - an unscored hook returns `hasScore() == false` and `FLAG_INSUFFICIENT_DATA`
-  ([`flags`](contracts/src/HookBook.sol#L124)). **never a clean zero**
+  ([`flags`](contracts/src/HookBook.sol#L124)), **never a clean zero**
 - a hook with too few measured fills gets `score = null`; a good rating has to be earned
 - updates are monotonic in `asOfBlock` ([`StaleUpdate`](contracts/src/HookBook.sol#L83)),
   which is replay and staleness protection in one
@@ -293,7 +293,7 @@ scheduled attestor. Its load-bearing property is how it handles **absence**:
 | Network      | `HookBook`                                                                                                                                  | Status                                    |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | Base Sepolia | [`0x8A4470f7DDa8525b484527b21B19c3bc876A04c3`](https://sepolia.basescan.org/address/0x8A4470f7DDa8525b484527b21B19c3bc876A04c3) | Live, attestor authorised, scores written |
-| Base mainnet |. | Not deployed; `1,643,224` gas to do so    |
+| Base mainnet | not deployed | `1,643,224` gas to do so |
 
 The attestor wrote {{result:divergence.json:totals.eligible_hooks|int}} scores; a second scheduled run correctly wrote nothing,
 because the registry already held that block. Scoring is fully specified, with a worked example the test suite reproduces exactly.
