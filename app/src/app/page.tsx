@@ -266,8 +266,9 @@ export default function Landing() {
             quote and the trade the <em>same call</em>.
           </p>
 
+          <p className="code-src">contracts/src/SwornRouter.sol, verbatim</p>
           <pre className="code">
-            <code>{`// SwornRouter.sol:176 - the assertion the whole design rests on
+            <code>{`// 4. The assertion the whole design rests on.
 if (execIn != amountsIn[chosen] || execOut != amountsOut[chosen]) {
     revert Divergence(chosen, probed, executed);
 }`}</code>

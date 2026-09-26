@@ -112,6 +112,33 @@ print(f"    {len(anchors)} contract line anchors all resolve to real code")
 PYEOF
 ok "reviewers can verify every claim at the line that makes it"
 
+step "quoted source matches the file it cites"
+# The README prints a block of SwornRouter.sol and calls it verbatim. If someone edits the
+# contract and not the README, that claim silently becomes false.
+"$PY" - <<'PYEOF' || fail "README quotes source that no longer matches"
+import re, sys
+from pathlib import Path
+
+readme = Path("README.md").read_text(encoding="utf-8")
+src = Path("contracts/src/SwornRouter.sol").read_text(encoding="utf-8")
+
+blocks = re.findall(r"```solidity\n(.*?)```", readme, re.S)
+if not blocks:
+    print("    no solidity block in the README")
+    sys.exit(1)
+
+flat = " ".join(src.split())
+for block in blocks:
+    for line in (l.strip() for l in block.split("\n")):
+        if not line or line.startswith("//"):
+            continue
+        if " ".join(line.split()) not in flat:
+            print(f"    not in SwornRouter.sol: {line}")
+            sys.exit(1)
+print(f"    {len(blocks)} quoted block(s) match the contract")
+PYEOF
+ok "the code the README shows is the code that runs"
+
 step "the repository is publishable"
 # Checked here because the submission requires a public repo, and the checks that matter
 # before flipping that switch are all local.

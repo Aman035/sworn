@@ -186,8 +186,10 @@ Those are two different calls, and a hook can answer them differently.
 
 **Sworn asks once.** The quote and the trade become the same call.
 
+`contracts/src/SwornRouter.sol`, verbatim:
+
 ```solidity
-// SwornRouter.sol:176 — the assertion the whole design rests on
+// 4. The assertion the whole design rests on.
 if (execIn != amountsIn[chosen] || execOut != amountsOut[chosen]) {
     revert Divergence(chosen, probed, executed);
 }

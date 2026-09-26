@@ -1357,3 +1357,14 @@ html.js .reveal.in {
     gap: 4px;
   }
 }
+
+.code-src {
+  margin: 26px 0 8px;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--faint);
+}
+
+.code-src + .code {
+  margin-top: 0;
+}
