@@ -75,6 +75,49 @@ print("    all relative links and anchors resolve")
 PYEOF
 ok "nothing points at a file or heading that does not exist"
 
+step "the README points at real contract lines"
+# A prize requirement and a maintenance hazard in one: line anchors rot the moment anyone
+# edits a contract, and a reviewer following a stale `#L178` lands on whitespace.
+"$PY" - <<'PYEOF' || fail "a contract line anchor in the README does not resolve"
+import re, sys
+from pathlib import Path
+
+text = Path("README.md").read_text(encoding="utf-8")
+anchors = re.findall(r"\]\((contracts/[^)#]+)#L(\d+)\)", text)
+if not anchors:
+    print("    no contract line anchors; reviewers cannot verify the integration")
+    sys.exit(1)
+
+bad = []
+for path, line in anchors:
+    p, n = Path(path), int(line)
+    if not p.is_file():
+        bad.append(f"{path} does not exist")
+        continue
+    lines = p.read_text(encoding="utf-8").split("\n")
+    if n > len(lines) or not lines[n - 1].strip():
+        bad.append(f"{path}#L{n} is past the end of the file or points at a blank line")
+
+for b in bad:
+    print(f"    {b}")
+if bad:
+    sys.exit(1)
+print(f"    {len(anchors)} contract line anchors all resolve to real code")
+PYEOF
+ok "reviewers can verify every claim at the line that makes it"
+
+step "the repository is publishable"
+# Checked here because the submission requires a public repo, and the checks that matter
+# before flipping that switch are all local.
+[ -f LICENSE ] || fail "no LICENSE; the submission requires open-source code"
+git ls-files --error-unmatch .env >/dev/null 2>&1 && fail ".env is tracked"
+grep -qE "^\.env$" .gitignore || fail ".env is not gitignored"
+leaked=$(git rev-list --all | while read -r c; do
+  git grep -hoE "alch_[A-Za-z0-9_-]+|https?://[A-Za-z0-9._-]*quiknode\.pro/[A-Za-z0-9]+" "$c" 2>/dev/null
+done | sort -u | grep -v "alch_EXAMPLEkeyDoNotUse0000" || true)
+[ -z "$leaked" ] || { printf '    %s\n' "$leaked"; fail "a provider credential appears in git history"; }
+ok "MIT licensed, .env untracked, no credential anywhere in history"
+
 step "FEEDBACK.md has the four required sections"
 for section in \
   "Time to first success" \

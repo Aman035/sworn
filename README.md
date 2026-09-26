@@ -240,8 +240,10 @@ that the test suite reproduces exactly.
 
 | Network | `HookBook` | Status |
 | ------- | ---------- | ------ |
-| Base Sepolia | [`0x8A4470f7DDa8525b484527b21B19c3bc876A04c3`](https://sepolia.basescan.org/address/0x8A4470f7DDa8525b484527b21B19c3bc876A04c3) | Live. The attestor wrote 25 scores; a second scheduled run correctly wrote nothing, because the registry already held that block. |
+| Base Sepolia | [`0x8A4470f7DDa8525b484527b21B19c3bc876A04c3`](https://sepolia.basescan.org/address/0x8A4470f7DDa8525b484527b21B19c3bc876A04c3) | Live, attestor authorised, scores written |
 | Base mainnet | — | **Not deployed.** Same script; the deploy costs `1,643,224` gas, about three cents at current Base gas. |
+
+The attestor wrote 25 scores to Sepolia; a second scheduled run correctly wrote nothing, because the registry already held that block — `HookBook` is monotonic in `asOfBlock`, and an hourly job that reverted on every quiet hour is a job nobody would keep enabled.
 
 The mainnet registry is the one open item in the build. It is not load-bearing for anything
 claimed here: `SwornRouter` is verified against **live Base hook bytecode** by
@@ -315,6 +317,47 @@ rail showing the snapshot hash and block range behind each panel. Static export,
 ```bash
 cd app && npm install && npm run dev
 ```
+
+## Where to verify the integration
+
+Everything below is a direct link to the line that does the thing. The Uniswap surfaces
+integrated are `IPoolManager.unlock` / `unlockCallback`, `IPoolManager.swap`,
+`IHooks` permission bits, EIP-1153 transient storage, `V4Quoter`, and Permit2.
+
+### `SwornRouter` — the mechanism
+
+| What | Where |
+| ---- | ----- |
+| Entry point; validates candidates and opens the v4 lock | [`swornSwap` · SwornRouter.sol#L121](contracts/src/SwornRouter.sol#L121) |
+| `IUnlockCallback` implementation — all routing happens inside the lock | [`unlockCallback` · #L140](contracts/src/SwornRouter.sol#L140) |
+| **The guarantee**: execution must equal the probe, or the trade reverts | [`revert Divergence` · #L178](contracts/src/SwornRouter.sol#L178) |
+| One entry point for probe and execution, so a hook sees identical context | [`runRoute` · #L201](contracts/src/SwornRouter.sol#L201) |
+| A probe must revert; reaching the end means the EVM lied | [`ProbeMustRevert` · #L228](contracts/src/SwornRouter.sol#L228) |
+| Probe isolation via a derived transient slot (EIP-1153) | [`UNLOCKED_SLOT` · #L77](contracts/src/SwornRouter.sol#L77) |
+| EIP-150 `63/64` rule, so a griefing hook cannot starve the outer frame | [`_assertStipend` · #L251](contracts/src/SwornRouter.sol#L251) |
+
+### `HookBook` — the registry
+
+| What | Where |
+| ---- | ----- |
+| Unmeasured reads as `INSUFFICIENT_DATA`, never as a clean zero | [`flags` · HookBook.sol#L124](contracts/src/HookBook.sol#L124) |
+| Absence is explicit rather than inferred from a zero score | [`hasScore` · #L132](contracts/src/HookBook.sol#L132) |
+| Monotonic in `asOfBlock` — replay and staleness protection in one | [`StaleUpdate` · #L83](contracts/src/HookBook.sol#L83) |
+| EIP-712 attestation anyone can relay and pay for | [`setScoreWithSig` · #L198](contracts/src/HookBook.sol#L198) |
+
+### The v4 findings, and the code that produced them
+
+| What | Where |
+| ---- | ----- |
+| `Swap` event omits the `afterSwap` take — recovered from the trace instead | [`analysis/lib/swapcalls.py`](analysis/lib/swapcalls.py) |
+| Subtracting the measurement's own noise floor before calling a hook divergent | [`aggregate` · b_divergence.py](analysis/pipelines/b_divergence.py) |
+| Every attacker capability from the threat model, as a working fixture | [`ToxicHooks.sol`](contracts/test/fixtures/ToxicHooks.sol) |
+| A completed swap through live Base hooks, on a mainnet fork | [`RealSwap.fork.t.sol`](contracts/test/fork/RealSwap.fork.t.sol) |
+| Measured probe overhead against a slippage-only router | [`SwornGas.t.sol`](contracts/test/unit/SwornGas.t.sol) |
+
+Three defects found in v4 while building this are written up with reproductions in
+[FEEDBACK.md](FEEDBACK.md), and the hooklist schema change they imply is in
+[docs/HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
 
 ## 13. Reproduce everything
 
