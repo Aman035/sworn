@@ -6,108 +6,24 @@
 
 [![Sworn. Execution integrity for Uniswap v4](docs/assets/landing.png)](https://aman035.github.io/sworn/)
 
-**[Live dashboard](https://aman035.github.io/sworn/)**
-
 **Sworn is a Uniswap v4 router that makes the quote and the trade the same transaction.**
 It probes every candidate route inside the transaction that settles it, takes the best,
 and reverts if what executed differs from what it probed. It is periphery, not a hook:
 [`SwornRouter`](contracts/src/SwornRouter.sol) sits where a UniversalRouter sits, and
 hooks are what it defends against.
 
-Building it surfaced three defects in Uniswap's own surfaces, each with a reproduction:
-the `Swap` event is emitted **before** `afterSwap` so it cannot show what a hook took, its
-natspec documents the opposite sign to what the code emits, and the public record of a
-hook carries identity but never behaviour. Those, and the rest of the build notes, are in
-**[FEEDBACK.md](FEEDBACK.md)**.
+**[Live dashboard](https://aman035.github.io/sworn/)** · [Feedback for
+Uniswap](FEEDBACK.md) · [How every number was measured](docs/METRICS.md)
 
 ---
 
-Why that is worth building, in the order the evidence arrived.
+## The problem
 
-**On 14 September 2026, 0x published
-[*"Uniswap v4 hooks were a mistake"*](https://0x.org/post/uniswap-v4-hooks-were-a-mistake).**
-They analysed 84,163 hooks across six chains and reported **54.2% malicious, 19.4% safe**, with some hooks delivering *"as much as 50% less at execution than the amount quoted"*.
-
-They named one. [`0x800cef53…`](https://basescan.org/address/0x800cef53c3fd41109dffec62e5251bdd7acba5c7)
-on Base, an ETH/NVDAc pool: a median fee of 18% when it charged, and
-**$143,037** taken. That pool is still live: this repo forks Base at it in
-`NamedHooks.fork.t.sol`.
-
-**Hayden Adams [replied](https://x.com/haydenzadams/status/2099711270115013085):**
-*"Skill issue, don't route to bad hooks"*, and pointed integrators at the Uniswap API,
-which *"avoids malicious hooks"*.
-
-He is right. *Don't route to bad hooks* is exactly the correct advice, and this repo is
-an attempt to make it executable, because the question it leaves open is the one an
-integrator actually faces: **how do you know which ones are bad, at the moment you
-route?**
-
-Three questions, answered with tooling anyone can run.
-
-## 1. Does the public record of a hook tell you?
-
-First, the two lists people confuse, because the rest of this section turns on the
-difference:
-
-- **The [hooklist](https://github.com/Uniswap/hooklist)** is Uniswap's public,
-  machine-readable file of hooks. Anyone can open a pull request to add theirs. It records
-  who deployed it, whether the source is verified, and which permission bits the address
-  encodes. It is public, and this repo reads it.
-- **The routing allowlist** is a private list *inside* Uniswap's routing API: the hooks
-  that API is willing to send a user's trade through. It is not published, and nothing
-  here can see it.
-
-They are not the same list, and the hooklist's own README says so: being in it **does
-not** get a hook onto the routing allowlist. So the honest question this section can
-answer is the narrower one, about the public record.
-
-No, it does not tell you. [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) is **in the hooklist with verified source**, and takes a median 400 bps above its stated fee on 11% of its fills, worst observed take 44%.
-
-Every field in the hooklist is **identity**: who deployed it, is the source verified, what
-may it do. None is **behaviour**: what does it actually charge. A hook can be listed,
-verified and well-behaved on paper while taking 44% out of a fill,
-because nothing in the format has anywhere to record that.
-
-That is the gap, and it is fixable. A proposal with behaviour fields filled in for every
-hook measured here is in [HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
-
-Routing, the other list, cannot be inspected from outside, but its *effects* can be
-counted:
-**200,677**
-fills through a single UniversalRouter deployment
-([`0x6ff5693b…`](https://basescan.org/address/0x6ff5693b99212da76ad316178a184ab56d299b43))
-went into hooks measured here as charging more than they quote. That contract is used by
-the Uniswap interface and by anyone else who calls it, so this is a fact about what
-reached the router, not a claim about any one front-end or its allowlist.
-
-## 2. Can anyone measure this from logs?
-
-No, and that is the finding worth the most. `PoolManager` emits `Swap` **before**
-`afterSwap`, so the event excludes whatever the hook takes there. Every indexer,
-dashboard and hook-scoring tool built on `Swap` events under-reports exactly the hooks
-that take the most. This repo did it that way first, and spent a day chasing the
-resulting offset before reading the emission order.
-
-Measured properly, from the traced call rather than the event, with the measurement's
-own error subtracted. **4 of 25** hooks with enough fills to classify are
-charging more than they quote.
-
-## 3. Can it be closed at execution time?
-
-Yes, and not by detecting anything: static, differential and trace analysis all scored
-**zero recall** against ground truth here. `SwornRouter` moves the quote **inside the
-transaction that settles it**. Probe every candidate for real, revert, take the best,
-and assert that what executed equals what was probed. A hook that lies makes those two
-disagree, and the trade does not happen.
-
-# The problem
-
-## What a hook is allowed to do
-
-A v4 hook runs inside `PoolManager.swap`. In `beforeSwap` it can reduce the amount being
-swapped or override the fee; in `afterSwap` it can take a further delta out of the result.
-Both hook calls receive the same arguments whether the caller is a simulator or a
-transaction, but the *environment* differs, and the hook can read it:
+A v4 hook is arbitrary code running inside `PoolManager.swap`. In `beforeSwap` it can
+reduce the amount being swapped or override the fee; in `afterSwap` it can take a further
+delta out of the result. Both calls get the same arguments whether the caller is a
+simulator or a real transaction, but the **environment** differs, and the hook can read
+it:
 
 - `tx.gasprice` is `0` under `eth_call` and non-zero in a transaction
 - `tx.origin` is commonly the zero address in a simulator
@@ -120,138 +36,73 @@ its pool.
 
 ![How a quote-spoofing hook behaves differently under simulation](docs/assets/attack.svg)
 
-## Uniswap's own surfaces point the wrong way
+This is not hypothetical. On 14 September 2026, 0x published
+[*"Uniswap v4 hooks were a mistake"*](https://0x.org/post/uniswap-v4-hooks-were-a-mistake):
+84,163 hooks analysed across six chains, **54.2% malicious**, some delivering
+*"as much as 50% less at execution than the amount quoted"*.
 
-This is not a hypothetical the docs warn about. Three things found while building this,
-all with reproductions in the feedback write-up:
+**This repo measured it independently.** Every v4 pool on four chains indexed from
+`Initialize` logs, then a uniform random sample of 10,000 Base fills, each re-quoted
+against the state immediately before it and compared with what the swapper actually
+received:
 
-1. The [`Swap` event natspec](https://github.com/Uniswap/v4-core/blob/main/src/interfaces/IPoolManager.sol)
-   documents `amount0` as *"the delta of the currency0 balance of the pool"*. The code
-   emits the **swapper's** delta: the opposite sign. Every indexer built from the docs is
-   inverted.
-2. The **"Access msg.sender"** guide teaches hooks to read the caller, without noting that
-   routers therefore cannot trust a quote.
-3. The Trading API defaults to **hooks-inclusive** routing, and the public record of a
-   hook describes *identity*, never *behaviour*.
+- **4 of the 25** hooks with enough fills to classify charge more than they quote
+- **200,677** swaps reached them through a single UniversalRouter deployment alone
+- the worst is **in Uniswap's hooklist with verified source**, taking a median
+  400 bps above its stated fee, worst observed take 44%
 
-## Measured on mainnet
+Roughly 48.4% of charged fills in that sample are measurement error, estimated from
+the fills that measured as **over-delivered**, which a hook cannot do. That noise floor is
+subtracted before any hook is named, which is why the headline is 4 and not a larger
+number. Every hook, every fill and every snapshot hash is on the
+[dashboard](https://aman035.github.io/sworn/hooks/).
 
-Every v4 pool on four chains, indexed from `Initialize` logs. No subgraph, no third-party
-index.
+**And you cannot see any of this in the logs.** `PoolManager` emits `Swap` *before*
+`afterSwap`, so the event excludes whatever the hook takes there. Every indexer, dashboard
+and hook-scoring tool built on `Swap` events under-reports exactly the hooks that take the
+most. That finding, the natspec sign bug beside it, and the rest of the build notes are in
+**[FEEDBACK.md](FEEDBACK.md)**.
 
-![Pools indexed per chain, and the hooked share](docs/assets/census.svg)
+## The reply
 
-Then a **uniform random sample of 10,000 Base fills**, each re-quoted against the
-state immediately before it and compared with what the swapper actually received:
+Hayden Adams [replied to that post](https://x.com/haydenzadams/status/2099711270115013085):
 
-- **5,121** fills measured, across **1,404** hooks
-- **25** of those hooks had enough fills to classify at all
-- **4 charge more than they quote**
+> Skill issue, don't route to bad hooks
 
-### The hooks, named
+pointing integrators at the Uniswap API, which *"avoids malicious hooks"*.
 
-| Hook (Base) | Fills | Charged | Over-delivered | Net rate | Median excess | Score |
-| ----------- | ----: | ------: | -------------: | -------: | ------------: | ----: |
-| [`0x1f91c998…e02acc`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc) ✓ hooklist | 782 | 183 | 99 | 11% | 400 bps | 24 |
-| [`0x985c14ba…ca2acc`](https://basescan.org/address/0x985c14baa2a18316ffda0aefb3a632fadfca2acc) ✓ hooklist | 751 | 126 | 105 | 3% | 142 bps | 14 |
-| [`0xa5c4a1be…5a4145`](https://basescan.org/address/0xa5c4a1be2d59af03c8578609f2621c91ad5a4145) | 36 | 11 | 3 | 22% | 99 bps | 21 |
-| [`0x0d5d83c5…aba8cc`](https://basescan.org/address/0x0d5d83c5a1d27654d12670bb07461971a5aba8cc) | 41 | 9 | 2 | 17% | 45 bps | 14 |
+**He is right.** *Don't route to bad hooks* is exactly the correct advice. The question it
+leaves open is the one an integrator actually faces: **how do you know which ones are bad,
+at the moment you route?** Two answers exist today, and neither works.
 
-`✓ hooklist` means the hook is in Uniswap's public hooklist with verified source, which
-says nothing about how it behaves. `Score` is this repo's own divergence score, `0-100`,
-**higher is worse**; it is defined in [METRICS.md](docs/METRICS.md) and written on-chain
-by `HookBook`, not by Uniswap.
-**The worst offender is one of them**: [`0x1f91c998…`](https://basescan.org/address/0x1f91c998e7c2f4b690d75bdbf6502bdcd6e02acc)
-is listed, source-verified, and takes a median **400 bps above its stated
-fee** on 11% of its fills, with a worst observed take of
-44%. A registry keyed on address cannot express that.
+**The public record does not tell you.** Two lists get confused here, so to be precise:
 
-Every figure resolves from [`divergence.json`](data/results/divergence.json), which carries
-the sha256 of the snapshot it was computed from.
+- **The [hooklist](https://github.com/Uniswap/hooklist)** is Uniswap's public,
+  machine-readable file of hooks. Anyone can open a pull request to add theirs. It records
+  who deployed it, whether the source is verified, and which permission bits the address
+  encodes. It is public, and this repo reads it.
+- **The routing allowlist** is a private list *inside* Uniswap's routing API: the hooks
+  that API is willing to send a user's trade through. It is not published, and nothing
+  here can see it.
 
-### Half the signal is noise, and that is published too
+Being in the first does not get a hook onto the second, and the hooklist's own README says
+so. What the public one shows is that every field in it is **identity**: who deployed it,
+is the source verified, what may it do. None is **behaviour**: what does it actually
+charge. That is why a listed, source-verified hook can still be the worst offender
+measured here. A proposal with behaviour fields filled in for every hook measured is in
+[HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
 
-A hook cannot deliver **more** than it quoted, so any fill measured as over-delivering is a
-known false positive, and because the error is symmetric, its count estimates the false
-positives among the charged fills:
-
-- **732** charged fills
-- **354** over-delivered. Impossible from hook behaviour, so pure error
-- **48.4%** estimated false-positive share
-- **20** eligible hooks failed the floor and were dropped
-
-Counting positives alone reports a much larger number. Subtracting each hook's own negative
-tail leaves 4, and the published figure is the smaller one.
-
-## Why nobody has noticed
-
-The `Swap` event omits the `afterSwap` take, as above. The two numbers, for a hook taking
-exactly one percent:
-
-| `amount1`             |                                          value |
-| --------------------- | ---------------------------------------------: |
-| `Swap` event          |                    `3,941,355,102,139,778,949` |
-| `swap()` return value |                    `3,901,941,551,118,381,160` |
-| difference            | `39,413,551,021,397,789`. Exactly one percent |
-
-A second, independent defect: the event's sign pattern cannot distinguish exact-input on
-token0 from exact-output on token1. They are identical, and **449** of the sampled fills
-turned out to be exact-output swaps the event had disguised.
-
-So every fill here is confirmed against its own transaction trace. `amountSpecified`,
-`hookData` and the realized output all come from the traced `PoolManager.swap` call. Of
-10,000 sampled fills, 8,968 survived confirmation.
-
-## Detection does not catch it either
-
-Four ways to flag a spoofing hook, each scored against what hooks actually did to settled
-trades:
-
-| Method | What it looks at | Found | Missed | False alarms | Recall |
-| ------ | ---------------- | ----: | -----: | -----------: | -----: |
-| `static` | bytecode contains an environment opcode | 0 | 2 | 3 | 0.00 |
-| `dynamic` | quotes disagree under permuted `eth_call` | 0 | 2 | 0 | 0.00 |
-| `trace` | an environment opcode *executes* while pricing | 0 | 2 | 0 | 0.00 |
-| `union` | any of the above | 0 | 2 | 3 | 0.00 |
-| `settled_trade` | re-quoting real fills against real prior state | 2 | 0 | 0 | 1.00 |
-
-![Precision and recall of each hook detection method](docs/assets/precision.svg)
-
-**No static, differential or trace detector caught either divergent hook** among those both
-probed and measured. Only re-quoting settled trades did, and that is retrospective by
-construction: it works after someone has already been paid less than they were quoted.
-
-The ground truth is small: it is the overlap between the hooks this repo probed and the
-hooks it measured from settled trades, and `Found` plus `Missed` is the whole of it. Too
-small to claim a detection *rate*, which is why the counts sit in the table instead of
-hiding behind a ratio. What it does show is that every check an integrator could run
-before a trade found none of the hooks that were demonstrably charging, while the bytecode
-scan raised alarms on hooks that were not.
+**Detection does not tell you either.** Static bytecode analysis, differential `eth_call`
+and `debug_traceCall` were each scored against what hooks actually did to settled trades.
+All three found **none** of the hooks that were demonstrably charging. Only re-quoting
+settled trades caught them, and that works after someone has already been paid less than
+they were quoted. The full matrix, and the small ground truth it rests on, are on the
+[detection page](https://aman035.github.io/sworn/detection/).
 
 A score tells you what a hook did last week. It cannot tell you what it is doing to your
 transaction right now.
 
-## Who is routing into this
-
-These hooks are not off to the side. Every v4 swap logs the contract that called
-`PoolManager`, never the person swapping, so mapping those contracts to the products that
-run them is what this table does:
-
-| Product | Swaps into those hooks | Share of its v4 swaps |
-| ------- | ---------------------: | --------------------: |
-| Uniswap | 233,431 | 4.8% |
-| 0x | 104,643 | 12.9% |
-| unknown-aggregator | 13,665 | 2.9% |
-| routers nobody has identified | 497,712 | 50.2% of all fills |
-
-**50.2% of fills are unattributed**, reported rather than dropped, because a table
-that hides its coverage is not evidence. The products above are not doing anything wrong:
-they are doing the normal thing, which is to trust a quote. That is the point. The gap is
-invisible from where a router stands, so avoiding it cannot be a matter of diligence.
-
----
-
-# The solution
+## The solution
 
 Every router today asks a hook a question off-chain, then acts on the answer on-chain.
 Those are two different calls, and a hook can answer them differently.
@@ -272,11 +123,10 @@ product. Everything else exists to make those four lines meaningful.
 
 ![How SwornRouter probes candidates inside the transaction](docs/assets/mechanism.svg)
 
-## Why a hook cannot tell it is being probed
+### Why a hook cannot tell it is being probed
 
-For a hook to cheat Sworn it would have to answer the probe honestly and the execution
-dishonestly. To do that it has to tell them apart. Here is everything it could try, and
-why each fails:
+To cheat Sworn a hook would have to answer the probe honestly and the execution
+dishonestly, which means telling them apart. Here is everything it could try:
 
 | It could look at | But |
 | ---------------- | --- |
@@ -284,111 +134,66 @@ why each fails:
 | `msg.sender`, call depth, calldata shape | Probe and execution go through the same external self-call, [`runRoute`](contracts/src/SwornRouter.sol#L201). The `probing` flag is read only *after* the last externally observable call |
 | `gasleft()` | Both get the same stipend, enforced by [`_assertStipend`](contracts/src/SwornRouter.sol#L251) against EIP-150's `63/64` rule |
 | A counter in storage | The probe reverts, so its own bookkeeping rolls back with it |
-| A counter in *transient* storage | EIP-1153 slots do not survive the revert either. Tested in `test_gasSniff_probeStateIsRolledBack` |
+| A counter in *transient* storage | EIP-1153 slots do not survive the revert either |
 | Refusing to be probed | A reverting candidate is skipped and the swap still settles through another |
 
-There is no remaining signal. A hook that wants to overcharge you has to overcharge the
-probe by the same amount, at which point Sworn routes around it and the hook earns
-nothing.
-
-This is not an argument, it is a test suite: twelve attacker capabilities from
-`THREAT_MODEL.md`, each with a working fixture in
+A hook that wants to overcharge you has to overcharge the probe by the same amount, at
+which point Sworn routes around it and the hook earns nothing. This is not an argument, it
+is a test suite: twelve attacker capabilities from
+[THREAT_MODEL.md](docs/THREAT_MODEL.md), each with a working fixture in
 [`ToxicHooks.sol`](contracts/test/fixtures/ToxicHooks.sol) that tries the attack and
 fails.
 
-## What it looks like when it works
+### Caught on a live Base hook
 
-Same pool, same block, same swap. The only difference is the router:
-
-```
-a hook that charges only when tx.gasprice > 0
-
-  quoted to a simulator          996,999,005,991,991
-  naive router, trusting it      817,539,331,628,894   -17.99%
-  sworn router, probing in-tx    996,999,005,991,991        0%
-```
-
-Produced live by `DemoTest`, not typed in. Run `./scripts/demo.sh` to watch it happen.
-
-## Caught on mainnet
-
-Everything above this line is measurement. This is the router working, against a hook that
-is live on Base right now.
-
-Fork Base at block 51,247,545 and send one identical swap twice, from two different
-callers, into the pool behind hook
+Everything above is measurement. This is the router working against a hook that is live on
+Base right now. Fork Base at block 51,247,545 and send one identical swap twice, from
+two different callers, into the pool behind
 [`0xf54473f4…`](https://basescan.org/address/0xf54473f4c554baa8411c0a7dac7df735f34d00c4):
 
-- caller A, a naive router, receives **17,582,769** USDC units. Fee `0`, nothing taken afterwards.
-- caller B, `SwornRouter`, receives **16,340,546**. Fee `700`, and the hook transfers itself a further slice inside `afterSwap`.
-- caller B is charged **707 bps** more for the same trade.
+- caller A, a naive router, receives **17,582,769** USDC units. Fee `0`, nothing taken afterwards
+- caller B, `SwornRouter`, receives **16,340,546**. Fee `700`, and the hook moves a further slice out inside `afterSwap`
+- caller B is charged **707 bps** more for the same trade
 
 Neither caller is known to the hook. Both were deployed seconds earlier in the same test.
-
-Sworn does not need to know why it is being charged. It probes, sees what it is actually
-being offered, probes the hookless pool beside it, and settles there instead:
-**17,438,404** units, **672 bps** recovered.
+Sworn does not need to know *why* it is being charged: it probes, sees what it is actually
+being offered, probes the hookless pool beside it, and settles there instead for
+**17,438,404** units, recovering **672 bps**.
 
 ```bash
 forge test --match-path 'test/fork/ProtectedSwap.fork.t.sol' -vv
 ```
 
-**The part worth sitting with:** the offline pipeline in this repo did *not* flag that hook
-as divergent. It saw a handful of charged fills against nearly as many over-delivered ones
-and correctly refused to call that a signal. A full re-quote of 10,000 fills, with a
-noise floor and a sensitivity sweep, missed a hook that a single in-transaction probe
-caught immediately.
+**The part worth sitting with:** the offline pipeline in this repo did *not* flag that
+hook. It saw a handful of charged fills against nearly as many over-delivered ones and
+correctly refused to call that a signal. A full re-quote of 10,000 fills, with a noise
+floor and a sensitivity sweep, missed a hook that a single in-transaction probe caught
+immediately. That tells against this repo's own measurement as much as anyone else's.
 
-That is the argument, and it tells against this repo's own measurement as much as anyone
-else's. A score is retrospective and lossy. The probe is neither.
+Three more fork tests pin real deployed code at real blocks:
+[`RealSwap`](contracts/test/fork/RealSwap.fork.t.sol) proves a swap through a live hook
+**completes** rather than merely refusing to trade,
+[`NamedHooks`](contracts/test/fork/NamedHooks.fork.t.sol) runs against the ETH/NVDAc hook
+0x named, and [`BnbNamedHook`](contracts/test/fork/BnbNamedHook.fork.t.sol) shows the
+second hook 0x named overcharges through the fee override alone, with permission bits
+`0x0880` and no returns-delta at all, which is what a scanner keyed on returns-delta would
+score clean.
 
-## Also verified against live hooks
+### What it costs
 
-One catch could be a fluke. These pin real deployed code at real blocks and assert the
-rest of the claim:
+Insurance pricing: the premium is **fixed** and small, the payout **proportional** and
+rare. Median cost to protect one trade is **$0.0045**; a better route existed on
+3.0% of fills that had an alternative, and when one did it was worth
+**65.16 bps** at the median. Break-even trade size is **$22.77**, so a router
+should not probe a two-dollar swap, and `maxProbes` and `hookMarginBps` exist so an
+integrator can set that line.
 
-| Fork test | What it settles |
-| --------- | --------------- |
-| [`RealSwap.fork.t.sol`](contracts/test/fork/RealSwap.fork.t.sol) | A swap through a live Base hook **completes**, pays out, and passes the divergence check. The guarantee is not a well-defended way of refusing to trade |
-| [`NamedHooks.fork.t.sol`](contracts/test/fork/NamedHooks.fork.t.sol) | The ETH/NVDAc hook 0x named is live at the pinned block, and Sworn picks between real candidates around it |
-| [`BnbNamedHook.fork.t.sol`](contracts/test/fork/BnbNamedHook.fork.t.sol) | The second hook 0x named, on BNB Smart Chain, is live with permission bits `0x0880`. It can override the fee and nothing else: no returns-delta at all |
-
-That last row is the one to take away if you are building a scanner. The obvious heuristic,
-*flag the hooks that can return a delta*, scores that hook clean.
-
-These need an archive RPC and skip rather than fail without one, so plain `forge test`
-stays runnable offline. `make test-fork` runs the set.
-
-## What the guarantee costs
-
-![What the guarantee is worth](docs/assets/landing-value.png)
-
-This is insurance, and it prices like insurance: the premium is **fixed** and small, the
-payout is **proportional** and rare. For every measured fill, every other pool that could
-have filled the same trade was quoted against the same pre-fill state.
-
-- median cost to protect one trade: **$0.0045**
-- a better route existed on 3.0% of fills that had an alternative
-  (105 of 3,478)
-- when one did, it was worth **65.16 bps** at the median
-- break-even trade size: **$22.77**
-
-So a router should not probe a two-dollar swap, and `maxProbes` and `hookMarginBps` exist
-so an integrator can set that line.
-
-**The dollar totals do not flatter this, and they are published anyway.** Across the
-priceable subset, $1.22 was protected against $20.28 of gas. Three
-reasons that ratio is not the ROI of the mechanism, each of them a limitation of the
-sample rather than a defence:
-
-1. Only 7.3% of fills pay out in a token this repo can value from the chain,
-   so the dollar figures cover a small slice of the sample.
-2. A uniform random sample of Base fills is overwhelmingly dust, well under the
-   break-even, which is exactly where probing should be switched off.
-3. 92% of that gas came from ten transactions.
-
-The honest summary: on average-case Base dust, probing everything loses money. The case
-for it is the tail, and the tail is the 707 bps catch above.
+The dollar totals do not flatter this and are published anyway: **$1.22** protected
+against **$20.28** of gas across the priceable subset. Only 7.3% of fills pay
+out in a token this repo can value from the chain, a uniform sample of Base fills is
+overwhelmingly dust well under the break-even, and 92% of that gas came from ten
+transactions. On average-case Base dust, probing everything loses money. The case for it
+is the tail, and the tail is the catch above.
 
 Measured probe overhead, verbatim from `forge test --match-contract SwornGasTest`:
 
@@ -399,30 +204,64 @@ Measured probe overhead, verbatim from `forge test --match-contract SwornGasTest
   swornSwap, 3 candidates                    341,845   overhead vs naive +230,292
 ```
 
-## HookBook, and what it refuses to say
+## Components
 
-[`HookBook`](contracts/src/HookBook.sol) is an on-chain registry of hook scores written by a
-scheduled attestor. Its load-bearing property is how it handles **absence**:
+| | | |
+| --- | --- | --- |
+| **`contracts/src`** | Solidity | [`SwornRouter`](contracts/src/SwornRouter.sol), the probe-and-assert router. [`HookBook`](contracts/src/HookBook.sol), an on-chain score registry that returns `INSUFFICIENT_DATA` rather than a clean zero for a hook nobody has measured. |
+| **`contracts/test`** | Solidity | Unit, fuzz and invariant tests, twelve toxic-hook fixtures, and fork tests against live Base hooks. |
+| **`analysis/lib`** | Python | RPC with adaptive log fetching, parquet compaction, re-quoting, trace recovery, scoring, on-chain pricing. |
+| **`analysis/pipelines`** | Python | `census` → `fills` → `divergence` → `intermittency` → `attribution` → `replay` → `precision` → `scores`. Each writes one file to `data/results`. |
+| **`app`** | Next.js | The [dashboard](https://aman035.github.io/sworn/). Static export, reads the committed result files at build time. |
+| **`attestor`** | TypeScript | Scheduled job that signs scores and writes them to `HookBook`, live on Base Sepolia at [`0x8A4470f7…`](https://sepolia.basescan.org/address/0x8A4470f7DDa8525b484527b21B19c3bc876A04c3). |
+| **`sdk`** | TypeScript | `buildSwornCall`: turns a quote into router calldata. viem action included. |
+| **`scripts/gates`** | bash | One gate per phase. `make phase-N` is the only thing that can mark a phase done. |
 
-- an unscored hook returns `hasScore() == false` and `FLAG_INSUFFICIENT_DATA`
-  ([`flags`](contracts/src/HookBook.sol#L124)), **never a clean zero**
-- a hook with too few measured fills gets `score = null`; a good rating has to be earned
-- updates are monotonic in `asOfBlock` ([`StaleUpdate`](contracts/src/HookBook.sol#L83)),
-  which is replay and staleness protection in one
-- scores are EIP-712 signed ([`setScoreWithSig`](contracts/src/HookBook.sol#L198)), so
-  anyone can relay an attestation and pay for it
+### Where to verify the integration
 
-| Network      | `HookBook`                                                                                                                                  | Status                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| Base Sepolia | [`0x8A4470f7DDa8525b484527b21B19c3bc876A04c3`](https://sepolia.basescan.org/address/0x8A4470f7DDa8525b484527b21B19c3bc876A04c3) | Live, attestor authorised, scores written |
-| Base mainnet | not deployed | `1,643,224` gas to do so |
+The mechanism is four places in one file.
+[`swornSwap`](contracts/src/SwornRouter.sol#L121) opens the v4 lock,
+[`runRoute`](contracts/src/SwornRouter.sol#L201) is the single entry point probe and
+execution share, [`ProbeMustRevert`](contracts/src/SwornRouter.sol#L228) enforces that a
+probe cannot complete, and [`Divergence`](contracts/src/SwornRouter.sol#L178) is the
+assertion quoted above. Probe isolation is the transient slot at
+[`UNLOCKED_SLOT`](contracts/src/SwornRouter.sol#L77);
+[`HookBook.flags`](contracts/src/HookBook.sol#L124) is where an unmeasured hook reads as
+`INSUFFICIENT_DATA`; the measurement side starts at
+[`analysis/lib/swapcalls.py`](analysis/lib/swapcalls.py).
 
-The attestor wrote 25 scores; a second scheduled run correctly wrote nothing,
-because the registry already held that block. Scoring is fully specified, with a worked example the test suite reproduces exactly.
+Every result file carries `meta.snapshots[]` with a sha256 of its input snapshot and the
+commit of the script that produced it. A number that cannot be traced to a snapshot is a
+number this repo will not print, enforced by
+[`verify_readme_numbers.py`](scripts/verify_readme_numbers.py), which fails the build on
+any digit in this file that did not come from a result.
 
----
+## Run it locally
 
-# Demo
+You need Node `20`, Python `3.11+`, and Foundry. No RPC key for the parts that matter
+most.
+
+```bash
+git clone https://github.com/Aman035/sworn && cd sworn
+corepack enable            # the repo is a pnpm workspace; Node ships corepack
+make install               # pnpm, git submodules, a venv, and the analysis package
+```
+
+```bash
+cd app && npm run dev      # the dashboard, from committed data, no network
+make test                  # forge + pytest + vitest
+make test-fork             # fork tests; needs BASE_RPC_ARCHIVE in .env
+make readme                # re-render this file and its diagrams from data/results
+```
+
+Copy `.env.sample` to `.env` for the fork tests. Keys stay in that file, which is
+gitignored and never read into a log or an error message.
+
+Re-deriving the measurements takes hours and an archive node with
+`debug_traceTransaction`: `make phase-3` produces `divergence.json`, `make phase-6` runs
+the fork tests and the replay.
+
+## Demo
 
 ```bash
 ./scripts/demo.sh
@@ -434,106 +273,21 @@ string contains a number.
 
 | Act | What runs | What it shows |
 | --- | --------- | ------------- |
-| `1` | `DemoTest` on a local chain | A fixture hook quotes well at `tx.gasprice = 0`, delivers materially less at a real gas price, and Sworn routes around it. The figures it prints are the ones shown verbatim [above](#what-it-looks-like-when-it-works) |
+| `1` | `DemoTest` on a local chain | A fixture hook quotes well at `tx.gasprice = 0`, delivers materially less at a real gas price, and Sworn routes around it |
 | `2` | `RealSwap.fork.t.sol` on anvil forked from Base | The same router completes ETH → USDC through **live mainnet hooks**, probe and execution agreeing |
 | `3` | `ProtectedSwap.fork.t.sol` on the same fork | **The catch.** A real Base hook charges one caller more than another for the identical swap, and Sworn routes away from it |
 | `4` | `app/` static export | The dashboard, rendered from the same result files as this README |
 
 Acts `2` and `3` need an archive RPC and are skipped with a warning without one. Act `3`
-is the one to watch, and the only act that is neither a fixture nor a happy path: the hook
-charges the second caller 707 bps more
-for the identical swap, and Sworn recovers 672 bps by settling elsewhere.
-
+is the one to watch, and the only act that is neither a fixture nor a happy path.
 Storyboard, including what the demo deliberately does **not** show, in
 [DEMO.md](docs/DEMO.md).
 
 [![The Sworn hook explorer](docs/assets/dashboard-hooks.png)](https://aman035.github.io/sworn/hooks/)
 
-Three pages behind the landing, all rendered from the same `data/results/*.json` this
-README is:
-[Hooks](https://aman035.github.io/sworn/hooks/) ·
-[Detection](https://aman035.github.io/sworn/detection/) ·
-[Attribution](https://aman035.github.io/sworn/attribution/)
-
 ---
 
-# Components
-
-| | | |
-| --- | --- | --- |
-| **`contracts/src`** | Solidity | [`SwornRouter`](contracts/src/SwornRouter.sol), the probe-and-assert router. [`HookBook`](contracts/src/HookBook.sol), the on-chain score registry. |
-| **`contracts/test`** | Solidity | Unit, fuzz and invariant tests, twelve toxic-hook fixtures, and fork tests against live Base hooks. |
-| **`analysis/lib`** | Python | RPC with adaptive log fetching, parquet compaction, re-quoting, trace recovery, scoring, on-chain pricing. |
-| **`analysis/pipelines`** | Python | `census` → `fills` → `divergence` → `intermittency` → `attribution` → `replay` → `precision` → `scores`. Each writes one file to `data/results`. |
-| **`app`** | Next.js | The [dashboard](https://aman035.github.io/sworn/). Static export, reads the committed result files at build time. |
-| **`attestor`** | TypeScript | Scheduled job that signs scores and writes them to `HookBook`. |
-| **`sdk`** | TypeScript | `buildSwornCall`: turns a quote into router calldata. viem action included. |
-| **`scripts/gates`** | bash | One gate per phase. `make phase-N` is the only thing that can mark a phase done. |
-
-## Run it locally
-
-You need Node `20`, Python `3.11+`, and Foundry. Nothing else, and no RPC key for the parts
-that matter most.
-
-```bash
-git clone https://github.com/Aman035/sworn && cd sworn
-corepack enable            # the repo is a pnpm workspace; Node ships corepack
-make install               # pnpm, git submodules, a venv, and the analysis package
-```
-
-**The dashboard**, entirely from committed data, no network:
-
-```bash
-cd app && npm run dev          # http://localhost:3100
-```
-
-**The tests**, including the twelve attacker fixtures:
-
-```bash
-make test                      # forge + pytest + vitest
-forge test --root contracts --match-contract ToxicHooksTest -vv
-```
-
-**The demo**, three acts, nothing manual:
-
-```bash
-./scripts/demo.sh
-```
-
-The last two acts fork Base, so they need an archive RPC. Copy `.env.sample` to `.env` and set
-`BASE_RPC_ARCHIVE`. Keys stay in that file, which is gitignored and never read into a log
-or an error message.
-
-**Re-derive the measurements** (hours, and an archive node with `debug_traceTransaction`):
-
-```bash
-make phase-3                   # the gate that produced divergence.json
-make phase-6                   # fork tests against live Base hooks, then replay
-make readme                    # re-render this file and its diagrams from data/results
-```
-
-## Where to check the claims
-
-The mechanism is four places in one file.
-[`swornSwap`](contracts/src/SwornRouter.sol#L121) opens the v4 lock,
-[`runRoute`](contracts/src/SwornRouter.sol#L201) is the single entry point probe and
-execution share, [`ProbeMustRevert`](contracts/src/SwornRouter.sol#L228) enforces that a
-probe cannot complete, and [`Divergence`](contracts/src/SwornRouter.sol#L178) is the
-assertion above. Probe isolation is the transient slot at
-[`UNLOCKED_SLOT`](contracts/src/SwornRouter.sol#L77), and
-[`HookBook.flags`](contracts/src/HookBook.sol#L124) is where an unmeasured hook reads as
-`INSUFFICIENT_DATA` rather than zero. The measurement side starts at
-[`analysis/lib/swapcalls.py`](analysis/lib/swapcalls.py).
-
-Every result file carries `meta.snapshots[]` with a sha256 of its input snapshot and the
-commit of the script that produced it. A number that cannot be traced to a snapshot is a
-number this repo will not print, enforced by
-[`verify_readme_numbers.py`](scripts/verify_readme_numbers.py), which fails the build on
-any digit in this file that did not come from a result.
-
----
-
-# Threat model and limits
+## Threat model and limits
 
 - **The divergence sample is small.** 25 hooks clear `min_fills`, out of
   69,242 on Base. It establishes that the measurement works and that
@@ -546,9 +300,7 @@ any digit in this file that did not come from a result.
 - **A hook that is honest to everyone is still honest under Sworn.** This defends against
   quote/execution divergence, not against a hook that charges a large fee openly.
 
----
-
-## Three things that would fix this upstream
+### Three things that would fix this upstream
 
 1. **Emit the caller's final delta.** A `SwapSettled` event after
    `_accountPoolBalanceDelta`, or an `afterSwap` delta field on the existing one. Without
@@ -558,9 +310,8 @@ any digit in this file that did not come from a result.
 3. **Carry behaviour in the hooklist**, not just identity. Proposal with data in
    [HOOKLIST_PROPOSAL.md](docs/HOOKLIST_PROPOSAL.md).
 
-All three, with reproductions and the rest of the build notes, are in
-**[FEEDBACK.md](FEEDBACK.md)**, written for the Uniswap developer feedback form.
-
-If you want to go deeper: [METRICS.md](docs/METRICS.md) defines every term before it is
-measured, [THREAT_MODEL.md](docs/THREAT_MODEL.md) has the full attacker model, and
+All three, with reproductions, are in **[FEEDBACK.md](FEEDBACK.md)**.
+[METRICS.md](docs/METRICS.md) defines every term before it is measured, and
 [PHASES.md](PHASES.md) is the gate ledger.
+
+MIT licensed.
