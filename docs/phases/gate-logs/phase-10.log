@@ -1,10 +1,10 @@
 ==> README renders from the template
-    rendered 29 measurement(s) into README.md
+    rendered 30 measurement(s) into README.md
   ok  every placeholder resolved against data/results
 ==> no placeholder sits inside a markdown table
   ok  placeholders live in prose and lists only
 ==> no number in the README was typed by hand
-      29 measured value(s) via placeholders
+      30 measured value(s) via placeholders
       README.md is current and every number resolves from data/results
   ok  README.md is current and fully sourced
 ==> the rendered README is committed
@@ -18,6 +18,11 @@
 ==> every link in the README resolves
     all relative links and anchors resolve
   ok  nothing points at a file or heading that does not exist
+==> the README points at real contract lines
+    13 contract line anchors all resolve to real code
+  ok  reviewers can verify every claim at the line that makes it
+==> the repository is publishable
+  ok  MIT licensed, .env untracked, no credential anywhere in history
 ==> FEEDBACK.md has the four required sections
   ok  all four sections present
 ==> the README states its limits
