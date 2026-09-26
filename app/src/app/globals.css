@@ -85,6 +85,55 @@ body {
   overflow-x: hidden;
 }
 
+/* ------------------------------------------------------------------- page head */
+
+/* Interior pages open on the same gradient ground as the landing, so the site reads as
+   one surface. Top padding clears the floating nav. */
+.pagehead {
+  position: relative;
+  padding: 148px var(--gutter) 46px;
+  background: radial-gradient(900px 420px at 20% -20%, rgba(240, 74, 16, 0.1), transparent 60%),
+    radial-gradient(760px 380px at 86% -10%, rgba(120, 140, 170, 0.1), transparent 58%),
+    var(--paper);
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.pagehead::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(700px 420px at 26% 0%, #000 18%, transparent 76%);
+  pointer-events: none;
+}
+
+.pagehead-inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--page);
+  margin: 0 auto;
+}
+
+.pagehead h1 {
+  margin: 0;
+  font-size: clamp(30px, 4.2vw, 50px);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.032em;
+  max-width: 20ch;
+}
+
+.pagehead-sub {
+  max-width: 62ch;
+  margin: 16px 0 0;
+  font-size: var(--t-m);
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
 /* --------------------------------------------------------------------- masthead */
 
 .masthead {
@@ -197,8 +246,21 @@ main {
   padding: 0 var(--gutter);
 }
 
+/* The page head is full-bleed, like the landing hero, so it breaks out of the measure
+   `main` applies and re-applies it to its own inner wrapper. */
+main:has(.pagehead) {
+  max-width: none;
+  padding: 0;
+}
+
+main:has(.pagehead) .sheet {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
 .band {
-  padding: 72px 0;
+  padding: 64px 0;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -1110,4 +1172,12 @@ html.js .reveal.in {
   font-size: var(--t-xs);
   color: var(--faint);
   border-bottom: 1px solid var(--rule);
+}
+
+/* A muted table cell. Not `.mark`, which is `display: inline-block` and pulls a `<td>`
+   out of table layout — that produced stray rules across the "blind to" column. */
+.grid td.dim {
+  color: var(--faint);
+  white-space: normal;
+  max-width: 34ch;
 }

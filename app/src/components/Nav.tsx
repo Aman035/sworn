@@ -36,7 +36,6 @@ const NAV = [
  */
 export function Nav() {
   const pathname = usePathname();
-  const onLanding = pathname === '/' || pathname === '';
 
   const links = NAV.map(([href, label]) => {
     const active = pathname === href || pathname === `${href}/`;
@@ -47,30 +46,13 @@ export function Nav() {
     );
   });
 
-  if (onLanding) {
-    return (
-      <nav className="floatnav" aria-label="Sections">
-        <Link href="/" className="floatnav-mark" aria-label="Sworn, home">
-          <Mark />
-          <span>SWORN</span>
-        </Link>
-        <div className="floatnav-links">{links}</div>
-      </nav>
-    );
-  }
-
   return (
-    <header className="masthead">
-      <div className="masthead-inner">
-        <Link href="/" className="wordmark" aria-label="Sworn, home">
-          <Mark />
-          <span>SWORN</span>
-        </Link>
-        <p className="standfirst">
-          A hook is arbitrary code inside every swap. This is what they actually do.
-        </p>
-        <nav aria-label="Sections">{links}</nav>
-      </div>
-    </header>
+    <nav className="floatnav" aria-label="Sections">
+      <Link href="/" className="floatnav-mark" aria-label="Sworn, home">
+        <Mark />
+        <span>SWORN</span>
+      </Link>
+      <div className="floatnav-links">{links}</div>
+    </nav>
   );
 }
