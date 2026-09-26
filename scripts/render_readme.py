@@ -31,6 +31,8 @@ OUTPUT = ROOT / "README.md"
 # Whitespace-tolerant on purpose: prettier pads `|` inside markdown table cells, turning
 # `{{result:x|int}}` into `{{result:x | int}}`. A stricter pattern silently stopped
 # matching and shipped a README full of raw placeholders, because nothing checked for them.
+TABLE = re.compile(r"\{\{\s*table\s*:\s*([a-z_]+)\s*\}\}")
+
 PLACEHOLDER = re.compile(
     r"\{\{\s*result\s*:\s*([^:{}|]+?)\s*:\s*([^|}]+?)\s*(?:\|\s*([a-z_0-9]+)\s*)?\}\}"
 )
@@ -46,7 +48,9 @@ class RenderError(RuntimeError):
 def _load(filename: str) -> Any:
     path = RESULTS / filename
     if not path.is_file():
-        raise RenderError(f"{filename} does not exist — run the pipeline that produces it")
+        raise RenderError(
+            f"{filename} does not exist — run the pipeline that produces it"
+        )
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -66,7 +70,9 @@ def resolve(document: Any, path: str) -> Any:
             continue
         if isinstance(node, dict):
             if segment not in node:
-                raise RenderError(f"{path}: no field {segment!r}; have {sorted(node)[:8]}")
+                raise RenderError(
+                    f"{path}: no field {segment!r}; have {sorted(node)[:8]}"
+                )
             node = node[segment]
         elif isinstance(node, list) and segment.isdigit():
             node = node[int(segment)]
@@ -104,6 +110,85 @@ def fmt(value: Any, style: str | None) -> str:
     raise RenderError(f"unknown format {style!r}")
 
 
+def _scan(url: str, address: str) -> str:
+    return f"[`{address[:10]}…{address[-6:]}`]({url}/address/{address})"
+
+
+def table_divergent_hooks() -> str:
+    """The hooks measured as taking more than they quoted, named and linked.
+
+    Named on purpose. A claim that "some hooks charge" is unfalsifiable; a claim about
+    `0x1f91c998…` on Base is one a reader can go and check, and one this repo has to be
+    right about.
+    """
+    doc = _load("divergence.json")
+    scores = {h["address"]: h for h in _load("scores.json")["hooks"]}
+    rows = [
+        "| Hook (Base) | Fills | Charged | Over-delivered | Net rate | Median excess | Score |",
+        "| ----------- | ----: | ------: | -------------: | -------: | ------------: | ----: |",
+    ]
+    for h in sorted(
+        (h for h in doc["hooks"] if h["divergent"]),
+        key=lambda h: -h.get("median_charged_excess_bps", 0),
+    ):
+        flags = scores.get(h["address"], {}).get("flags", [])
+        listed = " ✓ hooklist" if "ALLOWLISTED" in flags else ""
+        rows.append(
+            f"| {_scan('https://basescan.org', h['address'])}{listed} "
+            f"| {h['fills']:,} | {h['charged_fills']:,} | {h['overdelivered_fills']:,} "
+            f"| {h['net_charged_rate'] * 100:.0f}% "
+            f"| {h.get('median_charged_excess_bps', 0):,.0f} bps "
+            f"| {scores.get(h['address'], {}).get('score', '—')} |"
+        )
+    return "\n".join(rows)
+
+
+def table_detection() -> str:
+    """Precision and recall per detection method, against settled trades."""
+    doc = _load("precision.json")
+    rows = [
+        "| Method | What it looks at | Precision | Recall |",
+        "| ------ | ---------------- | --------: | -----: |",
+    ]
+    looks_at = {
+        "static": "bytecode contains an environment opcode",
+        "dynamic": "quotes disagree under permuted `eth_call`",
+        "trace": "an environment opcode *executes* while pricing",
+        "union": "any of the above",
+        "settled_trade": "re-quoting real fills against real prior state",
+    }
+    for m in doc["methods"]:
+        name = str(m["method"])
+        rows.append(
+            f"| `{name}` | {looks_at.get(name, '')} "
+            f"| {float(m['precision']):.2f} | {float(m['recall']):.2f} |"
+        )
+    return "\n".join(rows)
+
+
+def table_attribution() -> str:
+    """Which products route users into hooked pools."""
+    doc = _load("attribution.json")
+    rows = [
+        "| Product | Router | Fills | Into hooked pools |",
+        "| ------- | ------ | ----: | ----------------: |",
+    ]
+    for p in doc["products"][:6]:
+        rows.append(
+            f"| {p['product']} | {_scan('https://basescan.org', p['router'])} "
+            f"| {int(p['fills_total']):,} "
+            f"| {float(p['share_of_product_v4_volume']) * 100:.1f}% |"
+        )
+    return "\n".join(rows)
+
+
+TABLES = {
+    "divergent_hooks": table_divergent_hooks,
+    "detection": table_detection,
+    "attribution": table_attribution,
+}
+
+
 def render(template: str) -> tuple[str, int]:
     cache: dict[str, Any] = {}
     count = 0
@@ -116,7 +201,14 @@ def render(template: str) -> tuple[str, int]:
         count += 1
         return fmt(resolve(cache[filename], path), style)
 
-    return PLACEHOLDER.sub(substitute, template), count
+    def substitute_table(match: re.Match[str]) -> str:
+        name = match.group(1)
+        if name not in TABLES:
+            raise RenderError(f"unknown table {name!r}; have {sorted(TABLES)}")
+        return TABLES[name]()
+
+    body = TABLE.sub(substitute_table, template)
+    return PLACEHOLDER.sub(substitute, body), count
 
 
 def main() -> int:

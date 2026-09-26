@@ -24,16 +24,19 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "data" / "results"
 OUT = ROOT / "docs" / "assets"
 
-INK = "#0f1419"
-SLATE = "#171d26"
-RULE = "#232c38"
-BRASS = "#e8b84b"
-CORAL = "#e5644e"
-FAINT = "#5a6675"
-PAPER = "#e8ecf1"
+# Matches the dashboard (app/src/app/globals.css): a cool instrument grey, near-black
+# ink, and one signal colour that means "value a hook took" and nothing else.
+PAPER = "#e8eaec"
+SHEET = "#f6f7f8"
+INK = "#101418"
+INK2 = "#454d55"
+FAINT = "#8b939b"
+RULE = "#d2d7db"
+RULE_HARD = "#b9c0c6"
+SIGNAL = "#e2400a"
 
-MONO = "ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace"
-SANS = "'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+MONO = "ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace"
+SANS = "'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
 
 
 def _load(name: str) -> Any:
@@ -45,7 +48,7 @@ def _load(name: str) -> Any:
 
 def _frame(width: int, height: int, body: str, title: str) -> str:
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="{title}">
-  <rect width="{width}" height="{height}" rx="10" fill="{INK}"/>
+  <rect width="{width}" height="{height}" rx="10" fill="{PAPER}"/>
 {body}
 </svg>
 """
@@ -57,7 +60,7 @@ def _text(
     s: str,
     *,
     size=13,
-    fill=PAPER,
+    fill=INK,
     family=SANS,
     weight=400,
     anchor="start",
@@ -71,7 +74,7 @@ def _text(
     )
 
 
-def _box(x, y, w, h, *, stroke=RULE, fill=SLATE, dash="") -> str:
+def _box(x, y, w, h, *, stroke=RULE, fill=SHEET, dash="") -> str:
     d = f' stroke-dasharray="{dash}"' if dash else ""
     return f'  <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{fill}" stroke="{stroke}"{d}/>'
 
@@ -109,28 +112,26 @@ def attack() -> str:
 
     # left: the simulation
     p.append(_box(28, 84, 300, 176))
-    p.append(_text(48, 112, "eth_call — the quote", size=13, family=MONO, fill=BRASS))
-    p.append(_text(48, 140, "tx.gasprice == 0", size=12.5, family=MONO, fill=PAPER))
+    p.append(_text(48, 112, "eth_call — the quote", size=13, family=MONO, fill=INK))
+    p.append(_text(48, 140, "tx.gasprice == 0", size=12.5, family=MONO, fill=INK))
     p.append(_text(48, 162, "no state is written", size=12.5, family=MONO, fill=FAINT))
-    p.append(_box(48, 182, 260, 56, stroke=BRASS))
+    p.append(_box(48, 182, 260, 56, stroke=INK))
     p.append(
-        _text(
-            68, 208, "beforeSwap  →  honest price", size=12.5, family=MONO, fill=BRASS
-        )
+        _text(68, 208, "beforeSwap  →  honest price", size=12.5, family=MONO, fill=INK)
     )
     p.append(_text(68, 226, "the number the user is shown", size=11.5, fill=FAINT))
 
     # right: the execution
     p.append(_box(372, 84, 300, 176))
     p.append(
-        _text(392, 112, "eth_sendRawTransaction", size=13, family=MONO, fill=CORAL)
+        _text(392, 112, "eth_sendRawTransaction", size=13, family=MONO, fill=SIGNAL)
     )
-    p.append(_text(392, 140, "tx.gasprice > 0", size=12.5, family=MONO, fill=PAPER))
+    p.append(_text(392, 140, "tx.gasprice > 0", size=12.5, family=MONO, fill=INK))
     p.append(_text(392, 162, "state is written", size=12.5, family=MONO, fill=FAINT))
-    p.append(_box(392, 182, 260, 56, stroke=CORAL))
+    p.append(_box(392, 182, 260, 56, stroke=SIGNAL))
     p.append(
         _text(
-            412, 208, "beforeSwap  →  worse price", size=12.5, family=MONO, fill=CORAL
+            412, 208, "beforeSwap  →  worse price", size=12.5, family=MONO, fill=SIGNAL
         )
     )
     p.append(_text(412, 226, "the number the user receives", size=11.5, fill=FAINT))
@@ -180,30 +181,30 @@ def mechanism() -> str:
     )
 
     steps = [
-        ("1", "unlock", "PoolManager hands control back to the router", BRASS),
+        ("1", "unlock", "PoolManager hands control back to the router", INK),
         (
             "2",
             "probe each candidate",
             "run the real route, then revert — state and transient storage roll back",
-            BRASS,
+            INK,
         ),
         (
             "3",
             "select",
             "keep the best probed delta and the route that produced it",
-            BRASS,
+            INK,
         ),
         (
             "4",
             "execute",
             "run that route for real, through the same entry point",
-            BRASS,
+            INK,
         ),
         (
             "5",
             "assert",
             "executedDelta == probed[chosen], or the whole transaction reverts",
-            CORAL,
+            SIGNAL,
         ),
     ]
     y = 88
@@ -225,7 +226,7 @@ def mechanism() -> str:
             y + 18,
             "Step 5 is the guarantee. A hook that quotes one price and executes another",
             size=12.5,
-            fill=PAPER,
+            fill=INK,
         )
     )
     p.append(
@@ -234,7 +235,7 @@ def mechanism() -> str:
             y + 38,
             "makes those two deltas differ, and the trade does not happen at all.",
             size=12.5,
-            fill=PAPER,
+            fill=INK,
         )
     )
     return _frame(
@@ -252,7 +253,10 @@ def precision_chart() -> str:
     if not methods:
         raise SystemExit("precision.json has no methods")
 
-    row_h, top, left, bar_w = 64, 116, 232, 300
+    row_h, top, left, bar_w = 64, 116, 190, 170
+    # Distance from the precision track to the recall track. Both tracks plus their
+    # value labels have to finish inside the 700px frame; they did not before.
+    gap = 250
     height = top + row_h * len(methods) + 52
     p: list[str] = []
     p.append(
@@ -278,7 +282,7 @@ def precision_chart() -> str:
     )
     p.append(
         _text(
-            left + bar_w + 56,
+            left + gap,
             96,
             "recall",
             size=11,
@@ -296,23 +300,24 @@ def precision_chart() -> str:
         p.append(
             f'  <line x1="28" y1="{y - 14}" x2="672" y2="{y - 14}" stroke="{RULE}"/>'
         )
-        p.append(_text(28, y + 8, name, size=13.5, family=MONO, fill=PAPER))
+        p.append(_text(28, y + 8, name, size=13.5, family=MONO, fill=INK))
         note = str(m.get("note", "") or "")
         if note:
             p.append(_text(28, y + 26, note[:40], size=11, fill=FAINT))
 
-        for offset, value in ((0, precision), (bar_w + 56, recall)):
+        for offset, value in ((0, precision), (gap, recall)):
             x = left + offset
             p.append(
-                f'  <rect x="{x}" y="{y - 6}" width="{bar_w - 60}" height="10" rx="5" fill="{SLATE}"/>'
+                f'  <rect x="{x}" y="{y - 6}" width="{bar_w}" height="10" rx="5" '
+                f'fill="{SHEET}" stroke="{RULE}"/>'
             )
             if value is None:
                 p.append(
                     _text(x, y + 22, "not measurable", size=11, family=MONO, fill=FAINT)
                 )
                 continue
-            w = max(2.0, float(value) * (bar_w - 60))
-            color = CORAL if float(value) < 0.5 else BRASS
+            w = max(2.0, float(value) * bar_w)
+            color = SIGNAL if float(value) < 0.5 else INK
             p.append(
                 f'  <rect x="{x}" y="{y - 6}" width="{w:.1f}" height="10" rx="5" fill="{color}"/>'
             )
@@ -373,18 +378,17 @@ def census_chart() -> str:
     for c in sorted(chains, key=lambda c: -int(c["pools_total"])):
         total = int(c["pools_total"])
         hooked = int(c["hooked_pools"])
-        w = max(3.0, total / biggest * 420)
-        hw = max(1.0, hooked / biggest * 420)
+        # 300px of track, ending well clear of the count that follows it.
+        w = max(3.0, total / biggest * 300)
+        hw = max(1.0, hooked / biggest * 300)
         p.append(
-            _text(
-                28, y + 12, str(c.get("chain", "?")), size=13, family=MONO, fill=PAPER
-            )
+            _text(28, y + 12, str(c.get("chain", "?")), size=13, family=MONO, fill=INK)
         )
         p.append(
-            f'  <rect x="130" y="{y}" width="{w:.1f}" height="16" rx="3" fill="{SLATE}" stroke="{RULE}"/>'
+            f'  <rect x="130" y="{y}" width="{w:.1f}" height="16" rx="3" fill="{SHEET}" stroke="{RULE}"/>'
         )
         p.append(
-            f'  <rect x="130" y="{y}" width="{hw:.1f}" height="16" rx="3" fill="{BRASS}"/>'
+            f'  <rect x="130" y="{y}" width="{hw:.1f}" height="16" rx="3" fill="{INK}"/>'
         )
         share = (hooked / total * 100) if total else 0.0
         p.append(
@@ -394,7 +398,7 @@ def census_chart() -> str:
                 f"{total:,}",
                 size=12,
                 family=MONO,
-                fill=PAPER,
+                fill=INK,
                 anchor="end",
             )
         )
@@ -405,7 +409,7 @@ def census_chart() -> str:
                 f"{share:.1f}% hooked",
                 size=12,
                 family=MONO,
-                fill=BRASS,
+                fill=INK,
                 anchor="end",
             )
         )
@@ -418,10 +422,10 @@ def census_chart() -> str:
         _text(
             562,
             y + 26,
-            f"{int(totals.get('pools_total', 0)):,}",
+            f"{totals['pools_total']:,}",
             size=13,
             family=MONO,
-            fill=PAPER,
+            fill=INK,
             anchor="end",
         )
     )
@@ -429,10 +433,12 @@ def census_chart() -> str:
         _text(
             672,
             y + 26,
-            f"{int(totals.get('pools_hooked', 0)):,} hooked",
+            # A share, like every row above it: the absolute figure is eight digits wide
+            # and ran straight into the pool count beside it.
+            f"{totals['hooked_pools'] / totals['pools_total'] * 100:.1f}% hooked",
             size=13,
             family=MONO,
-            fill=BRASS,
+            fill=INK,
             anchor="end",
         )
     )
@@ -441,9 +447,56 @@ def census_chart() -> str:
     )
 
 
+def banner() -> str:
+    """The README's opening image: the wordmark, the claim, and the one number."""
+    doc = _load("divergence.json")
+    p: list[str] = []
+    w, h = 1200, 300
+
+    p.append(f'  <rect width="{w}" height="{h}" fill="{PAPER}"/>')
+    # The same bled watermark the dashboard uses, so the two read as one product.
+    p.append(
+        f'  <text x="700" y="196" font-family="{SANS}" font-size="150" font-weight="700" '
+        f'letter-spacing="-7" fill="none" stroke="{RULE_HARD}" stroke-width="1.4">SWORN</text>'
+    )
+    p.append(
+        f'  <text x="64" y="150" font-family="{SANS}" font-size="118" font-weight="700" '
+        f'letter-spacing="-5.5" fill="{INK}">SWORN</text>'
+    )
+    p.append(_text(68, 196, "Execution integrity for Uniswap v4.", size=21, fill=INK2))
+    p.append(
+        _text(
+            68,
+            228,
+            "A hook can quote one price and charge another. This makes it unprofitable.",
+            size=17,
+            fill=FAINT,
+        )
+    )
+
+    n = int(doc["totals"]["divergent_hooks"])
+    eligible = int(doc["totals"]["eligible_hooks"])
+    p.append(f'  <line x1="64" y1="256" x2="{w - 64}" y2="256" stroke="{RULE_HARD}"/>')
+    p.append(
+        _text(
+            68,
+            282,
+            f"{n} of {eligible} measurable hooks on Base charge more than they quote",
+            size=15,
+            family=MONO,
+            fill=SIGNAL,
+        )
+    )
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="Sworn: execution integrity for Uniswap v4">
+{chr(10).join(p)}
+</svg>
+"""
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     drawings = {
+        "banner.svg": banner,
         "attack.svg": attack,
         "mechanism.svg": mechanism,
         "precision.svg": precision_chart,
