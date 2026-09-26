@@ -41,13 +41,19 @@ step "graphics are generated, not drawn by hand"
 git diff --quiet -- docs/assets \
   || fail "docs/assets differs from its render; run 'make readme' and commit"
 for asset in banner.svg logo.svg logo-seal.svg logo-wordmark.svg \
-             attack.svg mechanism.svg precision.svg census.svg; do
+             attack.svg mechanism.svg routing.svg precision.svg census.svg; do
   [ -f "docs/assets/$asset" ] || fail "docs/assets/$asset is missing"
 done
 # Screen captures are produced by scripts/capture_dashboard.mjs, not the SVG renderer, so
 # they are checked for existence only.
-for shot in landing.png landing-value.png dashboard-evidence.png; do
+for shot in landing.png landing-value.png dashboard-evidence.png \
+            submission-1-problem.png submission-2-catch.png submission-3-solution.png \
+            submission-4-defence.png submission-5-hooks.png submission-6-attribution.png; do
   [ -f "docs/assets/$shot" ] || fail "docs/assets/$shot is missing; run node scripts/capture_dashboard.mjs"
+done
+# PNG copies of the brand assets, for submission forms that will not take an SVG.
+for png in banner.png logo.png logo-wordmark.png routing.png; do
+  [ -f "docs/assets/$png" ] || fail "docs/assets/$png is missing; run node scripts/rasterise.mjs"
 done
 ok "diagrams and charts rebuild to the committed bytes"
 

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 972 514" width="972" height="514" role="img" aria-label="How routing works today, and how it works with Sworn">
+  <rect width="972" height="514" rx="10" fill="#0d1014"/>
+  <defs>
+    <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6c7680"/>
+    </marker>
+  </defs>
+  <text x="28" y="36" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="600" fill="#f2f4f6" text-anchor="start">Where the quote happens</text>
+  <text x="28" y="58" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12.5" font-weight="400" fill="#6c7680" text-anchor="start">A quote and a trade are two different calls today. Sworn makes them one.</text>
+  <text x="28" y="92" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="14" font-weight="600" fill="#6c7680" text-anchor="start">Today</text>
+  <text x="28" y="110" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">quote off-chain, execute on-chain</text>
+  <text x="492" y="92" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="14" font-weight="600" fill="#f04a10" text-anchor="start">With Sworn</text>
+  <text x="492" y="110" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">quote and execute in one transaction</text>
+  <rect x="28" y="132" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="44" y="152" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">eth_call to the hook</text>
+  <text x="44" y="168" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">the router asks for a price</text>
+  <line x1="238.0" y1="181" x2="238.0" y2="196" stroke="#6c7680" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="28" y="200" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="44" y="220" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">hook answers honestly</text>
+  <text x="44" y="236" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">quotes 100, because nothing is at stake</text>
+  <line x1="238.0" y1="249" x2="238.0" y2="264" stroke="#6c7680" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="28" y="268" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="44" y="288" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">router builds the trade</text>
+  <text x="44" y="304" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">on a promise it cannot enforce</text>
+  <line x1="28" y1="328" x2="448" y2="328" stroke="#f04a10" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text x="448" y="323" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="10.5" font-weight="400" fill="#f04a10" text-anchor="end">transaction boundary</text>
+  <rect x="28" y="336" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="44" y="356" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">the transaction lands</text>
+  <text x="44" y="372" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">different tx.gasprice, different tx.origin</text>
+  <line x1="238.0" y1="385" x2="238.0" y2="400" stroke="#6c7680" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="28" y="404" width="420" height="46" rx="6" fill="#141a21" stroke="#2c343e"/>
+  <text x="44" y="424" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f04a10" text-anchor="start">hook charges</text>
+  <text x="44" y="440" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">delivers 82 and keeps the difference</text>
+  <rect x="492" y="132" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="508" y="152" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">unlock</text>
+  <text x="508" y="168" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">PoolManager hands control to the router</text>
+  <line x1="702.0" y1="181" x2="702.0" y2="196" stroke="#6c7680" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="492" y="200" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="508" y="220" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">probe every candidate</text>
+  <text x="508" y="236" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">run each route for real, then revert</text>
+  <line x1="702.0" y1="249" x2="702.0" y2="264" stroke="#6c7680" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="492" y="268" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="508" y="288" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">select</text>
+  <text x="508" y="304" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">keep the best probed delta</text>
+  <line x1="702.0" y1="317" x2="702.0" y2="332" stroke="#6c7680" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="492" y="336" width="420" height="46" rx="6" fill="#141a21" stroke="#1e252e"/>
+  <text x="508" y="356" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f2f4f6" text-anchor="start">execute the winner</text>
+  <text x="508" y="372" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">same entry point, same transaction</text>
+  <line x1="702.0" y1="385" x2="702.0" y2="400" stroke="#6c7680" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="492" y="404" width="420" height="46" rx="6" fill="#141a21" stroke="#2c343e"/>
+  <text x="508" y="424" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="12.5" font-weight="400" fill="#f04a10" text-anchor="start">assert executed == probed</text>
+  <text x="508" y="440" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#6c7680" text-anchor="start">or the whole transaction reverts</text>
+  <path d="M921 126 H928 V456 H921" fill="none" stroke="#f04a10" stroke-width="1.2"/>
+  <text x="945" y="291.0" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="11" fill="#f04a10" text-anchor="middle" transform="rotate(90 945 291.0)">one transaction</text>
+  <text x="28" y="488" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#f2f4f6" text-anchor="start">The hook answered two callers. Nothing here can tell.</text>
+  <text x="492" y="488" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="400" fill="#f2f4f6" text-anchor="start">The hook answered one caller, once. Lying costs it the trade.</text>
+</svg>

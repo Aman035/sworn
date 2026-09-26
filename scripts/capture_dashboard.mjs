@@ -33,6 +33,24 @@ const SHOTS = [
   { path: '/', file: 'landing.png', clipHeight: 1560 },
   { path: '/', file: 'landing-value.png', section: 'What the guarantee is worth' },
   { path: '/evidence/', file: 'dashboard-evidence.png', clipHeight: 1300 },
+
+  // The submission set, in the order the story is told: the problem, the router catching
+  // a real hook, what it does instead, why that cannot be gamed, and the evidence behind
+  // it. Numbered so they stay in order in a file picker.
+  { path: '/', file: 'submission-1-problem.png', clipHeight: 1100 },
+  { path: '/', file: 'submission-2-catch.png', section: 'The same swap, priced two ways' },
+  { path: '/', file: 'submission-3-solution.png', section: 'Ask once.' },
+  {
+    path: '/',
+    file: 'submission-4-defence.png',
+    section: 'Why a hook cannot tell it is being probed',
+  },
+  {
+    path: '/evidence/',
+    file: 'submission-5-hooks.png',
+    section: 'The hooks that charge more than they quote',
+  },
+  { path: '/evidence/', file: 'submission-6-attribution.png', section: 'Everyone is routing into them' },
 ];
 
 async function waitForServer(url, attempts = 40) {

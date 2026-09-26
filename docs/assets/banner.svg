@@ -1,18 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Sworn: execution integrity for Uniswap v4">
-  <rect width="1200" height="320" fill="#0d1014"/>
-  <g transform="translate(64 44)">
-    <rect width="72" height="72" rx="18" fill="#f4f6f7"/>
-  <path d="M59.62 36.00 A23.62 23.62 0 1 1 47.25 15.30 L59.62 22.50 Z"
-        fill="none" stroke="#101418" stroke-width="7.42" stroke-linejoin="round"/>
-  <g stroke="#101418" stroke-width="7.42" stroke-linecap="round">
-    <path d="M24.19 30.38 H47.81"/>
-    <path d="M24.19 42.75 H47.81"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="Sworn: a Uniswap v4 router that makes the quote and the trade the same transaction">
+  <rect width="1280" height="640" fill="#0d1014"/>
+  <line x1="160" y1="0" x2="160" y2="640" stroke="#1e252e"/>
+  <line x1="320" y1="0" x2="320" y2="640" stroke="#1e252e"/>
+  <line x1="480" y1="0" x2="480" y2="640" stroke="#1e252e"/>
+  <line x1="640" y1="0" x2="640" y2="640" stroke="#1e252e"/>
+  <line x1="800" y1="0" x2="800" y2="640" stroke="#1e252e"/>
+  <line x1="960" y1="0" x2="960" y2="640" stroke="#1e252e"/>
+  <line x1="1120" y1="0" x2="1120" y2="640" stroke="#1e252e"/>
+  <line x1="0" y1="160" x2="1280" y2="160" stroke="#1e252e"/>
+  <line x1="0" y1="320" x2="1280" y2="320" stroke="#1e252e"/>
+  <line x1="0" y1="480" x2="1280" y2="480" stroke="#1e252e"/>
+  <g transform="translate(80 72)">
+    <rect width="80" height="80" rx="20" fill="#f4f6f7"/>
+  <path d="M66.25 40.00 A26.25 26.25 0 1 1 52.50 17.00 L66.25 25.00 Z"
+        fill="none" stroke="#101418" stroke-width="8.25" stroke-linejoin="round"/>
+  <g stroke="#101418" stroke-width="8.25" stroke-linecap="round">
+    <path d="M26.88 33.75 H53.12"/>
+    <path d="M26.88 47.50 H53.12"/>
   </g>
   </g>
-  <text x="152" y="98" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="52" font-weight="700" letter-spacing="-2" fill="#f2f4f6">SWORN</text>
-  <text x="66" y="168" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="23" font-weight="400" fill="#f2f4f6" text-anchor="start">Execution integrity for Uniswap v4.</text>
-  <text x="66" y="202" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="400" fill="#9ba5af" text-anchor="start">A hook can quote one price and charge another. This makes it unprofitable.</text>
-  <line x1="64" y1="238" x2="1136" y2="238" stroke="#2c343e"/>
-  <text x="66" y="270" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="15" font-weight="400" fill="#f04a10" text-anchor="start">4 of 25 measurable hooks on Base charge more than they quote</text>
-  <text x="66" y="294" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="13" font-weight="400" fill="#6c7680" text-anchor="start">every figure reproducible from a hashed snapshot</text>
+  <text x="184" y="128" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="54" font-weight="700" letter-spacing="-2" fill="#f2f4f6">SWORN</text>
+  <text x="80" y="300" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="50" font-weight="700" fill="#f2f4f6" text-anchor="start" letter-spacing="-1.6">A hook can quote one price</text>
+  <text x="80" y="356" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="50" font-weight="700" fill="#f2f4f6" text-anchor="start" letter-spacing="-1.6">and charge another.</text>
+  <text x="80" y="410" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="19" font-weight="400" fill="#9ba5af" text-anchor="start">Sworn is a Uniswap v4 router that makes</text>
+  <text x="80" y="438" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="19" font-weight="400" fill="#9ba5af" text-anchor="start">the quote and the trade one transaction.</text>
+  <line x1="768" y1="72" x2="768" y2="520" stroke="#2c343e"/>
+  <text x="812" y="168" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="38" font-weight="700" fill="#f04a10" text-anchor="start" letter-spacing="-0.8">4 of 25</text>
+  <text x="812" y="194" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" font-weight="400" fill="#9ba5af" text-anchor="start">measurable hooks on Base charge</text>
+  <text x="812" y="212" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" font-weight="400" fill="#9ba5af" text-anchor="start">more than they quote</text>
+  <text x="812" y="286" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="38" font-weight="700" fill="#f04a10" text-anchor="start" letter-spacing="-0.8">849,451</text>
+  <text x="812" y="312" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" font-weight="400" fill="#9ba5af" text-anchor="start">swaps routed into those hooks,</text>
+  <text x="812" y="330" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" font-weight="400" fill="#9ba5af" text-anchor="start">through every major aggregator</text>
+  <text x="812" y="404" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="38" font-weight="700" fill="#f04a10" text-anchor="start" letter-spacing="-0.8">707 bps</text>
+  <text x="812" y="430" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" font-weight="400" fill="#9ba5af" text-anchor="start">caught on a live Base hook, and</text>
+  <text x="812" y="448" font-family="'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" font-weight="400" fill="#9ba5af" text-anchor="start">recovered by routing around it</text>
+  <line x1="80" y1="520" x2="1200" y2="520" stroke="#2c343e"/>
+  <text x="80" y="560" font-family="ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace" font-size="14" font-weight="400" fill="#6c7680" text-anchor="start">every figure reproducible from a hashed snapshot  ·  github.com/Aman035/sworn</text>
 </svg>

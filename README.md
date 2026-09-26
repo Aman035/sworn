@@ -134,7 +134,11 @@ if (execIn != amountsIn[chosen] || execOut != amountsOut[chosen]) {
 Both sides are checked, so a hook cannot take more input either. That is the entire
 product. Everything else exists to make those four lines meaningful.
 
-![How SwornRouter probes candidates inside the transaction](docs/assets/mechanism.svg)
+![How routing works today, and how it works with Sworn](docs/assets/routing.svg)
+
+The left column is every router today: the quote and the trade sit on opposite sides of a
+transaction boundary, and the hook answers differently on each side. The right column
+never crosses one.
 
 ### Why a hook cannot tell it is being probed
 

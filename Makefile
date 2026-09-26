@@ -78,6 +78,12 @@ readme: ## Render README.md and its graphics from data/results
 	$(PY) scripts/verify_readme_numbers.py
 .PHONY: readme
 
+assets: ## Re-capture screenshots and rasterise the brand assets to PNG
+	$(PY) scripts/render_graphics.py
+	node scripts/capture_dashboard.mjs
+	node scripts/rasterise.mjs
+.PHONY: assets
+
 clean: ## Remove build output (keeps .venv and node_modules)
 	cd contracts && forge clean
 	rm -rf $(addsuffix /dist,index probe attestor sdk app) app/.next

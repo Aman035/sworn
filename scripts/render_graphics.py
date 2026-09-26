@@ -252,6 +252,127 @@ def mechanism() -> str:
     )
 
 
+def routing() -> str:
+    """Two lanes, side by side: how a router works today, and how Sworn works.
+
+    The whole argument is a change in *when* the quote happens, which is hard to see in
+    prose and obvious once the two call sequences sit next to each other. The left lane
+    crosses a boundary between two transactions, and the hook answers differently on
+    either side of it. The right lane never leaves one transaction.
+    """
+    p: list[str] = [MARKER]
+    lane = 420
+    left = 28
+    right = left + lane + 44
+    w = right + lane + 60
+    y0, row, box = 132, 68, 46
+
+    p.append(_text(left, 36, "Where the quote happens", size=17, weight=600))
+    p.append(
+        _text(
+            left,
+            58,
+            "A quote and a trade are two different calls today. Sworn makes them one.",
+            size=12.5,
+            fill=FAINT,
+        )
+    )
+
+    for x, title, sub, colour in (
+        (left, "Today", "quote off-chain, execute on-chain", FAINT),
+        (right, "With Sworn", "quote and execute in one transaction", SIGNAL),
+    ):
+        p.append(_text(x, 92, title, size=14, family=MONO, fill=colour, weight=600))
+        p.append(_text(x, 110, sub, size=11.5, fill=FAINT))
+
+    # (label, caption, is the step where the harm lands)
+    today = [
+        ("eth_call to the hook", "the router asks for a price", False),
+        ("hook answers honestly", "quotes 100, because nothing is at stake", False),
+        ("router builds the trade", "on a promise it cannot enforce", False),
+        ("the transaction lands", "different tx.gasprice, different tx.origin", False),
+        ("hook charges", "delivers 82 and keeps the difference", True),
+    ]
+    sworn = [
+        ("unlock", "PoolManager hands control to the router", False),
+        ("probe every candidate", "run each route for real, then revert", False),
+        ("select", "keep the best probed delta", False),
+        ("execute the winner", "same entry point, same transaction", False),
+        ("assert executed == probed", "or the whole transaction reverts", True),
+    ]
+
+    # The left lane crosses a transaction boundary after step 3; that gap carries the
+    # dashed rule instead of an arrow, because the boundary *is* the transition.
+    BOUNDARY_AFTER = 2
+
+    for x, steps in ((left, today), (right, sworn)):
+        for i, (name, why, terminal) in enumerate(steps):
+            y = y0 + i * row
+            colour = SIGNAL if terminal else INK
+            p.append(_box(x, y, lane, box, stroke=RULE_HARD if terminal else RULE))
+            p.append(_text(x + 16, y + 20, name, size=12.5, family=MONO, fill=colour))
+            p.append(_text(x + 16, y + 36, why, size=11.5, fill=FAINT))
+            if i == len(steps) - 1:
+                continue
+            if steps is today and i == BOUNDARY_AFTER:
+                rule = y + box + 14
+                p.append(
+                    f'  <line x1="{x}" y1="{rule}" x2="{x + lane}" y2="{rule}" '
+                    f'stroke="{SIGNAL}" stroke-width="1.2" stroke-dasharray="5 4"/>'
+                )
+                p.append(
+                    _text(
+                        x + lane,
+                        rule - 5,
+                        "transaction boundary",
+                        size=10.5,
+                        family=MONO,
+                        fill=SIGNAL,
+                        anchor="end",
+                    )
+                )
+            else:
+                p.append(_arrow(x + lane / 2, y + box + 3, x + lane / 2, y + row - 4))
+
+    # Everything in the right lane happens inside one transaction. Say so with a bracket.
+    top = y0 - 6
+    bottom = y0 + (len(sworn) - 1) * row + box + 6
+    bx = right + lane + 16
+    mid = (top + bottom) / 2
+    p.append(
+        f'  <path d="M{bx - 7} {top} H{bx} V{bottom} H{bx - 7}" fill="none" '
+        f'stroke="{SIGNAL}" stroke-width="1.2"/>'
+    )
+    p.append(
+        f'  <text x="{bx + 17}" y="{mid}" font-family="{MONO}" font-size="11" '
+        f'fill="{SIGNAL}" text-anchor="middle" '
+        f'transform="rotate(90 {bx + 17} {mid})">one transaction</text>'
+    )
+
+    verdict = bottom + 32
+    p.append(
+        _text(
+            left,
+            verdict,
+            "The hook answered two callers. Nothing here can tell.",
+            size=12,
+            fill=INK,
+        )
+    )
+    p.append(
+        _text(
+            right,
+            verdict,
+            "The hook answered one caller, once. Lying costs it the trade.",
+            size=12,
+            fill=INK,
+        )
+    )
+    return _frame(
+        w, verdict + 26, "\n".join(p), "How routing works today, and how it works with Sworn"
+    )
+
+
 def precision_chart() -> str:
     """Precision and recall per detection method, from precision.json."""
     doc = _load("precision.json")
@@ -529,60 +650,91 @@ def logo_wordmark() -> str:
 
 
 def banner() -> str:
-    """The README's opening image: the lockup, the claim, and the one number."""
-    doc = _load("divergence.json")
-    w, h = 1200, 320
+    """The cover image: the lockup and the claim on the left, the evidence on the right.
+
+    1280x640 on purpose. That is GitHub's social-preview size and the 2:1 most submission
+    forms crop to, so the image is never letterboxed or cropped through the text. Two
+    columns, because at 2:1 a single left-aligned block leaves half the frame empty.
+    """
+    div = _load("divergence.json")
+    attrib = _load("attribution.json")
+    caught = _load("caught.json")
+
+    w, h = 1280, 640
+    m = 80
+    col = 812  # where the evidence column starts
     p: list[str] = [f'  <rect width="{w}" height="{h}" fill="{PAPER}"/>']
 
-    # No watermark. A cropped glyph at 7% on a near-black ground resolved into stray
-    # rectangles rather than into the mark; the lockup carries the identity on its own.
+    # The same faint rule grid the site uses behind its hero.
+    for gx in range(160, w, 160):
+        p.append(f'  <line x1="{gx}" y1="0" x2="{gx}" y2="{h}" stroke="{RULE}"/>')
+    for gy in range(160, h, 160):
+        p.append(f'  <line x1="0" y1="{gy}" x2="{w}" y2="{gy}" stroke="{RULE}"/>')
 
-    # The lockup.
-    p.append('  <g transform="translate(64 44)">')
-    p.append(f'    <rect width="72" height="72" rx="18" fill="{LOGO_LIGHT}"/>')
-    p.append(_mark(size=72, ink=LOGO_DARK))
+    # Lockup.
+    p.append(f'  <g transform="translate({m} 72)">')
+    p.append(f'    <rect width="80" height="80" rx="20" fill="{LOGO_LIGHT}"/>')
+    p.append(_mark(size=80, ink=LOGO_DARK))
     p.append("  </g>")
     p.append(
-        f'  <text x="152" y="98" font-family="{SANS}" font-size="52" font-weight="700" '
-        f'letter-spacing="-2" fill="{INK}">SWORN</text>'
+        f'  <text x="{m + 104}" y="128" font-family="{SANS}" font-size="54" '
+        f'font-weight="700" letter-spacing="-2" fill="{INK}">SWORN</text>'
     )
 
-    p.append(_text(66, 168, "Execution integrity for Uniswap v4.", size=23, fill=INK))
+    # Claim.
+    p.append(_text(m, 300, "A hook can quote one price", size=50, weight=700, spacing=-1.6))
+    p.append(_text(m, 356, "and charge another.", size=50, weight=700, spacing=-1.6))
     p.append(
         _text(
-            66,
-            202,
-            "A hook can quote one price and charge another. This makes it unprofitable.",
-            size=17,
+            m,
+            410,
+            "Sworn is a Uniswap v4 router that makes",
+            size=19,
             fill=INK2,
         )
     )
+    p.append(_text(m, 438, "the quote and the trade one transaction.", size=19, fill=INK2))
 
-    p.append(f'  <line x1="64" y1="238" x2="{w - 64}" y2="238" stroke="{RULE_HARD}"/>')
-    n = int(doc["totals"]["divergent_hooks"])
-    eligible = int(doc["totals"]["eligible_hooks"])
+    # Evidence column.
+    p.append(f'  <line x1="{col - 44}" y1="72" x2="{col - 44}" y2="520" stroke="{RULE_HARD}"/>')
+    into = sum(int(x["fills_into_divergent"]) for x in attrib["products"])
+    stats = [
+        (
+            f'{int(div["totals"]["divergent_hooks"])} of {int(div["totals"]["eligible_hooks"])}',
+            "measurable hooks on Base charge",
+            "more than they quote",
+        ),
+        (
+            f"{into:,}",
+            "swaps routed into those hooks,",
+            "through every major aggregator",
+        ),
+        (
+            f'{int(caught["observed"]["charged_extra_bps"])} bps',
+            "caught on a live Base hook, and",
+            "recovered by routing around it",
+        ),
+    ]
+    y = 168
+    for figure, line1, line2 in stats:
+        p.append(_text(col, y, figure, size=38, weight=700, fill=SIGNAL, spacing=-0.8))
+        p.append(_text(col, y + 26, line1, size=13, fill=INK2))
+        p.append(_text(col, y + 44, line2, size=13, fill=INK2))
+        y += 118
+
+    p.append(f'  <line x1="{m}" y1="520" x2="{w - m}" y2="520" stroke="{RULE_HARD}"/>')
     p.append(
         _text(
-            66,
-            270,
-            f"{n} of {eligible} measurable hooks on Base charge more than they quote",
-            size=15,
-            family=MONO,
-            fill=SIGNAL,
-        )
-    )
-    p.append(
-        _text(
-            66,
-            294,
-            "every figure reproducible from a hashed snapshot",
-            size=13,
+            m,
+            560,
+            "every figure reproducible from a hashed snapshot  ·  github.com/Aman035/sworn",
+            size=14,
             family=MONO,
             fill=FAINT,
         )
     )
 
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="Sworn: execution integrity for Uniswap v4">
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="Sworn: a Uniswap v4 router that makes the quote and the trade the same transaction">
 {chr(10).join(p)}
 </svg>
 """
@@ -596,6 +748,7 @@ def main() -> int:
         "logo-seal.svg": logo_seal,
         "logo-wordmark.svg": logo_wordmark,
         "banner.svg": banner,
+        "routing.svg": routing,
         "attack.svg": attack,
         "mechanism.svg": mechanism,
         "precision.svg": precision_chart,
