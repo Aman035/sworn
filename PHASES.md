@@ -26,3 +26,4 @@ Phase definitions live in `SWORN_PLAN.md`; per-phase notes in `docs/phases/PHASE
 | 4 | DONE | 2026-09-26T00:30:40Z | `d5720c5-dirty` | `make phase-4` — 4 checks ok | [gate log](docs/phases/gate-logs/phase-4.log), [notes](docs/phases/PHASE-4.md) |
 | 7 | DONE | 2026-09-26T00:37:27Z | `90419a6-dirty` | `make phase-7` — 8 checks ok | [gate log](docs/phases/gate-logs/phase-7.log), [notes](docs/phases/PHASE-7.md) |
 | 10 | DONE | 2026-09-26T01:33:28Z | `9c556d3-dirty` | `make phase-10` — 11 checks ok | [gate log](docs/phases/gate-logs/phase-10.log), [notes](docs/phases/PHASE-10.md) |
+| 10 | DONE | 2026-09-26T02:14:21Z | `5195fce-dirty` | `make phase-10` — 11 checks ok | [gate log](docs/phases/gate-logs/phase-10.log), [notes](docs/phases/PHASE-10.md) |
