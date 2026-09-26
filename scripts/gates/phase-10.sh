@@ -8,11 +8,17 @@ PY="$(venv_python)"
 step "README renders from the template"
 [ -f README.template.md ] || fail "README.template.md is missing"
 "$PY" scripts/render_readme.py | sed 's/^/    /' || fail "render failed"
-# The rendered file is then formatted, exactly as `make readme` does it, so that the drift
-# check below compares like with like rather than flagging prettier's own output.
-npx --yes prettier --write README.md README.template.md >/dev/null 2>&1 \
-  || fail "prettier failed on the rendered README"
 ok "every placeholder resolved against data/results"
+
+step "no placeholder sits inside a markdown table"
+# prettier aligns table columns against the *placeholder* text, which is far longer than
+# the number that replaces it. That produced misaligned tables, `|` padding that broke the
+# placeholder pattern outright, and escaped `\*\*` in the published README. Both files are
+# in .prettierignore now; this keeps the shape that made them safe to hand-wrap.
+if grep -nE '^\|.*\{\{\s*result' README.template.md; then
+  fail "move these placeholders out of the table; a formatter will mangle them"
+fi
+ok "placeholders live in prose and lists only"
 
 step "no number in the README was typed by hand"
 # The whole point: a figure with no provenance is a claim about mainnet that nothing can

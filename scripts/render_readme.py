@@ -28,7 +28,12 @@ RESULTS = ROOT / "data" / "results"
 TEMPLATE = ROOT / "README.template.md"
 OUTPUT = ROOT / "README.md"
 
-PLACEHOLDER = re.compile(r"\{\{result:([^:]+):([^|}]+)(?:\|([a-z_]+))?\}\}")
+# Whitespace-tolerant on purpose: prettier pads `|` inside markdown table cells, turning
+# `{{result:x|int}}` into `{{result:x | int}}`. A stricter pattern silently stopped
+# matching and shipped a README full of raw placeholders, because nothing checked for them.
+PLACEHOLDER = re.compile(
+    r"\{\{\s*result\s*:\s*([^:{}|]+?)\s*:\s*([^|}]+?)\s*(?:\|\s*([a-z_0-9]+)\s*)?\}\}"
+)
 
 # Selector inside a list: `chains[chain=base]`
 INDEXED = re.compile(r"^([A-Za-z_][\w]*)\[([\w]+)=([^\]]+)\]$")

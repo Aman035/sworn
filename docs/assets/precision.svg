@@ -39,10 +39,10 @@
   <line x1="28" y1="358" x2="672" y2="358" stroke="#232c38"/>
   <text x="28" y="380" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="13.5" font-weight="400" fill="#e8ecf1" text-anchor="start">settled_trade</text>
   <rect x="232" y="366" width="240" height="10" rx="5" fill="#171d26"/>
-  <rect x="232" y="366" width="2.0" height="10" rx="5" fill="#e5644e"/>
-  <text x="480" y="376" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e5644e" text-anchor="start">0%</text>
+  <rect x="232" y="366" width="240.0" height="10" rx="5" fill="#e8b84b"/>
+  <text x="480" y="376" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="start">100%</text>
   <rect x="588" y="366" width="240" height="10" rx="5" fill="#171d26"/>
-  <rect x="588" y="366" width="2.0" height="10" rx="5" fill="#e5644e"/>
-  <text x="836" y="376" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e5644e" text-anchor="start">0%</text>
+  <rect x="588" y="366" width="240.0" height="10" rx="5" fill="#e8b84b"/>
+  <text x="836" y="376" font-family="ui-monospace,'SF Mono','IBM Plex Mono',Menlo,monospace" font-size="12" font-weight="400" fill="#e8b84b" text-anchor="start">100%</text>
   <text x="28" y="468" font-family="'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11.5" font-weight="400" fill="#5a6675" text-anchor="start">Ground truth: phase-3 divergent (settled trades)</text>
 </svg>

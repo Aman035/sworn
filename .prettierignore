@@ -9,3 +9,11 @@ dist/
 PHASES.md
 docs/phases/gate-logs/
 app/.next/
+
+# README.md is generated from README.template.md, and prettier's table alignment and
+# prose wrapping are both computed against the *placeholder* text, which is far longer
+# than the number that replaces it. That produced misaligned tables, `|` padding that
+# broke the placeholder pattern outright, and escaped `\*\*` in the output. Both files
+# are wrapped by hand instead.
+README.md
+README.template.md

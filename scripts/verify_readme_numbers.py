@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "README.template.md"
 RENDERED = ROOT / "README.md"
 
-PLACEHOLDER = re.compile(r"\{\{result:[^}]+\}\}")
+PLACEHOLDER = re.compile(r"\{\{\s*result\s*:[^}]+\}\}")
 CODE_BLOCK = re.compile(r"```.*?```", re.S)
 INLINE_CODE = re.compile(r"`[^`]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
@@ -96,6 +96,18 @@ def main() -> int:
     expected, _ = render(template)
     if expected != RENDERED.read_text(encoding="utf-8"):
         print("  README.md is stale; re-run scripts/render_readme.py", file=sys.stderr)
+        return 1
+
+    # An unresolved placeholder is worse than a wrong number: it ships as literal braces
+    # in the published README. The staleness check above cannot catch it, because a
+    # renderer that fails to match produces the same unresolved text on both sides.
+    rendered = RENDERED.read_text(encoding="utf-8")
+    leftover = re.findall(r"\{\{[^}]*\}\}", rendered)
+    if leftover:
+        print(f"\n  {len(leftover)} unresolved placeholder(s) in README.md:", file=sys.stderr)
+        for item in sorted(set(leftover))[:8]:
+            print(f"    {item}", file=sys.stderr)
+        print("\n  The renderer did not match them — check the placeholder pattern.", file=sys.stderr)
         return 1
 
     print("  README.md is current and every number resolves from data/results")

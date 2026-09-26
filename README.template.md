@@ -23,12 +23,14 @@ lies makes those two disagree, and the trade does not happen.
 
 Four assumptions hold everything up, and v4 guarantees none of them:
 
-| Assumed                            | Actually                                                         |
-| ---------------------------------- | ---------------------------------------------------------------- | -------------------------------------- |
-| A quote predicts execution         | A hook runs in both and can tell them apart                      |
-| Hook code is reviewable            | {{result:census.json:chains[chain=base].upgradeable              | int}} hooks on Base sit behind a proxy |
-| Routers can price safely off-chain | Every router prices with `eth_call`, which is the honest path    |
-| Allowlists are enough              | An allowlisted hook can be upgraded the block after it is listed |
+| Assumed                            | Actually                                                          |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| A quote predicts execution         | A hook runs in both and can tell them apart                       |
+| Hook code is reviewable            | Thousands of hooks sit behind a proxy and can change after review |
+| Routers can price safely off-chain | Every router prices with `eth_call`, which is the honest path     |
+| Allowlists are enough              | An allowlisted hook can be upgraded the block after it is listed  |
+
+On Base, {{result:census.json:chains[chain=base].upgradeable|int}} of the {{result:census.json:chains[chain=base].hooks_total|int}} distinct hooks sit behind a proxy: today's bytecode is not tomorrow's.
 
 The Trading API defaults to hooks-inclusive routing. Allowlisting is the only defence
 anyone ships, and it is a defence against _identity_, not against _behaviour_.
@@ -71,23 +73,18 @@ is free.
 ![Pools indexed per chain, and the hooked share](docs/assets/census.svg)
 
 Every v4 pool on four chains, indexed from `Initialize` logs — no subgraph, no third-party
-index. Base alone: {{result:census.json:chains[chain=base].pools_total|int}} pools across
-{{result:census.json:chains[chain=base].hooks_total|int}} distinct hooks.
+index. Base alone: {{result:census.json:chains[chain=base].pools_total|int}} pools across {{result:census.json:chains[chain=base].hooks_total|int}} distinct hooks.
 
 Front-end attribution covers every fill and publishes its own blind spot:
-**{{result:attribution.json:unlabeled_share|pct}} of fills are unlabeled.** A table that
-hides its coverage is not evidence.
+**{{result:attribution.json:unlabeled_share|pct}} of fills are unlabeled.** A table that hides its coverage is not evidence.
 
 Divergence is measured by re-quoting settled trades against the state immediately before
-them, over a uniform random sample of
-{{result:divergence.json:trace_confirmation.sampled|int}} Base fills:
+them, over a uniform random sample of {{result:divergence.json:trace_confirmation.sampled|int}} Base fills:
 
-|                                     |                                                     |
-| ----------------------------------- | --------------------------------------------------: | --------- |
-| fills measured                      |               {{result:divergence.json:totals.fills | int}}     |
-| hooks seen                          |               {{result:divergence.json:totals.hooks | int}}     |
-| hooks with enough fills to classify |      {{result:divergence.json:totals.eligible_hooks | int}}     |
-| **divergent hooks**                 | \*\*{{result:divergence.json:totals.divergent_hooks | int}}\*\* |
+- **{{result:divergence.json:totals.fills|int}}** fills measured
+- **{{result:divergence.json:totals.hooks|int}}** hooks seen
+- **{{result:divergence.json:totals.eligible_hooks|int}}** hooks with enough fills to classify
+- **{{result:divergence.json:totals.divergent_hooks|int}} divergent hooks**
 
 The denominator that matters is `eligible_hooks`, not `hooks`. A hook seen three times
 cannot be called clean or dirty, and this repo will not do either.
@@ -97,12 +94,10 @@ cannot deliver _more_ than it quoted, so every fill measured as over-delivering 
 false positive — and because the error is symmetric, its count estimates the false
 positives among the charged fills:
 
-|                                               |                                                                     |
-| --------------------------------------------- | ------------------------------------------------------------------: | ----- |
-| charged fills                                 |                  {{result:divergence.json:noise_floor.charged_fills | int}} |
-| over-delivered fills (impossible; pure error) |            {{result:divergence.json:noise_floor.overdelivered_fills | int}} |
-| estimated false-positive share                | {{result:divergence.json:noise_floor.estimated_false_positive_share | pct}} |
-| eligible hooks that failed the floor          |        {{result:divergence.json:noise_floor.hooks_failing_the_floor | int}} |
+- **{{result:divergence.json:noise_floor.charged_fills|int}}** charged fills
+- **{{result:divergence.json:noise_floor.overdelivered_fills|int}}** over-delivered fills — impossible from hook behaviour, so pure error
+- **{{result:divergence.json:noise_floor.estimated_false_positive_share|pct}}** estimated false-positive share
+- **{{result:divergence.json:noise_floor.hooks_failing_the_floor|int}}** eligible hooks that failed the floor
 
 Counting positives alone gave a larger and wronger headline. Subtracting a hook's own
 negative tail is what the published number does.
@@ -135,10 +130,7 @@ token0 from exact-output on token1. They are identical.
 
 So every measured fill is confirmed against its own transaction trace — `amountSpecified`,
 `hookData` and the realized output all come from the traced `PoolManager.swap` call. Of
-{{result:divergence.json:trace_confirmation.sampled|int}} sampled fills,
-{{result:divergence.json:trace_confirmation.confirmed|int}} survived, and
-{{result:divergence.json:trace_confirmation.dropped.exact-output|int}} were exact-output
-swaps the event had disguised. Both defects are filed upstream in [FEEDBACK.md](FEEDBACK.md).
+{{result:divergence.json:trace_confirmation.sampled|int}} sampled fills, {{result:divergence.json:trace_confirmation.confirmed|int}} survived, and {{result:divergence.json:trace_confirmation.dropped.exact-output|int}} were exact-output swaps the event had disguised. Both defects are filed upstream in [FEEDBACK.md](FEEDBACK.md).
 
 ## 6. Sworn
 

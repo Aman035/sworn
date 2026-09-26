@@ -75,7 +75,6 @@ $(addprefix phase-,$(PHASES)): phase-%:
 readme: ## Render README.md and its graphics from data/results
 	$(PY) scripts/render_graphics.py
 	$(PY) scripts/render_readme.py
-	npx --yes prettier --write README.md README.template.md >/dev/null
 	$(PY) scripts/verify_readme_numbers.py
 .PHONY: readme
 
