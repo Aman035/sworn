@@ -25,14 +25,17 @@ agree exactly, or the router is wrong).
 
 ### The pool that broke the first attempt
 
-The first version routed into a token at `0xb200…108C`. Its entire deployed code is the
-single byte `0xef`: an invalid opcode. v4 initializes and swaps a pool against it happily,
-the swap accounts correctly, and settlement then reverts inside `transfer` for every router
-that has ever existed. The failure surfaced as `WrappedError(…, 0xa9059cbb, 0x, 0xf27f64e4)`
-wrapping an `OpcodeNotFound`, four frames down.
+A large family of Base tokens (vanity addresses of the form `0xb2…01`) return a
+one-byte `0xef` from `eth_getCode`, which is the EOF prefix rather than runnable bytecode.
+On chain they work normally: supply, decimals, and thousands of `Transfer` logs. Inside a
+Foundry fork they do not, because forge fetches code with `eth_getCode`, receives `0xef`,
+and executing that is an invalid opcode. A swap into one settles on mainnet and reverts on
+a fork with `OpcodeNotFound` four frames down, inside `transfer`.
 
-Nothing was wrong with the router. A fork test that picks its pools carelessly measures the
-token instead.
+That is a tooling limitation, not a broken token, and it constrains which measured fills
+can be replayed in a fork test at all.
+
+The fork tests therefore route ETH to USDC, where both sides execute under a fork.
 
 ## What the router is worth
 
@@ -70,7 +73,7 @@ have been the single easiest way to fabricate an ROI figure. Anything above 5,00
 and the count published (`implausible_fills: 2`).
 
 **Unpriceable outputs.** Protection denominated in a token nothing can value is not
-protection anyone can spend, including, literally, the `0xef` token above. Those fills
+protection anyone can spend. Those fills
 still count in the bps median; they never reach the dollars. The priceable share is
 published as `price_confidence: 7.3%`.
 

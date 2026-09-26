@@ -22,12 +22,12 @@ import {Candidate, Hop, SwornParams, SwornRouter} from "../../src/SwornRouter.so
 ///      mainnet hook **completes**, pays out, and passes the divergence check, so the
 ///      guarantee is not merely a well-defended way of refusing to trade.
 ///
-///      ETH/USDC was chosen deliberately. An earlier version of this test routed into a
-///      token at `0xb200...108C` whose entire deployed code is the single byte `0xef`, an
-///      invalid opcode: v4 will happily initialize and swap a pool against it, the swap
-///      accounts correctly, and then settlement reverts inside `transfer` for every router
-///      that has ever existed. Nothing is wrong with the pool; the token cannot execute.
-///      A fork test that picks its pools carelessly measures that instead of the router.
+///      ETH/USDC was chosen deliberately. A large family of Base tokens (vanity addresses
+///      of the form `0xb2...01`) return a one-byte `0xef` from `eth_getCode`, the EOF
+///      prefix rather than runnable bytecode. They work on chain, but forge builds a fork
+///      from `eth_getCode`, so a swap into one reverts with `OpcodeNotFound` inside
+///      `transfer`. That is a limitation of forking, not a broken token, and it decides
+///      which pools a fork test can use.
 contract RealSwapForkTest is Test {
     using PoolIdLibrary for PoolKey;
 
