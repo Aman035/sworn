@@ -6,6 +6,13 @@
 
 [![Sworn — execution integrity for Uniswap v4](docs/assets/landing.png)](https://aman035.github.io/sworn/)
 
+**[Live dashboard](https://aman035.github.io/sworn/)** ·
+**[Feedback for Uniswap](FEEDBACK.md)** ·
+**[Run the demo](docs/DEMO.md)** ·
+**[Raw results](data/results)**
+
+---
+
 **On 14 September 2026, 0x published
 [*"Uniswap v4 hooks were a mistake"*](https://0x.org/post/uniswap-v4-hooks-were-a-mistake).**
 They analysed {{cite:0x.org:84,163}} hooks across six chains and reported **{{cite:0x.org:54.2%}} malicious, {{cite:0x.org:19.4%}} safe**, with some hooks delivering *"as much as {{cite:0x.org:50%}} less at execution than the amount quoted"*.
@@ -72,7 +79,7 @@ its pool.
 ## Uniswap's own surfaces point the wrong way
 
 This is not a hypothetical the docs warn about. Three things found while building this,
-all written up with reproductions in [FEEDBACK.md](FEEDBACK.md):
+all with reproductions in the feedback write-up:
 
 1. The [`Swap` event natspec](https://github.com/Uniswap/v4-core/blob/main/src/interfaces/IPoolManager.sol)
    documents `amount0` as *"the delta of the currency0 balance of the pool"*. The code
@@ -122,8 +129,7 @@ positives among the charged fills:
 - **{{result:divergence.json:noise_floor.hooks_failing_the_floor|int}}** eligible hooks failed the floor and were dropped
 
 Counting positives alone reports a much larger number. Subtracting each hook's own negative
-tail leaves {{result:divergence.json:totals.divergent_hooks|int}}, and the published figure is the smaller one. The full
-before-and-after is in [PHASE-3.md](docs/phases/PHASE-3.md).
+tail leaves {{result:divergence.json:totals.divergent_hooks|int}}, and the published figure is the smaller one.
 
 ## Why nobody has noticed
 
@@ -142,8 +148,7 @@ turned out to be exact-output swaps the event had disguised.
 
 So every fill here is confirmed against its own transaction trace — `amountSpecified`,
 `hookData` and the realized output all come from the traced `PoolManager.swap` call. Of
-{{result:divergence.json:trace_confirmation.sampled|int}} sampled fills, {{result:divergence.json:trace_confirmation.confirmed|int}} survived confirmation. Both defects are filed
-upstream in [FEEDBACK.md](FEEDBACK.md).
+{{result:divergence.json:trace_confirmation.sampled|int}} sampled fills, {{result:divergence.json:trace_confirmation.confirmed|int}} survived confirmation.
 
 ## Detection does not catch it either
 
@@ -229,8 +234,7 @@ A router should not probe a two-dollar swap, and `maxProbes` and `hookMarginBps`
 integrator can set that line. Gross dollars across the priceable subset were
 ${{result:replay.json:totals.protected_usd_gross|f2}} protected against ${{result:replay.json:totals.probe_gas_usd|f2}} of gas — a real sum and a
 misleading one, since a uniform sample of Base fills is mostly dust and
-{{result:replay.json:totals.gas_cost_top10_share|pct0}} of that gas came from ten transactions. Full working in
-[PHASE-6.md](docs/phases/PHASE-6.md).
+{{result:replay.json:totals.gas_cost_top10_share|pct0}} of that gas came from ten transactions.
 
 Measured probe overhead, verbatim from `forge test --match-contract SwornGasTest`:
 
@@ -260,8 +264,7 @@ scheduled attestor. Its load-bearing property is how it handles **absence**:
 | Base mainnet | —                                                                                                                                             | Not deployed; `1,643,224` gas to do so    |
 
 The attestor wrote {{result:divergence.json:totals.eligible_hooks|int}} scores; a second scheduled run correctly wrote nothing,
-because the registry already held that block. Scoring is specified in
-[SCORING.md](docs/SCORING.md), with a worked example the test suite reproduces exactly.
+because the registry already held that block. Scoring is fully specified, with a worked example the test suite reproduces exactly.
 
 ---
 
@@ -362,11 +365,17 @@ digit in this file that did not come from a result.
   divergent hooks exist; it is not a population rate.
 - **The precision table rests on two positives.** Directionally clear, statistically thin.
 - **Accurate measurement needs an archive node with `debug_traceTransaction`.** That is a
-  property of v4, not of this repo, and it is the first item in [FEEDBACK.md](FEEDBACK.md).
+  property of v4, not of this repo.
 - **Candidate routes are quoted with empty `hookData`**, because no router called them.
 - **`HookBook` scores are advisory.** The guarantee is the probe.
 - **A hook that is honest to everyone is still honest under Sworn.** This defends against
   quote/execution divergence, not against a hook that charges a large fee openly.
 
-Full model in [THREAT_MODEL.md](docs/THREAT_MODEL.md) ·
-[METRICS.md](docs/METRICS.md) · [GAS.md](docs/GAS.md) · [PHASES.md](PHASES.md)
+---
+
+**[FEEDBACK.md](FEEDBACK.md)** — three defects found in v4 while building this, with
+reproductions. Written for the Uniswap developer feedback form.
+
+If you want to go deeper: [METRICS.md](docs/METRICS.md) defines every term before it is
+measured, [THREAT_MODEL.md](docs/THREAT_MODEL.md) has the full attacker model, and
+[PHASES.md](PHASES.md) is the gate ledger.
