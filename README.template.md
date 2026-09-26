@@ -8,7 +8,15 @@
 
 **[Live dashboard](https://aman035.github.io/sworn/)**
 
+**Sworn is a Uniswap v4 router that makes the quote and the trade the same transaction.**
+It probes every candidate route inside the transaction that settles it, takes the best,
+and reverts if what executed differs from what it probed. It is periphery, not a hook:
+[`SwornRouter`](contracts/src/SwornRouter.sol) sits where a UniversalRouter sits, and
+hooks are what it defends against.
+
 ---
+
+Why that is worth building, in the order the evidence arrived.
 
 **On 14 September 2026, 0x published
 [*"Uniswap v4 hooks were a mistake"*](https://0x.org/post/uniswap-v4-hooks-were-a-mistake).**
