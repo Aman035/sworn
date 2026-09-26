@@ -347,19 +347,32 @@ stays runnable offline. `make test-fork` runs the set.
 
 ![What the guarantee is worth](docs/assets/landing-value.png)
 
-Probing costs a **fixed** amount of gas and saves a **proportion** of the trade, so it pays
-above a trade size and not below it:
+This is insurance, and it prices like insurance: the premium is **fixed** and small, the
+payout is **proportional** and rare. For every measured fill, every other pool that could
+have filled the same trade was quoted against the same pre-fill state.
 
-- break-even trade size: **${{result:replay.json:totals.breakeven_notional_usd|f2}}**
-- median protection where a better route existed: **{{result:replay.json:totals.median_protection_bps|f2}} bps**
 - median cost to protect one trade: **${{result:replay.json:totals.probe_gas_usd_median|f4}}**
-- {{result:replay.json:totals.fills_protected|int}} of {{result:replay.json:totals.fills_with_alternatives|int}} fills with an alternative had a better one
+- a better route existed on {{result:replay.json:totals.protection_hit_rate|pct}} of fills that had an alternative
+  ({{result:replay.json:totals.fills_protected|int}} of {{result:replay.json:totals.fills_with_alternatives|int}})
+- when one did, it was worth **{{result:replay.json:totals.median_protection_bps|f2}} bps** at the median
+- break-even trade size: **${{result:replay.json:totals.breakeven_notional_usd|f2}}**
 
-A router should not probe a two-dollar swap, and `maxProbes` and `hookMarginBps` exist so an
-integrator can set that line. Gross dollars across the priceable subset were
-${{result:replay.json:totals.protected_usd_gross|f2}} protected against ${{result:replay.json:totals.probe_gas_usd|f2}} of gas: a real sum and a
-misleading one, since a uniform sample of Base fills is mostly dust and
-{{result:replay.json:totals.gas_cost_top10_share|pct0}} of that gas came from ten transactions.
+So a router should not probe a two-dollar swap, and `maxProbes` and `hookMarginBps` exist
+so an integrator can set that line.
+
+**The dollar totals do not flatter this, and they are published anyway.** Across the
+priceable subset, ${{result:replay.json:totals.protected_usd_gross|f2}} was protected against ${{result:replay.json:totals.probe_gas_usd|f2}} of gas. Three
+reasons that ratio is not the ROI of the mechanism, each of them a limitation of the
+sample rather than a defence:
+
+1. Only {{result:replay.json:totals.price_confidence|pct}} of fills pay out in a token this repo can value from the chain,
+   so the dollar figures cover a small slice of the sample.
+2. A uniform random sample of Base fills is overwhelmingly dust, well under the
+   break-even, which is exactly where probing should be switched off.
+3. {{result:replay.json:totals.gas_cost_top10_share|pct0}} of that gas came from ten transactions.
+
+The honest summary: on average-case Base dust, probing everything loses money. The case
+for it is the tail, and the tail is the {{result:caught.json:observed.charged_extra_bps|int}} bps catch above.
 
 Measured probe overhead, verbatim from `forge test --match-contract SwornGasTest`:
 
